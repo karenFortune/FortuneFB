@@ -1,0 +1,68 @@
+﻿@model IEnumerable<FortuneSystem.Models.Almacen.recibo>
+@{ Layout = null; }
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="~/Scripts/jquery-3.3.1.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Scripts/bootstrap.js"></script>
+    <style>
+        body {
+            /*font-family: monospace;*/
+            font-family: sans-serif;
+            font-size: 10px;
+        }
+        .caja {
+            /*float: left;
+            width: 30%;
+            border: solid 1px #928c8c;
+            border-radius: 5px;
+            padding: 0.05em .05em 0em .05em;
+            margin: .5em;*/
+        }
+        hr.style1 {
+            border-top: .8px dashed #8c8b8b;
+        }
+        .page-breaker {
+            display: block;
+            clear: both;
+            page-break-after: always;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid" >        
+            @foreach (var item in Model)
+            {
+                int total_cajas=0,i=0;
+                foreach (var inv in item.lista_recibos_item) {
+                    foreach (var caja in inv.lista_cajas) {
+                        total_cajas++;
+                    }
+                }
+                foreach (var inv in item.lista_recibos_item)
+                {
+                    foreach (var caja in inv.lista_cajas)
+                    {
+                        i++;
+                        <div class="caja" style="page-break-inside: avoid;">
+                            <div class="" style="float:left;">
+                                <img src="~/Content/img/QR/@caja.img" alt="@inv.item.categoria_inventario" style="width:130px; height:130px; z-index:-1;" />
+                            </div>
+                            <div class="" style="padding-top:2em !important; word-break: break-all; word-wrap: break-word;">
+                                <div style="margin-left:1em; width:80%; font-size: 10px;">@inv.item.descripcion<hr class="style1" /></div>
+                                Mill PO:@item.mill_po<br />
+                                PO Reference: @item.po_referencia<br />
+                                Total: @caja.cantidad_inicial pieces<br />
+                            </div>
+                        </div>
+                        if (i != total_cajas) {
+                            <div class="page-breaker"></div>
+                        }
+                        
+                    }
+                }
+            }        
+    </div>
+</body>
+</html>

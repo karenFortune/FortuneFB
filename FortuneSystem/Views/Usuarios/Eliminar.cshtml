@@ -1,0 +1,82 @@
+﻿@model FortuneSystem.Models.Usuarios.CatUsuario
+
+@{
+    ViewBag.Title = "Eliminar";
+
+}
+
+
+<div>
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.NoEmpleado)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.NoEmpleado)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Nombres)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Nombres)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Apellidos)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Apellidos)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Cargo)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CatRoles.Rol)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.IdSucursal)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CatSucursal.Sucursal)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Turnos)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Turnos)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Email)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Email)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Contrasena)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Contrasena)
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm()) {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Delete" class="btn btn-danger" />
+        </div>
+    }
+</div>

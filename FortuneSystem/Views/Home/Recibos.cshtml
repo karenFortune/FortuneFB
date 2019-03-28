@@ -1,0 +1,46 @@
+﻿
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - FORTUNE</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    <link href="~/Content/DataTables/datatables.min.css" rel="stylesheet" />
+    <script src="~/Content/DataTables/datatables.js"></script>
+</head>
+<body>
+
+    <nav class="main-menu">
+        <p class="text-small text-center menu">MEN&Uacute;</p>
+        <ul>
+            <li><a href="@Url.Action("Index","home")"><i class="glyphicon glyphicon-home fa_menu"></i> <span class="nav-text">Inicio</span></a></li>
+            <p class="text-small menu-title text-center"></p>
+            <li class="has-subnav"><a href="@Url.Action("Index", "usuarios")"> <i class="glyphicon glyphicon-user fa_menu"></i> <span class="nav-text">Usuarios</span></a></li>
+            <li class="has-subnav"><a href="@Url.Action("Index", "colores")"> <i class="glyphicon glyphicon-list-alt fa_menu"></i> <span class="nav-text">Catalogo</span></a></li>
+
+
+        </ul>
+        <ul class="logout">
+            <li>
+                <a href="#">
+                    <i class="glyphicon glyphicon-log-out fa_menu"></i> <span class="nav-text">Logout</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="container body-content">
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year - Fortune Fashions Baja</p>
+        </footer>
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+</body>
+</html>

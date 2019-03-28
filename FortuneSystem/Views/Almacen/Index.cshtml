@@ -1,0 +1,718 @@
+﻿@model IEnumerable<FortuneSystem.Models.Almacen.Inventario>
+@{
+    ViewBag.Title = "STOREHOUSE";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+</div>
+<script src="~/Content/Chart.js-master/Chart.min.js"></script>
+<script src="~/Content/Chart.js-master/moment.js"></script>
+<script src="~/Content/Chart.js-master/Chart.bundle.min.js"></script>
+<script>
+    $(document).on("input", ".numeric", function () {
+        this.value = this.value.replace(/\D/g, '');
+    });
+
+    function guardar_sellos_index(event) {
+        var error = 0;
+        $(".must").each(function () {
+            var id = $(this).attr('id');
+            if ($(this).val() == '' && $(this).val() != "0") {
+                $("#" + id).css('border', '2px solid #e03f3f');
+                error++;
+            } else {
+                $("#" + id).css('border', '1px solid #cccccc');
+            }
+        });
+
+        if ($("#caja_sucursal").val() == "Select") {
+            $("#caja_sucursal").css('border', '2px solid #e03f3f');
+            error++;
+        } else {
+            $("#caja_sucursal").css('border', '1px solid #cccccc');
+        }
+
+        if ($("#caja_inicio").val() != '' && $("#caja_final").val() != '') {
+            if (parseFloat($("#caja_inicio").val()) > parseFloat($("#caja_final").val())) {
+                error++;
+                $("#caja_final").css('border', '2px solid #e03f3f');
+                $("#caja_inicio").css('border', '2px solid #e03f3f');
+            } else {
+                $("#caja_final").css('border', '1px solid #cccccc');
+                $("#caja_inicio").css('border', '1px solid #cccccc');
+            }
+        }
+
+        if (error == 0) {
+            guardar_sello_nuevo();
+        } else {
+            event.preventDefault();
+            alertify.alert('¡Error!', 'Favor de revisar los campos.');
+            return false;
+        }
+
+    }
+
+    function guardar_sello_nuevo() {
+        var inicio = $("#caja_inicio").val(), final = $("#caja_final").val(), sucursal = $("#caja_sucursal").val();
+        var actionData = "{'inicio':'" + inicio + "','final':'" + final + "','sucursal':'" + sucursal + "'}";
+        $.ajax({
+            url: '/Almacen/guardar_nuevo_sello',
+            data: actionData,
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (jsonData) {
+                limpiar_formularios();
+                $("#modal_nuevos_sellos").modal("hide");
+            }
+        });
+    }
+
+    function limpiar_formularios() {
+        $(".numeric").each(function () {
+            $(this).val("");
+        });
+        $('#caja_sucursal').val("Select");
+    }
+    function editar_item(ID) {
+        $.ajax({
+            url: '/Almacen/edicion_inventario',
+            data: "{'ID':'"+ID+"'}",
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (jsonData) {
+                limpiar_formularios();
+               // $("#modal_nuevos_sellos").modal("show");
+            }
+        });
+    }
+    $(document).on("dblclick", "#tabla_inventario tr", function () {
+        var row = this.rowIndex;
+        //alert($('#items_recibos tr:eq('+row+') td:eq(0)').html()); //empieza las columas desde 0
+        //alert($('#items_recibos tr:eq(' + row + ') td:nth-child(2)').html());     //empieza las columnas desde 1
+        //ver_recibo($('#tabla_inventario tr:eq(' + row + ') td:eq(0)').html());
+        var id = $('#tabla_inventario tr:eq(' + row + ') td:eq(0)').html();
+        $("#ContenedorModal").load("/Almacen/edicion_inventario/" + id, function () {
+            $("#modal_editar_inventario").modal("show");
+        });
+    });
+    //CAMBIAR LOS ROW DE COLOR
+    $(document).on("click", "#tabla_inventario tr", function () {
+        var row = this.rowIndex;
+        if (this.style.background == "" || this.style.background == "white") {
+            $(this).css('background', '#46a772');
+            $(this).css('color', 'white');
+        } else {
+            $(this).css('background', 'white');
+            var stock = $('#tabla_inventario tr:eq(' + row + ') td:eq(6)').html();
+            if (stock == "STOCK") {
+                $(this).css('color', '#3c763d');
+            } else {
+                $(this).css('color', '#a94442');
+            }
+            
+        }
+    });
+    function cerrar_graficas() {
+        $("#graficas").css('display','none');
+    }
+    function abrir_graficas() {
+        $("#graficas").css('display', 'inline');
+    }
+    $(document).ready(function () {
+        $("#loading").css('display','inline');
+        //obtener_charts();
+        //obtener_charts_transferencias();
+        busqueda_items("");  
+        
+    });
+    function obtener_charts() {
+        /*$.ajax({
+            url: "/Almacen/buscar_datos_grafica",
+            type: "POST",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                datos = result.split('*');
+                var ctx = document.getElementById("myChart");
+                var staging_chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ["Today", "Yesterday", "Last 7 days", "Current month", "Current year"],
+                        datasets: [{
+                            label: 'Receive totals',
+                            //data: [12, 19, 3, 5, 2, 3],                   
+                            data: datos,
+                            backgroundColor: [
+                                '#2ecc71',
+                                '#3498db',
+                                '#32CFD0',
+                                '#9b59b6',
+                                '#F45151'
+                            ],
+                            borderColor: [
+                                '#2ecc71',
+                                '#3498db',
+                                '#32CFD0',
+                                '#9b59b6',
+                                '#F45151'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        
+                    }
+                });
+            },
+            error: function (errormessage) {
+                alert(errormessage.responseText);
+            }
+        });*/
+
+
+
+    }
+    function obtener_charts_transferencias() {
+        /*$.ajax({
+            url: "/Almacen/buscar_datos_grafica_transferencias",
+            type: "POST",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                datos = result.split('*');
+                var ctx = document.getElementById("myChart2");
+                var staging_chart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ["Today", "Yesterday", "Last 7 days", "Current month", "Current year"],
+                        datasets: [{
+                            label: 'Receive totals',
+                            //data: [12, 19, 3, 5, 2, 3],                   
+                            data: datos,
+                            backgroundColor: [
+                                '#F45151',
+                                '#9b59b6',
+                                '#32CFD0',
+                                '#3498db',
+                                '#2ecc71'
+                            ],
+                            borderColor: [
+                                '#F45151',
+                                '#9b59b6',
+                                '#32CFD0',
+                                '#3498db',
+                                '#2ecc71'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+
+                    }
+                });
+            },
+            error: function (errormessage) {
+                alert(errormessage.responseText);
+            }
+        });*/
+    }
+    /********************************************************************************************************************************************************************** */
+    function busqueda_items_almacen() {
+        busqueda_items($("#caja_buscar_item").val());
+    }
+    function busqueda_items(busqueda) {
+        $.ajax({
+            url: "/Almacen/buscar_items_tabla_inventario",
+            data: "{'busqueda':'" + busqueda + "'}",
+            type: "POST",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                var html = ''; 
+                $.each(result, function (key, item) {
+                    if (item.estado =="STOCK") {
+                        html += '<tr style="color:#3c763d;">';
+                    } else {
+                        html += '<tr style="color:#a94442;">';
+                    }                    
+                    html += '<td>' + item.id_inventario + '</td>';
+                    html += '<td>' + item.sucursal + '</td>';
+                    html += '<td>' + item.po + '</td>';
+                    html += '<td>' + item.total + '</td>';
+                    html += '<td>' + item.categoria_inventario + '</td>';
+                    html += '<td>' + item.descripcion + '</td>';
+                    html += '<td>' + item.estado + '</td>';
+                    html += '</tr>';
+                });
+                $(".body_tabla_inventario").html(html);
+                $("#loading").css('display', 'none');
+            },
+            error: function (errormessage) { alert(errormessage.responseText); }
+        });
+    }
+
+    $(document).on("click", "a", function () {
+        //setTimeout(function () { $("#loading").css('display', 'none'); }, 1000);
+        $("#loading").css('display', 'none'); 
+    });
+
+   
+</script>
+<link href="~/Content/base_m.css" rel="stylesheet" />
+
+<style>
+    .results tr[visible='false'],
+    .no-result {
+        display: none;
+    }
+
+    .results tr[visible='true'] {
+        display: table-row;
+    }
+
+    .counter {
+        padding: 8px;
+        color: #ccc;
+    }
+
+
+    .modal-dialog {
+        width: 75% !important;
+        padding: 2em;
+        height: 90% !important;
+        min-height: 90% !important;
+    }
+
+    .modal-content {
+        height: 90% !important;
+    }
+
+    .modal-lg {
+        max-width: 80% !important;
+    } 
+
+    a {
+        text-decoration: none !important;
+    }  
+
+    .boton_barra_menu, .btn-info {
+        color: #fff;
+        background-color: #3479bf !important;
+        border-color: #3479bf !important;
+    }
+
+    .modal {
+        /*z-index: 4 !important;*/
+    }
+
+    .dataTables_filter {
+    
+    }
+
+    .dropbtn {
+        background-color: #3479bf;
+        color: white;
+        padding: 16px;
+        /*padding: 0.40em;*/
+        font-size: 18px;
+        border: none;
+    }
+
+    .dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: white;
+        color: black;
+        min-width: 160px;
+        box-shadow: 1px 5px 25px 1px rgba(0,0,0,0.2);
+        z-index: 1;
+    }
+
+    .dropdown-content a {
+        color: black;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+    }
+
+    .menu {
+        background: #3479bf;
+        border-radius: 5px;
+        border: solid 1px #3479bf;
+        margin-bottom: .5em;
+        margin: 1em;
+    }
+
+    .dropdown-content a:hover {
+        /*background-color: #f1f1f1;
+        color: black;*/
+        background-color: #61b363;
+        color:white;
+    }
+
+    .dropdown:hover .dropdown-content {
+        display: block;
+    }
+
+
+    .modal-header-primary {
+        color: #fff;
+        padding: 9px 15px;
+        border-bottom: 1px solid #eee;
+        background-color: #3479bf;
+        -webkit-border-top-left-radius: 5px;
+        -webkit-border-top-right-radius: 5px;
+        -moz-border-radius-topleft: 5px;
+        -moz-border-radius-topright: 5px;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+    }
+    
+    .x { 
+        transition: transform .25s ease-in-out; 
+        color:white !important;
+    }
+    
+    .x:hover {
+        transform: rotate(180deg);
+        color:white !important;
+    }
+
+    .x:before {
+        transform: rotate(45deg);
+        transform-origin: center;
+    }
+
+    .x:after {
+        transform: rotate(-45deg);
+        transform-origin: center;
+    }
+
+    #boton_cerrar_graficas {
+        cursor: pointer;
+        float: right;
+        color: #71bb73 !important;
+        margin: 0.5em;
+        font-size: 2em;
+        padding: 0em 0.5em .05em .5em;
+        font-weight: bolder;
+        border: 2px solid #71bb73;
+        border-radius: 25px;
+    }
+        #boton_cerrar_graficas:hover {
+            color: white !important;
+            border: 2px solid white;
+            background: #71bb73;
+        }
+    .boton_menu {
+        border: none;
+        color: black;
+        background: white;
+        width: 100%;
+        text-align: left;
+        padding: 0.5em
+    }
+
+        .boton_menu:hover {
+            border: none;
+            background: #61b363;
+            color: white;
+            width: 100%;
+            text-align: left;
+        } 
+</style>
+
+<div class="container-fluid" style="padding-left:7em; padding-right:3em;">
+    <h3>Warehouse</h3>
+    <div id="graficas" style="width:90%;height:50%; display:none; position:absolute; z-index:99; background:white; border-radius:35px; border:5px solid #61b363; padding-left:2em; margin-top:5em;">
+        <div class="x" id="boton_cerrar_graficas" onclick="cerrar_graficas()" style="">x</div>
+
+        <div style="width:45% !important; height:45% !important; float:left;">
+            <h2>Receive chart</h2>
+            <canvas id="myChart"> </canvas>
+        </div>
+        <div style="width:45% !important; height:45% !important; float:left;">
+            <h2>Transfers chart</h2>
+            <canvas id="myChart2"> </canvas>
+        </div>
+    </div>
+    <div class="row " style=" ">
+        <div class="menu">
+            <div class="dropdown">
+                <button class="dropbtn" type="button" href="#modal_formulario_nuevo_item" data-toggle="modal">
+                    New item
+                </button>
+            </div>
+
+            <div class="dropdown">
+                <button class="dropbtn">Receive</button>
+                <div class="dropdown-content">
+                    <a href="@Url.Action("recibo_items", "Almacen")">New receive</a>
+                    <a href="#modal_listado_recibos" data-toggle="modal" class="btn_abrir_lista_recibos">Receive list</a>
+                </div>
+            </div>
+
+            <div class="dropdown">
+                <button class="dropbtn">Transfers </button>
+                <div class="dropdown-content">
+                    <a href="@Url.Action("nueva_transferencia", "Almacen")">New transfer</a>
+                    <a href="@Url.Action("nueva_transferencia_qr", "Almacen")">New transfer scan</a>
+                    <a href="#modal_nuevos_sellos" data-toggle="modal">New seal package</a>
+                    <a href="#modal_aprobar_transferencia" data-toggle="modal">See transfers</a>
+                    <a href="#modal_recibir_transferencias" data-toggle="modal" class="btn_recibir_transferencia">Receive transfers</a>
+                </div>
+            </div>
+
+            <div class="dropdown">
+                <button class="dropbtn">Reports </button>
+                <div class="dropdown-content">
+                    <a href="@Url.Action("excel_diario", "Almacen")">Daily</a>
+                </div>
+            </div>
+
+            <div class="dropdown">
+            <button class="dropbtn" type="button" onclick="abrir_graficas()">
+                
+            </button>
+        </div>
+    </div>
+
+
+    <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+
+
+            <div class="modal fade" id="modal_nuevos_sellos" data-target="#modal_nuevos_sellos">
+                <div class="modal-dialog" style="width:30% !important; height:15% !important;">
+                    <div class="modal-content">
+                        <div class="modal-header orange modal-header-primary">
+                            <button type="button" class="close x" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                            <h4 class="modal-title"><strong></strong>Add seal package</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <div class="form-group col-3">
+                                    <label for="caja_inicio">First seal </label>
+                                    <input type="text" class="form-control numeric must " maxlength="10" onkeydown="upperCaseF(this)" id="caja_inicio">
+                                </div>
+                                <div class="form-group col-3">
+                                    <label for="caja_final">Last seal</label>
+                                    <input type="text" class="form-control numeric  must " maxlength="10" onkeydown="upperCaseF(this)" id="caja_final">
+                                </div>
+                                <div class="form-group col-3">
+                                    <label for="caja_sucursal">Branch office </label>
+                                    <select type="text" class="form-control" id="caja_sucursal">
+                                        <option>Select</option>
+                                        <option value="1">Fortune</option>
+                                        <option value="2">Lucky one</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-3">
+                                    <br />
+                                    <button type="button" class="btn btn-primary mb-2" id="boton_guardar_sello" onclick="guardar_sellos_index(event);">Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="modal_listado_recibos" data-target="#modal_listado_recibos">
+                <div class="modal-dialog" style="width:90% !important; padding:0px;">
+                    <div class="modal-content" style="overflow:auto; width:100% !important; height:100% !important;">
+                        <div class="modal-header orange  modal-header-primary">
+                            <button type="button" class="close x" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                            <h4 class="modal-title"><strong></strong>Receives and details</h4>
+                        </div>
+                        <div class="modal-body " id="contenedor_modal_listado_recibos">
+
+                            @{
+                                Html.RenderAction("lista_recibos", "Almacen");
+                            }
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="modal_formulario_nuevo_item" data-target="#modal_formulario_nuevo_item">
+                <div class="modal-dialog">
+                    <div class="modal-content" style="overflow:auto;">
+                        <div class="modal-header orange modal-header-primary">
+                            <button type="button" class="close x" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+
+                            </button>
+                            <h4 class="modal-title"><strong></strong>New item</h4>
+
+                        </div>
+                        <div class="modal-body">
+                            @{
+                                Html.RenderPartial("formulario_nuevo_item");
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="modal_formulario_recibo" data-target="#modal_formulario_recibo">
+                <div class="modal-dialog">
+                    <div class="modal-content" style="overflow:auto; width:100% !important; height:100% !important;">
+                        <div class="modal-header orange modal-header-primary">
+                            <button type="button" class="close x" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                            <h4 class="modal-title"><strong></strong>New receive</h4>
+                        </div>
+                        <div class="modal-body " id="contenedor_modal_recibos">
+                            @{
+                                //Html.RenderPartial("formulario_recibo");
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="modal_aprobar_transferencia" data-target="#modal_aprobar_transferencia">
+                <div class="modal-dialog">
+                    <div class="modal-content" style="overflow:auto; width:100% !important; height:100% !important;">
+                        <div class="modal-header orange modal-header-primary">
+                            <button type="button" class="close x" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                            <h4 class="modal-title"><strong></strong>Approval of transfers</h4>
+                        </div>
+                        <div class="modal-body ">
+
+                            @{
+                                Html.RenderAction("lista_transferencias", "Almacen");
+                            }
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="modal_editar_inventario" data-target="#modal_editar_inventario">
+                <div class="modal-dialog">
+                    <div class="modal-content" style="overflow:auto; width:100% !important; height:100% !important;">
+                        <div class="modal-header orange modal-header-primary">
+                            <button type="button" class="close x" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                            <h4 class="modal-title"><strong></strong>Modify inventory item</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div id="ContenedorModal"></div>
+                            @{
+                                //Html.RenderAction("edicion_inventario", "Almacen");
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="modal_recibir_transferencias" data-target="#modal_recibir_transferencias">
+                <div class="modal-dialog">
+                    <div class="modal-content" style="overflow:auto; width:100% !important; height:100% !important;">
+                        <div class="modal-header orange modal-header-primary">
+                            <button type="button" class="close x" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                            <h4 class="modal-title"><strong></strong>Receive transfer</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div id="contenedor_modal_recibir_transferencia"></div>
+                            @{
+                                //Html.RenderAction("edicion_inventario","Almacen");
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+    
+
+    </div>
+    <!----LISTADO DE INVENTARIO----->
+   
+    <div class="panel panel-default panel-primary " style="margin-left:7em; margin-right:3em;">
+        <div class="panel-heading"><h4>Inventory</h4> </div>
+        <div class=" " style=" margin-top:1em;  ">
+            <b style="left:0em; float:left; padding-top:.5em; padding-left:1em; ">Search </b>
+            <input type="text" class="search_po form-control validacion" onkeyup="busqueda_items_almacen()" placeholder="Type to search" id="caja_buscar_item" style="width: 15em; float:left; margin-top: 0px; margin-left:1em; margin-bottom:1em; ">
+        </div><br /><br /><br />
+        <div style="overflow:auto; height:500px;  ">
+            <table id="tabla_inventario" class="table table-striped ">
+                <thead style=" pointer-events:none; cursor:not-allowed;">
+                    <tr>
+                        <th>#</th>
+                        <th>OFFICE</th>
+                        <th>ORDER</th>
+                        <th>QUANTITY</th>
+                        <th>CATEGORY</th>
+                        <th>DESCRIPTION</th>
+                        <th>STOCK</th>
+                    </tr>
+                </thead>
+                <tbody class="body_tabla_inventario"></tbody>
+            </table>
+        </div>
+    </div>
+    <div class=" col-md-4">
+
+    </div>
+
+    <!----LISTADO DE nclick="editar_item(item.id_inventario)" INVENTARIO----->
+
+</div>
+
+<div id="loading" class="load">
+    <div id="spinner" class="imagen_loading" style=""></div>
+</div>
+
+<!-- Modal -->
+
+
+<script>
+    $(document).ready(function () {
+        $(".btnEdit").click(function () {
+            var id =$(this).data("value");
+            $("#ContenedorModal").load("/Almacen/edicion_inventario/"+id, function () {
+                $("#modal_editar_inventario").modal("show");
+            });
+        });
+        //btn_recibir_transferencia
+        $(".btn_recibir_transferencia").click(function () {            
+            $("#contenedor_modal_recibir_transferencia").load("/Almacen/lista_recepcion_transferencias" , function () {               
+                $("#modal_recibir_transferencias").modal("show");
+            });
+        });
+        //btn_ver_tabla_recibos
+        $(".btn_ver_tabla_recibos").click(function () {            
+            $("#contenedor_modal_recibos").load("/Almacen/formulario_recibo", function () {               
+                $("#modal_formulario_recibo").modal("show");
+            });
+        });
+        
+        $(".btn_abrir_lista_recibos").click(function () {
+            $("#contenedor_modal_listado_recibos").load("/Almacen/lista_recibos", function () {
+                $("#modal_listado_recibos").modal("show");
+            });
+        });
+    }); 
+</script>
+
+
+

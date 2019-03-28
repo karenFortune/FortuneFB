@@ -1,0 +1,250 @@
+﻿@model IEnumerable<FortuneSystem.IMAGEN_ARTE>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+
+<script>  
+    $(window).on('load', function () {
+        setTimeout(function () {
+            $(".loader-page").css({ visibility: "hidden", opacity: "0" })
+        }, 2000);
+
+    });
+
+    $(function () {
+        $('img').on('click', function () {
+            $('.enlargeImageModalSource').attr('src', $(this).attr('src'));
+            $('#enlargeImageModal').modal('show');
+        });
+    });
+
+
+</script>
+
+<style>
+
+    .center {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .edit_driver {
+    }
+
+        .edit_driver:hover {
+            color: white !important;
+            background: #3479bf !important;
+            border-radius: 15px;
+        }
+
+    .dot {
+        height: 50px;
+        width: 50px;
+        background-color: darkorange;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .dot2 {
+        height: 50px;
+        width: 50px;
+        background-color: dodgerblue;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .dot3 {
+        height: 50px;
+        width: 50px;
+        background-color: dimgray;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .loader-page {
+        position: fixed;
+        z-index: 999;
+        background: rgb(255, 255, 255);
+        border: 0;
+        overflow: auto;
+        top: 0%;
+        left: 0%;
+        height: 200%;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all .3s ease;
+        opacity: 0.8;
+    }
+
+        .loader-page::before {
+            content: "";
+            position: absolute;
+            top: 10%;
+            left: 43%;
+            width: 398px;
+            height: 398px;
+            background: url('../../Content/img/load.gif');
+        }
+
+        .loader-page::after {
+            content: "";
+            position: absolute;
+            top: 10%;
+            left: 43%;
+            width: 398px;
+            height: 398px;
+            background: url('../../Content/img/load.gif');
+        }
+</style>
+
+@{
+    if (TempData["imagArteOK"] != null)
+    {
+        <script type="text/javascript">
+            alertify.set('notifier', 'position', 'top-right');
+            alertify.notify(@Html.Raw(Json.Encode(TempData["imagArteOK"])), 'success', 5, null);
+
+        </script>
+    }
+
+    if (TempData["imgArteOK"] != null)
+    {
+        <script type="text/javascript">
+            alertify.set('notifier', 'position', 'top-right');
+            alertify.notify(@Html.Raw(Json.Encode(TempData["imgArteOK"])), 'success', 5, null);
+
+        </script>
+    }
+
+    if (TempData["imgArteError"] != null)
+    {
+        <script type="text/javascript">
+            alertify.set('notifier', 'position', 'top-right');
+            alertify.notify(@Html.Raw(Json.Encode(TempData["imgArteError"])), 'success', 5, null);
+
+        </script>
+    }
+
+
+
+}
+</div>
+       <div class="loader-page"></div>
+<div class="container-fluid" style="padding-left:20em; padding-right:10em;">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h4>
+                INVENTORY ART
+            </h4>
+
+        </div>
+        <br />
+        <table id="tablaArteInventario" class="table table-striped">
+            <thead>
+                <tr>
+                    <th style="width: 300px;">
+                        @Html.DisplayNameFor(model => model.Estilo)
+                    </th>
+                    <th style="width: 350px;">
+                        @Html.DisplayNameFor(model => model.DescripcionEstilo)
+                    </th>
+                    <th style="width: 300px;">
+                        @Html.DisplayNameFor(model => model.imgArte)
+                    </th>
+                    <th style="width: 257px;">
+                        @Html.DisplayNameFor(model => model.StatusArte)
+                    </th>
+                    <th style="width: 150px;">ACTIONS</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Estilo)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.DescripcionEstilo)
+                        </td>
+                        <td>
+                            <img width="70" height="70" src="@Url.Action("ConvertirImagenArte", "Arte", new {extensionArte = item.extensionArte})" />
+                        </td>
+
+
+                        @if (item.StatusArte == 1)
+                        {
+
+                            <td><span class="dot"></span> </td>
+                        }
+                        else if (item.StatusArte == 2)
+                        {
+
+                            <td><span class="dot2"></span> </td>
+                        }
+                        else if (item.StatusArte == 3)
+                        {
+                            <td><span class="dot3"></span> </td>
+                        }
+
+
+                        <td>
+                            <a href="#" class="btn edit_driver edicion_driver btnEdit" data-value="@item.IdImgArte " title="List Art"><span class="glyphicon glyphicon-search " aria-hidden="true" style="padding: 0px !important;"></span></a>
+                            <a href="@Url.Action("FileUpload", "Arte",  new { idArte = item.IdImgArte }) " class="btn edit_driver edicion_driver" Title="Art"> <span class="glyphicon glyphicon-check " aria-hidden="true" style="padding: 0px !important;"></span></a>
+
+                        </td>
+
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <br />
+    </div>
+
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h4>
+                LIST ART
+            </h4>
+        </div>
+        <br />
+        <div id="ContenedorModal"></div>
+        <br />
+    </div>
+</div>
+
+<div class="modal fade" id="enlargeImageModal" tabindex="-1" role="dialog" aria-labelledby="enlargeImageModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="exampleModalLabel">ART</h2>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+                <img class="enlargeImageModalSource center" style="width: 50%;">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+    $(document).on('click', '.btnEdit', function () {
+        $("#loading").css('display', 'inline');
+        var id = $(this).data("value");
+        $("#ContenedorModal").load("/Arte/ListaImgArte/" + id, function () {
+            $("#loading").css('display', 'none');
+        });
+    });
+ 
+</script>

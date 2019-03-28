@@ -1,0 +1,75 @@
+﻿@model FortuneSystem.Models.OrderModel.OrderDetail
+@{
+    ViewBag.Title = "www.cpmpilemode.com";
+}
+<hr />
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10 text-right">
+                <input type="button" value="Add Product" class="btn btn-primary" />
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-12">
+                <table class="table table-condensed table-hover">
+                    <tr>
+                        <th>
+                            Product Code
+                        </th>
+                        <th>
+                            Product Name
+                        </th>
+                        <th>
+                            Quantity
+                        </th>
+                        <th>
+                            Price
+                        </th>
+                        <th>
+                            Total Amount
+                        </th>
+                    </tr>
+                    @{
+                        //To make unique Id
+                        int i = 0;
+                        foreach (var item in Model.OrderDetails.ToList())
+                        {
+
+                            <tr>
+                                <td>
+
+
+                                    @Html.EditorFor(o => o.OrderDetails[i].ProductCode, new { @id = "ItemCode_" + i })
+                                </td>
+                                <td>
+                                    @Html.EditorFor(o => o.OrderDetails[i].ProductName, new { @id = "ProductName_" + i })
+                                </td>
+                                <td>
+                                    @Html.EditorFor(o => o.OrderDetails[i].Qty, new { @id = "Qty_" + i })
+                                </td>
+                                <td>
+                                    @Html.EditorFor(o => o.OrderDetails[i].Price, new { @id = "Price_" + i })
+                                </td>
+                                <td>
+                                    @Html.EditorFor(o => o.OrderDetails[i].TotalAmount, new { @id = "Price_" + i })
+                                </td>
+
+                            </tr>
+                            i++;
+                        }
+                    }
+                </table>
+            </div>
+        </div>
+        <hr />
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10 text-center">
+                <input type="submit" value="Place Order" class="btn btn-primary" />
+            </div>
+        </div>
+    </div>
+}

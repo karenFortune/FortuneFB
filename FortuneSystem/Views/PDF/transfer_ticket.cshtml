@@ -1,0 +1,200 @@
+﻿@model IEnumerable<FortuneSystem.Models.Almacen.salidas>
+@{ Layout = null; }
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="~/Scripts/jquery-3.3.1.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Scripts/bootstrap.js"></script>
+    <link href="~/Content/bootstrap-theme.css" rel="stylesheet" />
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+
+        .under_line {
+            border-bottom: 1px solid black;
+            text-align: center;
+            padding-left: 1em;
+            padding-right: 1em;
+        }
+
+        .texto_cabecera_derecha {
+            font-weight: bold;
+            text-align: right;
+        }
+
+        .texto {
+            font-size: 10px;
+        }
+
+        .table_tallas {
+            border-collapse: collapse;
+            font-size: 9px;
+        }
+
+            .table_tallas td {
+                border: 1px solid black;
+                text-align: center;
+            }
+
+        .texto_izquiera {
+            text-align: left !important;
+        }
+
+        tr.spaceTop > td {
+            padding-top: 1em;
+        }
+
+        .table_inventario td {
+            border: 1px solid black;
+            text-align: center;
+        }
+
+        table.table-bordered {
+            border: 1px solid #337ab7;
+            margin-top: 20px;
+        }
+
+            table.table-bordered > thead > tr > th {
+                border: 0px solid #337ab7;
+            }
+
+            table.table-bordered > tbody > tr > td {
+                border: 1px solid #0c0c0c;
+            }
+
+        .cabecera_inventario {
+            color: white;
+            background: #337ab7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <center><h4>***FORTUNE WHSE INVENTORY TRANSFER TICKET***</h4></center>
+        <img src="~/Content/img/logo_small.png" style="width:200px; height:135px; float:left; padding-top:2em;" />
+        <div class="row texto ">
+           
+            <div style=" padding-right:10em;  padding-top:3em;">
+                @foreach (var item in Model)
+                {
+                    <table>
+                        <tr class="spaceTop">
+                            <td class="texto_cabecera_derecha">REQUESTED BY: </td>
+                            <td class="under_line">@item.responsable</td>
+                        </tr>
+                        <tr class="spaceTop">
+                            <td class="texto_cabecera_derecha">DATE REQUEST: </td>
+                            <td class="under_line">@item.origen</td>
+                            <td class="texto_cabecera_derecha">WHSE TO: </td>
+                            <td class="under_line">@item.destino</td>
+                        </tr>
+                        <tr class="spaceTop">
+                            <td class="texto_cabecera_derecha"># ENVÍO: </td>
+                            <td class="under_line">@item.id_envio</td>
+                        </tr>
+                        <tr class="spaceTop">
+                            <td class="texto_cabecera_derecha">N. SEAL: </td>
+                            <td class="under_line">@item.sello</td>
+                        </tr>
+                    </table>
+                }
+            </div>
+            <div style="display:none;">
+                <table id="tabla_tallas" class=" table_tallas">
+                    <tr><td class="texto_izquiera">B - BIG</td><td>1XL</td><td>2XL</td><td>3XL</td><td>4XL</td><td>5XL</td><td>6XL</td><td>7XL</td><td>8XL</td></tr>
+                    <tr><td class="texto_izquiera">C - TODDLER GIRLS</td><td>2T</td><td>3T</td><td>4T</td><td>5T</td><td></td><td></td><td></td><td></td></tr>
+                    <tr><td class="texto_izquiera">D - TODDLER BOYS</td><td>XS</td><td>SM</td><td>MD</td><td>LG</td><td>XL</td><td>2XL</td><td>3XL</td><td></td></tr>
+                    <tr><td class="texto_izquiera">F - MISSY</td><td>XS</td><td>SM</td><td>MD</td><td>LG</td><td>XL</td><td>2XL</td><td>3XL</td><td></td></tr>
+                    <tr><td class="texto_izquiera">G - JUNIOR</td><td>XS</td><td>SM</td><td>MD</td><td>LG</td><td>XL</td><td>2XL</td><td>3XL</td><td></td></tr>
+                    <tr><td class="texto_izquiera">I - INFANT</td><td>NB</td><td>3M</td><td>6M</td><td>9M</td><td>12M</td><td>18M</td><td>24M</td><td></td></tr>
+                    <tr><td class="texto_izquiera">J - LITTLE BOYS</td><td>04</td><td>5/6</td><td>7</td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr><td class="texto_izquiera">M - YOUNG MENS</td><td>XS</td><td>SM</td><td>MD</td><td>LG</td><td>XL</td><td>2XL</td><td>3XL</td><td></td></tr>
+                    <tr><td class="texto_izquiera">Q - BIG GIRLS</td><td>XS</td><td>SM</td><td>MD</td><td>LG</td><td>XL</td><td>2XL</td><td>3XL</td><td></td></tr>
+                    <tr><td class="texto_izquiera">R - LITTLE GIRLS</td><td>04</td><td>5/6</td><td>6X</td><td>07</td><td></td><td></td><td></td><td></td></tr>
+                    <tr><td class="texto_izquiera">T - TALL</td><td>LT</td><td>1XLT</td><td>2XLT</td><td>3XLT</td><td>4XLT</td><td>5XLT</td><td>6XLT</td><td>7XLT</td></tr>
+                    <tr><td class="texto_izquiera">W - WOMEN</td><td>XS</td><td>SM</td><td>MD</td><td>LG</td><td>XL</td><td>2XL</td><td>3XL</td><td></td></tr>
+                    <tr><td class="texto_izquiera">Y - BIG BOYS</td><td>XXS</td><td>XS</td><td>SM</td><td>MD</td><td>LG</td><td>XL</td><td>2XL</td><td></td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="row texto" style="padding:1.5em 3em 1.5em 3em;">
+            <table id="table_items" class="table table-bordered" align="center">
+                <thead class="cabecera_inventario">
+                    <tr>
+                        <th>CNT</th>
+                        <th>P.O. NUMBER</th>
+                        <th>DESCRIPTION</th>
+                        <th>FABRIC TYPE</th>
+                        <th>STYLE NO.</th>
+                        <th>SIZE</th>
+                        <th>COLOR</th>
+                        <th>GENDER</th>
+                        <th>TOTAL</th>
+                    </tr>
+                </thead>
+                @foreach (var item in Model)
+                {
+                    foreach (var item_trans in item.lista_salidas_item)
+                    {
+                        foreach (var inventario in item_trans.lista_inventario)
+                        {
+                            <tr>
+
+                                <td>@item_trans.id_inventario </td>
+                                <td>@item_trans.po</td>
+                                <td>@item_trans.descripcion</td>
+                                <td>@inventario.fabric_type</td>
+                                <td>@item_trans.estilo</td>
+                                <td>@inventario.size</td>
+                                <td>@inventario.color</td>
+                                <td>@inventario.genero</td>
+                                <td>@item_trans.cantidad</td>
+                            </tr>
+                        }
+                    }
+                }
+            </table>
+        </div>
+        <div class="row texto">
+            <center>**************** BELOW IS FOR INVENTORY CONTROL USE ONLY ****************</center>
+            <div style="margin-left:35%; margin-top:5em;">
+                @foreach (var item in Model)
+                {
+                    <div style="float:left;">
+                        <div style="border: 1px solid black; padding:.5em;"><b># OF PALLET</b></div>
+                        <div style="text-align:center; border: 1px solid black; border-top:none; padding:.5em;">@item.pallet</div>
+
+                    </div>
+                    <div style="float:left; padding-left:5em;">
+
+                        <table>
+                            <tr class="spaceTop">
+                                <td class="texto_cabecera_derecha">SHIPPED </td>
+                                <td class="under_line">@item.usuario</td>
+                            </tr>
+                            <tr class="spaceTop">
+                                <td class="texto_cabecera_derecha">DRIVER </td>
+                                <td class="under_line">@item.driver</td>
+                            </tr>
+                            <tr class="spaceTop">
+                                <td class="texto_cabecera_derecha">RECEIVED </td>
+                                <td class="under_line">@item.recibio</td>
+                            </tr>
+
+                        </table>
+
+                    </div>
+                }
+            </div>
+        </div>
+
+
+
+    </div>
+</body>
+</html>

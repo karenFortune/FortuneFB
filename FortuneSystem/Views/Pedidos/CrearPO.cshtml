@@ -1,0 +1,216 @@
+﻿@model FortuneSystem.Models.Pedidos.OrdenesCompra
+
+@{
+    ViewBag.Title = "Create PO";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@Scripts.Render("~/Content/jquery-ui-1.12.1.custom/jquery-3.3.1.min.js")
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="~/Content/alertifyjs/alertify.min.js"></script>
+<link rel="stylesheet" href="~/Content/alertifyjs/css/alertify.min.css" />
+<link rel="stylesheet" href="~/Content/alertifyjs/css/themes/default.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+<script src="~/Scripts/jquery.validate.js"></script>
+
+
+
+<script type="text/javascript">
+    
+    $(document).ready(function () {
+       /* $("#PO").on('input', function () {
+            var val = this.value;
+            this.value = val.replace(/[^A-Z\u00f1\u00d1\u0020\s\^0-9]/g, '');
+        });*/
+        $("#TotalUnidades").on('input', function () {
+            var val = this.value;
+            this.value = val.replace(/[^0-9]/g, '');
+        });
+        $("#selectClienteFinal").val('32');
+        $("#selectClienteFinal").trigger('change');
+
+        $('#nuevoPO').click(function (e) {
+            var error = 0;
+            $(".nuevo_po").each(function () {
+                error;
+                var id = $(this).attr('id');
+                if ($(this).val() == '') {
+                    $("#" + id).css('border', '2px solid #e03f3f');
+                    error++;
+                } else {
+                    $("#" + id).css('border', '1px solid #cccccc');
+                }
+            });
+            if (error != 0) {
+                var alert = alertify.alert("Menssage",'All fields are required.').set('label', 'Aceptar');
+                alert.set({ transition: 'zoom' });
+                alert.set('modal', false);
+            } else {
+                $("#nuevoPO").prop("disabled", true);
+                deshabilitarFormPO();
+                $("#crearItems").css("visibility", "visible");
+                var po = $("#PO").val();
+                var VPO = $("#VPO").val();
+                var FechaCancel = $("#FechaCancel").val();
+                var FechaOrden = $("#FechaOrden").val();
+                var Cliente = $("#selectCliente option:selected").val();
+                var ClienteFinal = $("#selectClienteFinal option:selected").val();
+                var TipoOrden = $("#selectTipoOrden option:selected").val();
+                var TotalUnidades = $("#TotalUnidades").val();
+                enviarPO(po, VPO, FechaCancel, FechaOrden, Cliente, ClienteFinal, TotalUnidades, TipoOrden);
+                alertify.set('notifier', 'position', 'top-right');
+                alertify.notify('The purchase order was correctly registered.', 'success', 5, null);
+               
+            }
+
+        });
+    });
+
+    function deshabilitarFormPO() {
+        $("#PO").prop('disabled', true);
+        $("#VPO").prop('disabled', true);
+        $("#FechaCancel").prop('disabled', true);
+        $("#FechaOrden").prop('disabled', true);
+        $("#selectCliente").prop('disabled', 'disabled');
+        $("#selectClienteFinal").prop('disabled', 'disabled');
+        $("#selectTipoOrden").prop('disabled', 'disabled');
+        $("#TotalUnidades").prop('disabled', true);
+    }
+
+
+
+    function validar() {
+        if ($('#PO').val().length == 0) {
+            // $("#nuevoPO").prop("disabled", true);
+        } else {
+            $("#nuevoPO").prop("disabled", false);
+        }
+    }
+
+
+    function enviarPO(po, VPO, FechaCancel, FechaOrden, Cliente, ClienteFinal, TotalUnidades, TipoOrden) {
+        $.ajax({
+            url: "/Pedidos/RegistrarPO",
+            data: { po: po, VPO: VPO, FechaCancel: FechaCancel, FechaOrden: FechaOrden, Cliente: Cliente, ClienteFinal: ClienteFinal, TotalUnidades: TotalUnidades, IdTipoOrden: TipoOrden },
+            cache: false,
+            type: 'POST',
+            async: true,
+            success: function (data) {
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+            }
+        });
+    }
+   
+
+</script>
+<style>
+    .ui-autocomplete {
+        height: 200px;
+        overflow-y: scroll;
+        overflow-x: hidden;
+    }
+</style>
+
+</div>
+@*@using (Ajax.BeginForm("CrearPO", "Pedidos", new AjaxOptions { HttpMethod = "POST" }))*@
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "formPO" }))
+
+{
+    @Html.AntiForgeryToken()
+
+<div class="form-horizontal">
+
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    <div class="container-fluid" style="padding-left:20em; padding-right:10em;">
+        <h2 style="text-align:center;">PURCHASE ORDER REGISTRATION</h2>
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h4>Reception of Purchase Order</h4>
+            </div>
+            <div class="container-fluid">
+
+                <div class="form-row">
+                    <div class="form-group col-md-4">
+                        @Html.LabelFor(model => model.PO, htmlAttributes: new { @class = "control-label " })
+                        @Html.EditorFor(model => model.PO, new { htmlAttributes = new { @class = "form-control nuevo_po", @style = "text-transform:uppercase" } })
+                        @Html.ValidationMessageFor(model => model.PO, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="form-group col-md-4">
+                        @Html.LabelFor(model => model.VPO, htmlAttributes: new { @class = "control-label " })
+                        @Html.EditorFor(model => model.VPO, new { htmlAttributes = new { @class = "form-control nuevo_po", @style = "text-transform:uppercase" } })
+                        @Html.ValidationMessageFor(model => model.VPO, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="form-group col-md-4">
+                        @Html.LabelFor(model => model.FechaCancel, htmlAttributes: new { @class = "control-label" })
+                        @Html.EditorFor(model => model.FechaCancel, new { htmlAttributes = new { @class = "form-control date-picker nuevo_po" } })
+                        @Html.ValidationMessageFor(model => model.FechaCancel, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="form-row">
+                    <div class="form-group col-md-4">
+                        @Html.LabelFor(model => model.FechaOrden, htmlAttributes: new { @class = "control-label" })
+                        @Html.EditorFor(model => model.FechaOrden, new { htmlAttributes = new { @class = "form-control date-picker nuevo_po" } })
+                        @Html.ValidationMessageFor(model => model.FechaOrden, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="form-group col-md-4">
+                        @Html.LabelFor(model => model.Cliente, htmlAttributes: new { @class = "control-label " }) <br />
+                        @Html.DropDownList("listCliente", (IEnumerable<System.Web.Mvc.SelectListItem>)ViewData["listCliente"], new { @class = "form-control nuevo_po", @id = "selectCliente", @name = "state" })
+                        @Html.ValidationMessageFor(model => model.Cliente, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="form-group col-md-4">
+                        @Html.LabelFor(model => model.ClienteFinal, htmlAttributes: new { @class = "control-label" }) <br />
+                        @Html.DropDownList("listClienteFinal", (IEnumerable<System.Web.Mvc.SelectListItem>)ViewData["listClienteFinal"], new { @class = "form-control nuevo_po", @id = "selectClienteFinal", @name = "state" })
+                        @Html.ValidationMessageFor(model => model.ClienteFinal, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+            </div>
+            <div class="container-fluid">
+
+                <div class="form-row">
+                    <div class="form-group col-md-4">
+                        @Html.LabelFor(model => model.IdTipoOrden, htmlAttributes: new { @class = "control-label" }) <br />
+                        @Html.DropDownList("listTipoOrden", (IEnumerable<System.Web.Mvc.SelectListItem>)ViewData["listTipoOrden"], new { @class = "form-control nuevo_po", @id = "selectTipoOrden", @name = "state" })
+                        @Html.ValidationMessageFor(model => model.ClienteFinal, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="form-group col-md-4">
+                        @Html.LabelFor(model => model.TotalUnidades, htmlAttributes: new { @class = "control-label" })
+                        @Html.EditorFor(model => model.TotalUnidades, new { htmlAttributes = new { @class = "form-control nuevo_po" } })
+                        @Html.ValidationMessageFor(model => model.TotalUnidades, "", new { @class = "text-danger" })
+                    </div>
+
+                </div>
+
+
+                <div class="form-group row">
+                    <div class="text-center margin-bottom col-sm-12">
+                        <button type="button" class="btn btn-success" id="nuevoPO" data-toggle="modal">
+                            <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> Register PO
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid" id="crearItems" style="visibility:hidden;">
+            @RenderPage("~/Views/POSummary/CrearItems.cshtml")
+        </div>
+
+        <a href='@Url.Action("Index", "Pedidos")'>
+            <img src='@Url.Content("~/Content/img/backToPage.png")' id="flecha" title="Go Back" />
+        </a>
+    </div>
+    </div>
+    }
+
+   
+    @Scripts.Render("~/bundles/jqueryval")
+
+
+
+

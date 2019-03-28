@@ -1,0 +1,803 @@
+﻿@model FortuneSystem.Models.Pedidos.OrdenesCompra
+
+@{
+    ViewBag.Title = "Style PO";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script src="~/Scripts/general/obtenerListadoPacking.js"></script>
+<script src="~/Scripts/general/calculosPrintShop.js"></script>
+<script src="~/Scripts/general/AgregarTallasPacking.js"></script>
+<script src="~/Scripts/general/AgregarTallasPackingPPK.js"></script>
+<script src="~/Scripts/general/agregarPallet.js"></script>
+<script src="~/Scripts/general/actualizarPallet.js"></script>
+<style>
+
+    tr.highlighted td {
+        background: #b3e0ff;
+    }
+
+    .centerImg {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 35%;
+    }
+
+    input[type=number] {
+        width: 50%;
+        text-align: center;
+    }
+
+    input.numeric {
+        width: 50%;
+        text-align: center;
+    }
+
+    input[type=text] {
+        width: 50%;
+        text-align: center;
+    }
+
+    #guardarBatch {
+        margin-left: 750px;
+        margin-top: 1px;
+        width: 100px;
+        height: 40px;
+        border: none;
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    #registrarNuevo {
+        margin-left: 50px;
+        margin-top: 1px;
+        width: 170px;
+        height: 40px;
+        border: none;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    #btnAssort {
+        margin-left: 50px;
+        margin-top: 1px;
+        width: 170px;
+        height: 40px;
+        border: none;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    #agregarNuevoPack {
+        margin-left: 50px;
+        margin-top: 1px;
+        width: 170px;
+        height: 40px;
+        border: none;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+     #nuevaQty {
+        margin-left: 50px;
+        margin-top: 1px;
+        width: 100px;
+        height: 40px;
+        border: none;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    #modificarBatch {
+        margin-left: 1000px;
+        margin-top: 1px;
+        width: 120px;
+        height: 40px;
+        border: none;
+        font-size: 20px;
+        font-weight: 600;
+    }
+    
+    #modificarPack {
+        margin-left: 1100px;
+        margin-top: 1px;
+        width: 180px;
+        height: 40px;
+        border: none;
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    #nuevoPallet {
+        margin-left: 700px;
+        margin-top: 1px;
+        width: 120px;
+        height: 40px;
+        border: none;
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    #nuevoPalletAssort {
+        margin-left: 700px;
+        margin-top: 1px;
+        width: 120px;
+        height: 40px;
+        border: none;
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    #nuevoEmpaquePPK {
+        margin-left: 700px;
+        margin-top: 1px;
+        width: 120px;
+        height: 40px;
+        border: none;
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    #nuevoEmpaqueAssort {
+        margin-left: 200px;
+        margin-top: 1px;
+        width: 190px;
+        height: 40px;
+        border: none;
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    #nuevoEmpaque {
+        margin-left: 700px;
+        margin-top: 1px;
+        width: 120px;
+        height: 40px;
+        border: none;
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    #nuevoEmpaqueBulkHT {
+        /* margin-left: 700px;*/
+        width: 140px;
+        height: 40px;
+        border: none;
+        font-size: 20px;
+        font-weight: 600;
+    }
+    #btnDone {
+        width: 120px;
+        height: 40px;
+        border: none;
+        font-size: 20px;
+        font-weight: 600;
+    }
+    #btnAddPPK {
+        width: 130px;
+        height: 40px;
+        border: none;
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    #btnNext {
+        width: 130px;
+        height: 40px;
+        border: none;
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    #btnNuevoPPK {
+        width: 130px;
+        height: 40px;
+        border: none;
+        font-size: 20px;
+        font-weight: 600;
+    }
+    #btnNuevo, #guardarBulkHT {
+        width: 130px;
+        height: 40px;
+        border: none;
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    #nuevoEmpaquePPKHT {
+        width: 130px;
+        height: 40px;
+        border: none;
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    input.txtDes {
+        background-color: transparent;
+        border: 0px;
+        outline: none;
+        -webkit-box-shadow: none;
+        -moz-box-shadow: none;
+        box-shadow: none;
+        width: 50%;
+        font-size: 18px;
+        font-weight: 500;
+        text-align: justify;
+    }
+
+    .center {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 60%;
+        height: 25%;
+    }
+
+    .tImagen {
+        text-align: center;
+        font-size: 20px;
+    }
+
+    img {
+        cursor: zoom-in;
+    }
+
+    .selected {
+        background-color: brown;
+        color: #FFF;
+    }
+
+    #flecha {
+        cursor: auto;
+    }
+
+    /*label.lTotCartPPK {
+        display: inline-block;
+        max-width: 100%;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }*/
+  
+
+</style>
+<script>
+    $(function () {
+        $('#imagenArte').on('click', function () {
+            $('.enlargeImageModalSource').attr('src', $(this).attr('src'));
+            $('#enlargeImageModal').modal('show');
+        });
+        $('#imagenPNL').on('click', function () {
+            $('.enlargeImageModalSource').attr('src', $(this).attr('src'));
+            $('#enlargeImageModal').modal('show');
+        });
+    });
+</script>
+</div>
+<div class="modal fade" id="enlargeImageModal" tabindex="-1" role="dialog" aria-labelledby="enlargeImageModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="exampleModalLabel">ART</h2>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+                <img class="enlargeImageModalSource center" style="width: 80%;">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="tallasModal" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="tallasModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="exampleModalLabel">TALLAS</h2>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group input-group">
+                    <span class="input-group-addon" style="width:150px;">REFERENCE ORDER:</span>
+                    <input type="text" style="width:100px;" class="form-control" id="eaddress">
+                    @Html.EditorFor(model => model.PO, new { htmlAttributes = new { @class = "form-control", @style= "width:150px;" } })
+                </div>
+                <div id="tablaTallasAssort"></div>
+                <br /><br />
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="registroPiezasModal" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="registroPiezasModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="exampleModalLabel">PACKING QUANTITIES</h2>
+              
+            </div>
+                <div class="modal-footer">
+                
+                </div>
+            </div>
+    </div>
+</div>
+<div class="container-fluid" style="padding-left:20em; padding-right:10em;">
+    <div class="panel panel-primary" id="consultaPO">
+        <div class="panel-heading">
+            <h2>Reference Order: @Html.DisplayFor(model => model.PO, new { @class = "control-label col-md-6" })  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      Purchase Order: @Html.DisplayFor(model => model.VPO, new { @class = "control-label col-md-6" })</h2>
+        </div>
+        @Html.HiddenFor(model => model.IdPedido)
+
+    </div>
+
+    <div class="container-fluid">
+        <div class="form-row">
+            <div class="form-group col-sm-4 estilo">
+                <label style="font-size: x-large; font-weight: 500">
+                    @Html.LabelFor(model => model.CatCliente.Nombre, new { @class = "control-label" }):
+                    <label style="font-size: x-large; font-weight: 500">@Html.DisplayFor(model => model.CatCliente.Nombre, new { @class = "control-label col-md-6" })</label>
+                </label>
+            </div>
+            <div class="form-group col-sm-7 estilo">
+                <label style="font-size: x-large; font-weight: 500">
+                    @Html.LabelFor(model => model.CatClienteFinal.NombreCliente, new { @class = "control-label" }):
+                    <label style="font-size: x-large; font-weight: 300">@Html.DisplayFor(model => model.CatClienteFinal.NombreCliente, new { @class = "control-label col-md-6" })</label>
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="panel panel-primary" id="consultaPO">
+        <div class="panel-heading">
+            <h4>STYLES</h4>
+        </div>
+        <div id="div_tabla_estilos" style="width: 100%; height:350px; overflow:auto; ">
+            <br />
+            @if (Model.NombreClienteFinal != "HOT TOPIC")
+            {
+                if (Model.HistorialPacking == 0)
+                {
+                    <div class="btn-group" role="group" aria-label="Third group">
+                        <button type="button" id="btnAssort" class="btn btn-primary">ASSORTMENT</button>
+                    </div>
+                }
+
+            }
+            <br />
+            <table id="tabless" class="table table-sm table-striped table-hover ">
+                <thead>
+                    <tr>
+                        <th style="border-top-left-radius:0px !important;">#</th>
+                        <th>ITEM</th>
+                        <th>ITEM DESCRIPTION</th>
+                        <th>COLOR CODE</th>
+                        <th>COLOR DESCRIPTION</th>
+                        <th>QTY</th>
+                        <th>PRICE</th>
+                        <th>TOTAL</th>
+                        @*<th>ACTIONS</th> *@
+                    </tr>
+                </thead>
+                <tbody class="tbody"></tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <br />
+    <br />
+    @if (Model.NombreClienteFinal == "HOT TOPIC")
+    {
+        <script src="~/Scripts/general/obtenerListadoPackingHT.js"></script>
+        <div class="row" style="display:none;" id="panelHotTopic">
+            <div class="col-sm-11">
+                <div class="panel panel-primary" id="consultaTallaHT" style="visibility:hidden;  height: 1600px;">
+
+                    <div class="panel-heading">
+                        <h4>PACKING HOT TOPIC</h4>
+                    </div>
+                    <br />
+                    <!--<div class="btn-group mr-6" role="group" aria-label="First group">
+                        <button type="button" id="btnNewP" class="btn btn-primary">+ New Registration Packing</button>
+                    </div>-->
+                    <div class="container-fluid" style=" overflow:auto;">
+                        <br />
+                        <div id="div_estilo_ht"></div>
+                        <button type="button" id="btnAdd" class="btn btn-xs btn-primary classAddQ">+ Add Size</button>
+                        <br />
+                        <div id="listaTallaHT"></div>
+                        <table id="tablePackingHT" class="table table-sm table-striped table-hover ">
+                            <thead class="encabezado"></thead>
+                            <tbody class="tbodyPHT"></tbody>
+                        </table>
+                        <button type="button" id="nuevaTalla" class="btn btn-success btn-md pull-right btn-sm">Save Sizes</button>
+                        <br />
+                    </div>
+                    <div class="container-fluid" style=" overflow:auto;">
+                        <div id="div_titulo_Bulk" style=" overflow:auto; display:none; "></div>
+                        <div id="listaBatchHT" style="overflow: auto; height: 100px; display:none;"></div>
+                        <div id="listaTallaBatchHT" style="overflow: auto; height: 100px; display:none;"></div>
+                        <br />
+                        <div id="opciones" style="display: none;">
+                            <div class="form-row">
+                                <div class="form-group col-sm-12 tipoP">
+                                    @Html.LabelFor(model => model.Packing.PackingTypeSize.FormaEmpaque, htmlAttributes: new { @class = "control-label " })
+                                    @Html.EnumDropDownListFor(model => model.Packing.PackingTypeSize.FormaEmpaque, "Select the packaging form", new { @class = "form-control"/*, @onchange = "ObtenerTallasPorTipo(this);"*/})
+                                    @Html.ValidationMessageFor(model => model.Packing.PackingTypeSize.FormaEmpaque, "", new { @class = "text-danger" })
+
+                                    @Html.LabelFor(model => model.Packing.PackingTypeSize.NumberPO, htmlAttributes: new { @class = "control-label " })
+                                    @Html.EditorFor(model => model.Packing.PackingTypeSize.NumberPO, new { htmlAttributes = new { @class = "form-control" } })
+                                    @Html.ValidationMessageFor(model => model.Packing.PackingTypeSize.NumberPO, "", new { @class = "text-danger" })
+
+                                </div>
+                                <br />
+                                <div class="form-group col-sm-12" id="opcionTotal" style="display: none;">
+                                    @Html.LabelFor(model => model.Packing.PackingTypeSize.TotalUnits, htmlAttributes: new { @class = "control-label " })<br />
+                                    @Html.EditorFor(model => model.Packing.PackingTypeSize.TotalUnits, new { htmlAttributes = new { @class = "form-control" } })
+                                    @Html.ValidationMessageFor(model => model.Packing.PackingTypeSize.TotalUnits, "", new { @class = "text-danger" })
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="container-fluid">
+                        <div id="div_titulo_Register" style=" overflow:auto; display:none; "></div>
+                        <div class="form-row" id="opcionesRegistro" style="display:none; ">
+                            <div class="col-sm-5">
+                                @Html.LabelFor(model => model.Packing.PackingTypeSize.TipoEmpaque, htmlAttributes: new { @class = "control-label " })
+                                @Html.EnumDropDownListFor(model => model.Packing.PackingTypeSize.TipoEmpaque, "Select a type of packaging", new { @class = "form-control", id = "TipoEmp" })
+                                @Html.ValidationMessageFor(model => model.Packing.PackingTypeSize.TipoEmpaque, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-sm-5">
+                                @Html.LabelFor(model => model.Packing.Turnos, htmlAttributes: new { @class = "control-label " })
+                                @Html.EnumDropDownListFor(model => model.Packing.Turnos, "Select Turn", new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.Packing.Turnos, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-sm-4">
+                                <br />
+                                @Html.LabelFor(model => model.Packing.PackingTypeSize.NumberPO, htmlAttributes: new { @class = "control-label " })
+                                @Html.EditorFor(model => model.Packing.PackingTypeSize.NumberPO, new { htmlAttributes = new { @class = "form-control", id = "numeroPOHT" } })
+                                @Html.ValidationMessageFor(model => model.Packing.PackingTypeSize.NumberPO, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-sm-4">
+                                <br />
+                                @Html.LabelFor(model => model.Packing.CantidadPPKS, htmlAttributes: new { @class = "control-label " })
+                                @Html.EditorFor(model => model.Packing.CantidadPPKS, new { htmlAttributes = new { @class = "form-control cantPPK" } })
+                                @Html.ValidationMessageFor(model => model.Packing.CantidadPPKS, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-sm-4">
+                                <br />
+                                @Html.LabelFor(model => model.Packing.CantBox, htmlAttributes: new { @class = "control-label " })
+                                @Html.EditorFor(model => model.Packing.CantBox, new { htmlAttributes = new { @class = "form-control cantCajas", id = "numeroCajas" } })
+                                @Html.ValidationMessageFor(model => model.Packing.CantBox, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-sm-4">
+                                <br />
+                                @Html.LabelFor(model => model.Packing.PackingTypeSize.TotalUnits, htmlAttributes: new { @class = "control-label ", id = "numTotalUnitLabel" })
+                                @Html.EditorFor(model => model.Packing.PackingTypeSize.TotalUnits, new { htmlAttributes = new { @class = "form-control", id = "numTotalUnit" } })
+                                @Html.ValidationMessageFor(model => model.Packing.PackingTypeSize.TotalUnits, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <!-- <button type="button" id="btnAddP" class="btn btn-xs btn-primary classAdd">+ Add Size</button>-->
+                        <br />
+                        <br />
+                        <div id="listaTallaPHT"></div>
+                        <br />
+                        <br />
+                        <br />
+                        <div class="btn-toolbar pull-right" role="toolbar" id="grupoBotones" aria-label="Toolbar with button groups">
+                            <div class="btn-group mr-2" role="group" aria-label="First group">
+                                <button type="button" id="btnDone" class="btn btn-success">Done</button>
+                            </div>
+                            <div class="btn-group mr-2" role="group" aria-label="Second group">
+                                <button type="button" id="btnNuevo" class="btn btn-success" onclick="event.preventDefault(); ConfirmEmpaqueBulk(this);">+ New Bulk</button>
+                            </div>
+                            <div class="btn-group mr-2" role="group" aria-label="Second group">
+                                <button type="button" id="btnNuevoPPK" class="btn btn-success" onclick="event.preventDefault(); ConfirmEmpaquePPK(this);">+ New PPK</button>
+                            </div>
+                            <div class="btn-group" role="group" aria-label="Third group">
+                                <button type="button" id="btnNext" class="btn btn-success">Next PPK</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!--contenedor ppk-->
+                </div>
+            </div>
+            <div class="col-sm-1">
+                <div class="panel panel-primary" id="arte" style=" display:none; width:150px; height: 450px; ">
+                    <div class="panel-heading">
+                        <h4>ART</h4>
+                    </div>
+                    <p class="tImagen">STYLE IMAGE</p>
+                    <br />
+                    <img id="imagenArte" class="center" />
+                    <br />
+                    <br />
+                    <p class="tImagen">PNL IMAGE</p>
+                    <br />
+                    <img id="imagenPNL" class="center" />
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row" style="display:none;" id="panelPacking">
+            <div class="col-sm-10">
+                <div class="panel panel-primary" id="consultaTalla" style="visibility:hidden; width: 100%; height: 1350px;">
+                    <div class="panel-heading">
+                        <h4>PACKING</h4>
+                    </div>
+                    <div id="packBPPK">
+                        <div id="panelNoEstilosBPPK" style="display:none;">
+                            @{
+                                string[] imgsB = { "~/Content/img/iconoEmpaque.png" };
+                            }
+
+                            @foreach (var imgB in imgsB)
+                            {
+                                <img src="@Url.Content(imgB)" alt="tbd" id="imgPanelBPPK" class="centerImg" />
+                                <p style="font-size:200%; text-align:center;">
+                                    At the moment, there is no registered packaging for order.
+                                </p>
+                            }
+                        </div>
+                        <div class="container-fluid" style=" overflow:auto;">
+                            <br />
+                            <div id="div_Desc_Estilo" style="background-color:lightblue; text-align:center"></div>
+                            <div id="titulo_Tipo_Empaque" style="display:none; text-align:center"></div>
+                            <button type="button" class="btn btn-success btn-md pull-right btn-sm" id="modificarPack" onclick="event.preventDefault(); ConfirmCambioPack(this);"><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Change Pack</button>
+                            <div id="div_estilo"></div>
+                            <button type="button" id="btnAdd" class="btn btn-xs btn-primary classAddQ">+ Add Size</button>
+                            <br />
+                            <div id="listaTalla"></div>
+                            <table id="tablePacking" class="table table-sm table-striped table-hover ">
+                                <thead class="encabezado"></thead>
+                                <tbody class="tbodyP"></tbody>
+                            </table>
+                            <button type="button" id="nuevaTalla" class="btn btn-success btn-md pull-right btn-sm">Save Sizes</button>
+                            <br />
+                        </div>
+                        <div class="container-fluid">
+                            <div id="div_titulo" style="display:none; "></div>
+                            <div id="listaTallaBatch" style=" overflow:auto; height: 120px; display:none;"></div>
+                            <div id="opciones" style="display:none; ">
+                                <div class="form-row">
+                                    <div class="form-group col-sm-12 tipoP">
+                                        @Html.LabelFor(model => model.Packing.PackingTypeSize.TipoEmpaque, htmlAttributes: new { @class = "control-label " })
+                                        @Html.EnumDropDownListFor(model => model.Packing.PackingTypeSize.TipoEmpaque, "Select a type of packaging", new { @class = "form-control"/*, @onchange = "ObtenerTallasPorTipo(this);"*/})
+                                        @Html.ValidationMessageFor(model => model.Packing.PackingTypeSize.TipoEmpaque, "", new { @class = "text-danger" })
+
+                                        @Html.EditorFor(model => model.Packing.PackingTypeSize.NombreTipoPak, new { htmlAttributes = new { @class = "form-control txtDes" } })
+                                        @Html.ValidationMessageFor(model => model.Packing.PackingTypeSize.NombreTipoPak, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" id="btnAddP" class="btn btn-xs btn-primary classAdd">+ Add Size</button>
+                            <br />
+                            <div id="listaTallaP"></div>                            
+                            <div id="div_estilo_pack" style="display:none;"></div>
+                            <button type="button" class="btn btn-primary" id="registrarNuevo" data-toggle="modal">
+                                <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> ADD NEW BATCH
+                            </button>
+                            <br />
+                            <br />
+                            <div id="opcionesPack" style="display:none;">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <div class="col-xs-4 col-md-4" style="width: 150px;">
+                                            @Html.LabelFor(model => model.Packing.Turnos, htmlAttributes: new { @class = "control-label " })
+                                            @Html.EnumDropDownListFor(model => model.Packing.Turnos, "Select Turn", new { @class = "form-control" })
+                                            @Html.ValidationMessageFor(model => model.Packing.Turnos, "", new { @class = "text-danger" })
+                                        </div>
+                                        <div class="col-xs-4 col-md-4" style="width: 150px;">
+                                            @Html.LabelFor(model => model.Packing.CantBox, htmlAttributes: new { @class = "control-label " })
+                                            @Html.EditorFor(model => model.Packing.CantBox, new { htmlAttributes = new { @class = "form-control numeric cantBox", @style = "width:130px" } })
+                                            @Html.ValidationMessageFor(model => model.Packing.CantBox, "", new { @class = "text-danger" })
+                                        </div>
+                                        <div class="col-xs-4 col-md-4" style="width: 200px;">
+                                            @Html.LabelFor(model => model.Packing.TotalCartonsPPK, htmlAttributes: new { @class = "control-label lTotCartPPK " })
+                                            @Html.EditorFor(model => model.Packing.TotalCartonsPPK, new { htmlAttributes = new { @class = "form-control numeric cantTotCart", @style = "width:150px", @readonly = "readonly" } })
+                                            @Html.ValidationMessageFor(model => model.Packing.TotalCartonsPPK, "", new { @class = "text-danger" })
+                                        </div>
+                                        <div class="col-xs-4 col-md-4" style="width: 300px;">
+                                            @Html.LabelFor(model => model.Packing.TotalCartonesFaltPPK, htmlAttributes: new { @class = "control-label lTotCartPPK " })
+                                            @Html.EditorFor(model => model.Packing.TotalCartonesFaltPPK, new { htmlAttributes = new { @class = "form-control numeric cantTotFaltCart", @style = "width:150px", @readonly = "readonly" } })
+                                            @Html.ValidationMessageFor(model => model.Packing.TotalCartonesFaltPPK, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+                            <div id="listaTallaPacking"></div>
+                            <button type="button" id="nuevoPallet" class="btn btn-success btn-md pull-right btn-sm"><span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Save</button>
+                            <button type="button" class="btn btn-success btn-md pull-right btn-sm" id="modificarBatch" onclick="event.preventDefault(); ConfirmRev(this);"><span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Modify</button>
+                        </div>
+                    </div>
+                    <div id="packAssort">
+                        <div id="panelNoEstilos" style="display:none;">
+                            @{
+                                string[] imgs = { "~/Content/img/iconoEmpaque.png" };
+                            }
+
+                            @foreach (var img in imgs)
+                            {
+                                <img src="@Url.Content(img)" alt="tbd" id="imgPanel" class="centerImg" />
+                                <p style="font-size:200%; text-align:center;">
+                                    At the moment, there is no registered packaging for order.
+                                </p>
+                            }
+                        </div>
+                        <script src="~/Scripts/general/obtenerListadoPackingAssort.js"></script>
+                        <br />
+                        <button type="button" class="btn btn-success" id="agregarNuevoPack" onclick="event.preventDefault(); ConfirmNewAssort(this);"><span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> New Packing</button>
+                        <div class="container-fluid" style=" overflow:auto;">
+                            <br />
+                            <div id="div_titulo_Assort"></div>
+                            <div class="row" id="opcionesAssort" style="display:none; ">
+
+                                <div class="col-xs-6 col-md-4" style="width: 300px;">
+                                    @Html.LabelFor(model => model.IdEstilo, htmlAttributes: new { @class = "control-label " }) <br />
+                                    @Html.DropDownList("listEstilo", (IEnumerable<System.Web.Mvc.SelectListItem>)ViewData["listEstilo"], "Select Style", new { @class = "form-control", @id = "selectEstilos", @name = "state", @style = "width: 80% !important;" })
+                                    @Html.ValidationMessageFor(model => model.IdEstilo, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="col-xs-4 col-md-4" style="width: 300px;">
+                                    @Html.LabelFor(model => model.Packing.PackingTypeSize.PackingName, htmlAttributes: new { @class = "control-label " })
+                                    @Html.EditorFor(model => model.Packing.PackingTypeSize.PackingName, new { htmlAttributes = new { @class = "form-control", @style = "width: 60% !important;" } })
+                                    @Html.ValidationMessageFor(model => model.Packing.PackingTypeSize.PackingName, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="col-xs-4 col-md-4" style="width: 300px;">
+                                    @Html.LabelFor(model => model.Packing.PackingTypeSize.AssortName, htmlAttributes: new { @class = "control-label " })
+                                    @Html.EditorFor(model => model.Packing.PackingTypeSize.AssortName, new { htmlAttributes = new { @class = "form-control", @style = "width: 62% !important;" } })
+                                    @Html.ValidationMessageFor(model => model.Packing.PackingTypeSize.AssortName, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="col-xs-4 col-md-4"  style="width: 150px;">
+                                    @Html.LabelFor(model => model.Packing.PackingTypeSize.Cantidad, htmlAttributes: new { @class = "control-label " })
+                                    @Html.EditorFor(model => model.Packing.PackingTypeSize.Cantidad, new { htmlAttributes = new { @class = "form-control numeric tpieces", @style = "width:130px", @onkeyup = "sumar();" } })
+                                    @Html.ValidationMessageFor(model => model.Packing.PackingTypeSize.Cantidad, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="col-xs-4 col-md-4"  style="width: 150px;">
+                                    @Html.LabelFor(model => model.Packing.PackingTypeSize.Cartones, htmlAttributes: new { @class = "control-label " })
+                                    @Html.EditorFor(model => model.Packing.PackingTypeSize.Cartones, new { htmlAttributes = new { @class = "form-control numeric tcart", @style = "width:130px", @onkeyup = "sumar();" } })
+                                    @Html.ValidationMessageFor(model => model.Packing.PackingTypeSize.Cartones, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="col-xs-4 col-md-4"  style="width: 150px;">
+                                    @Html.LabelFor(model => model.Packing.PackingTypeSize.TotalUnits, htmlAttributes: new { @class = "control-label " })
+                                    @Html.EditorFor(model => model.Packing.PackingTypeSize.TotalUnits, new { htmlAttributes = new { @class = "form-control numeric tcu", @style = "width:130px", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(model => model.Packing.PackingTypeSize.TotalUnits, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div id="div_titulo_Registro" style="display:none; "></div>
+                            <div id="opcionesPAssort" style="display:none;">
+                                <br />
+                                @Html.LabelFor(model => model.Packing.PackingTypeSize.PackingRegistrado, htmlAttributes: new { @class = "control-label " }) <br />
+                                @Html.DropDownList("listPack", (IEnumerable<System.Web.Mvc.SelectListItem>)ViewData["listPack"], "Select Packing Name", new { @class = "form-control", @id = "selectPackingName", @name = "state", @style = "width: 15% !important;" })
+                                @Html.ValidationMessageFor(model => model.Packing.PackingTypeSize.PackingRegistrado, "", new { @class = "text-danger" })
+                            </div>
+                            <br />
+                            <div id="regAssort"></div>
+                            <!-- <div id="lTallasAssort" style=" overflow:auto; display:none; ">
+        <div id="div_titulo_Tallas_assort"></div>
+        <table id="listadoTallasAssort" class="table table-sm table-striped table-hover ">
+            <thead class="encabezado"></thead>
+            <tbody class="tbodyTallasAssort"></tbody>
+        </table>
+    </div>-->
+                            <div id="batch" style="overflow:auto; display:none; ">
+                                <div id="div_batch_assort"></div>
+                                <div id="listaBatchAssort" style="width: 100%; height:200px; overflow:auto;"></div>
+                            </div>
+                            <div id="palletAssort"></div>
+                            <div id="div_titulo_Register_pallet" style=" overflow:auto; display:none; "></div>
+                            <div class="form-row" id="opcionesRegPallet" style="display:none;  margin-right: 0px; ">
+                                <div class="col-xs-5 col-md-4 turn" style="width: 300px;">
+                                    @Html.LabelFor(model => model.Packing.PackingAssort.Turnos, htmlAttributes: new { @class = "control-label " })
+                                    @Html.EnumDropDownListFor(model => model.Packing.PackingAssort.Turnos, "Select Turn", new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.Packing.PackingAssort.Turnos, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="col-xs-4 col-md-4" style="width: 300px;">
+                                    @Html.LabelFor(model => model.Packing.PackingTypeSize.TotalCartones, htmlAttributes: new { @class = "control-label " })
+                                    @Html.EditorFor(model => model.Packing.PackingTypeSize.TotalCartones, new { htmlAttributes = new { @class = "form-control", id = "numeroTotalCart", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(model => model.Packing.PackingTypeSize.TotalCartones, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="col-xs-4 col-md-4" style="width: 300px;">
+                                    @Html.LabelFor(model => model.Packing.PackingAssort.TotalCartonesFalt, htmlAttributes: new { @class = "control-label " })
+                                    @Html.EditorFor(model => model.Packing.PackingAssort.TotalCartonesFalt, new { htmlAttributes = new { @class = "form-control", id = "numeroTotalFaltCart", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(model => model.Packing.PackingAssort.TotalCartonesFalt, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="col-xs-4 col-md-4" style="width: 300px;">
+                                    @Html.LabelFor(model => model.Packing.PackingAssort.TotalPiezasFalt, htmlAttributes: new { @class = "control-label " })
+                                    @Html.EditorFor(model => model.Packing.PackingAssort.TotalPiezasFalt, new { htmlAttributes = new { @class = "form-control tcFalt", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(model => model.Packing.PackingAssort.TotalPiezasFalt, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="col-xs-4 col-md-4" style="width: 300px;">
+                                    <br />
+                                    @Html.LabelFor(model => model.Packing.PackingAssort.CantCartons, htmlAttributes: new { @class = "control-label " })
+                                    @Html.EditorFor(model => model.Packing.PackingAssort.CantCartons, new { htmlAttributes = new { @class = "form-control numeric cantCartons", @onkeyup = "sumarAssort();" } })
+                                    @Html.ValidationMessageFor(model => model.Packing.PackingAssort.CantCartons, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="col-xs-4 col-md-4" style="width: 300px;">
+                                    <br />
+                                    @Html.LabelFor(model => model.Packing.PackingTypeSize.Pieces, htmlAttributes: new { @class = "control-label " })
+                                    @Html.EditorFor(model => model.Packing.PackingTypeSize.Pieces, new { htmlAttributes = new { @class = "form-control cantTPcs", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(model => model.Packing.PackingTypeSize.Pieces, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="col-xs-4 col-md-4" style="width: 300px;">
+                                    <br />
+                                    @Html.LabelFor(model => model.Packing.PackingAssort.TotalPiezas, htmlAttributes: new { @class = "control-label " })
+                                    @Html.EditorFor(model => model.Packing.PackingAssort.TotalPiezas, new { htmlAttributes = new { @class = "form-control totalPcs", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(model => model.Packing.PackingAssort.TotalPiezas, "", new { @class = "text-danger" })
+                                </div>
+
+                            </div>
+                            <div class="form-row" id="opcionesCantidadesPack" style="display:none;  margin-right: 0px; ">
+
+                                <div class="col-sm-4 turn" style="margin-right: -130px;">
+                                    @Html.LabelFor(model => model.Packing.PackingTypeSize.TotalCartones, htmlAttributes: new { @class = "control-label " })
+                                    @Html.EditorFor(model => model.Packing.PackingTypeSize.TotalCartones, new { htmlAttributes = new { @class = "form-control", id = "nTotalCart", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(model => model.Packing.PackingTypeSize.TotalCartones, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="col-sm-4" style="margin-right: -100px;">
+                                    @Html.LabelFor(model => model.Packing.PackingAssort.TotalCartonesFalt, htmlAttributes: new { @class = "control-label " })
+                                    @Html.EditorFor(model => model.Packing.PackingAssort.TotalCartonesFalt, new { htmlAttributes = new { @class = "form-control", id = "nTotalFaltCart", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(model => model.Packing.PackingAssort.TotalCartonesFalt, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="col-sm-4" style="margin-right:-100px;">
+                                    @Html.LabelFor(model => model.Packing.PackingAssort.TotalPiezasFalt, htmlAttributes: new { @class = "control-label " })
+                                    @Html.EditorFor(model => model.Packing.PackingAssort.TotalPiezasFalt, new { htmlAttributes = new { @class = "form-control tcFalt", id = "nTotalPcsFalt", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(model => model.Packing.PackingAssort.TotalPiezasFalt, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <button type="button" id="nuevoPalletAssort" class="btn btn-success btn-md pull-right btn-sm"><span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Pallet</button>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-1">
+                <div class="panel panel-primary" id="arte" style=" display:none; width:150px; height: 450px; ">
+                    <div class="panel-heading">
+                        <h4>ART</h4>
+                    </div>
+                    <p class="tImagen">STYLE IMAGE</p>
+                    <br />
+                    <img id="imagenArte" class="center" />
+                    <br />
+                    <br />
+                    <p class="tImagen">PNL IMAGE</p>
+                    <br />
+                    <img id="imagenPNL" class="center" />
+                </div>
+            </div>
+        </div>
+
+    }
+    <br />
+    <br />
+    <br />
+    <a href='@Url.Action("Index", "Packing")'>
+        <img src='@Url.Content("~/Content/img/backToPage.png")' id="flecha" title="Go Back" />
+    </a>
+</div>
+    <script>
+                               /* $('#tabless tr').click(function (e) {
+                                    $('#tabless tr').removeClass('highlighted');
+                                    $(this).addClass('highlighted');
+                                });*/
+
+
+                               /* function highlight(e) {
+                                    if (selected[0]) selected[0].className = '';
+                                    e.target.parentNode.className = 'selected';
+                                }
+
+                                var table = document.getElementById('tabless'),
+                                    selected = table.getElementsByClassName('selected');
+                                table.onclick = highlight;*/
+    </script>

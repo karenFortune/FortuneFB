@@ -1,0 +1,489 @@
+﻿@model FortuneSystem.IMAGEN_ARTE
+
+@{
+    ViewBag.Title = "Create Art";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link type="text/css" rel="stylesheet" href="~/Content/cssGeneral/estiloArte.css" />
+<link type="text/css" rel="stylesheet" href="~/Content/cssGeneral/estiloRadioButton.css" />
+<style>
+
+    .center {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+   
+    
+</style>
+<script>
+
+    var minLength = 12;
+    var maxLength = 15;
+    $(function () {
+
+    });
+    $(document).on("input", ".numeric", function () {
+        this.value = this.value.replace(/\D/g, '');
+        $(".numeric").on("keydown keyup change", function () {
+            debugger
+            var value = $(this).val();
+            if (value.length < minLength) {
+                $("#nuevoUPC").attr('disabled', 'disabled');
+                $(".msj").text("The minimum number of UPC is 12");
+                $('.msj').css('color', 'red');
+
+            }
+            else if (value.length > maxLength) {
+                $(".msj").text("The maximum UPC number is 15");
+                $('.msj').css('color', 'red');
+                $("#nuevoUPC").attr('disabled', 'disabled');
+            }
+            else {
+                $(".msj").text("The UPC is valid");
+                $('.msj').css('color', 'black');
+                $("#nuevoUPC").removeAttr('disabled');
+            }
+
+        });
+    });
+    $(function () {
+        $('img').on('click', function () {
+            $('.enlargeImageModalSource').attr('src', $(this).attr('src'));
+            $('#enlargeImageModal').modal('show');
+        });
+    });
+    $(function () {
+
+        $('#chooseFile').bind('change', function () {
+            var filename = $("#chooseFile").val();
+            if (/^\s*$/.test(filename)) {
+                $(".file-upload").removeClass('active');
+                $("#noFile").text("No file chosen...");
+            }
+            else {
+                $(".file-upload").addClass('active');
+                $("#noFile").text(filename.replace("C:\\fakepath\\", ""));
+            }
+        });
+
+    });
+    $(function () {
+        $('#chooseFile').change(function (e) {
+            addImage(e);
+        });
+
+        function addImage(e) {
+            var file = e.target.files[0],
+                imageType = /image.*/;
+
+            if (!file.type.match(imageType))
+                return;
+
+            var reader = new FileReader();
+            reader.onload = fileOnload;
+            reader.readAsDataURL(file);
+        }
+
+        function fileOnload(e) {
+            var result = e.target.result;
+            $('#imgSalida').attr("src", result);
+        }
+    });
+
+    function obtenerListaTallas() {
+                $("#loading").css('display', 'inline');
+                $.ajax('@Url.Action("Lista_Tallas_Estilo", "Arte")', {
+                    method: 'GET',
+                    dataType: "json",
+                    success: function (jsonData) {
+                        var listaT = jsonData.Data.listaTalla;
+                        var listaU = jsonData.Data.listaUPC;
+                        var html = '';
+                        html +='<table class="table" id="tablaTallas"><thead>' +
+                            '  <tr>' +
+                            '<th>SIZE</th>' +
+                            ' <th>UPC</th>' +
+                            '</tr>'+
+                            '</thead><tbody>';
+                        if (listaU.length != 0) {
+                            $.each(listaU, function (key, item) {
+                                html += '<tr>';
+                                html += '<td><input type="text" id="f-talla" class="form-control talla" value="' + item.Talla + '" readonly/></td>';
+                                html += '<td><input type="text" name="l-cantidad" id="l-cantidad" class="form-control numeric "  value="' + item.UPC1 + '" readonly /><span class="msj"></span></td>';
+
+                                html += '</tr>';
+
+                            });
+                            $("#nuevoUPC").hide();
+                        } else {
+                            $.each(listaT, function (key, item) {
+                                html += '<tr>';
+                                html += '<td><input type="text" id="f-talla" class="form-control talla" value="' + item.Talla + '" readonly/></td>';
+                                html += '<td><input type="text" name="l-cantidad" id="l-cantidad" class="form-control numeric " /><span class="msj"></span></td>';
+
+                                html += '</tr>';
+
+                            });
+                        }
+
+                        html += '</tbody> </table>';
+                        $('#listaTalla').html(html);
+                        $("#botonUPC").css("visibility", "visible");
+                        $("#loading").css('display', 'none');
+                    },
+                    error: function (errormessage) {
+                        alert(errormessage.responseText);
+                    },
+            }).done(function(data) {
+
+            });
+
+        }
+
+    function obtenerDetalleListaTallas() {
+                $("#loading").css('display', 'inline');
+                $.ajax('@Url.Action("Lista_Tallas_Estilo", "Arte")', {
+                    method: 'GET',
+                    dataType: "json",
+                    success: function (jsonData) {
+                        var listaT = jsonData.Data.listaTalla;
+                        var html = '';
+                        html +='<table class="table" id="detalleTallas"><thead>' +
+                            '  <tr>' +
+                            '<th >SIZE</th>' +
+                            '</tr>'+
+                            '</thead><tbody>';
+                        $.each(listaT, function (key, item) {
+                            html += '<tr>';
+                            html += '<td><input type="text" id="f-talla" class="form-control talla" value="' + item.Talla + '" readonly/></td>';
+                            html += '</tr>';
+
+                        });
+                        html += '</tbody> </table>';
+
+                        $('#detalleTallas').html(html);
+                       $("#loading").css('display', 'none');
+
+                    },
+                    error: function (errormessage) {
+                        alert(errormessage.responseText);
+                    },
+            }).done(function(data) {
+
+            });
+
+        }
+    $(document).ready(function () {
+        obtenerListaTallas();
+        obtenerDetalleListaTallas();
+        debugger
+        var btn = $("#botonUPC").css("visibility", "visible");
+        if (btn.length != 0) {
+            $("#btnRegister").attr('disabled', 'disabled');
+        }
+
+        $('#nuevoUPC').on('click', function () {
+            var r = 0; var c = 0; var i = 0; var cadena = new Array(1);
+            cadena[0] = ''; cadena[1] = '';
+            var nFilas = $("#tablaTallas tbody>tr").length;
+            var nColumnas = $("#tablaTallas tr:last td").length;
+            $('#tablaTallas tbody>tr').each(function () {
+                r = 0;
+                c = 0;
+                $(this).find("input").each(function () {
+                    $(this).closest('td').find("input").each(function () {
+                        cadena[c] += this.value + "*";
+                        c++;
+                    });
+
+                    r++;
+                });
+            });
+            debugger
+            var error = 0;
+            $('#tablaTallas').find('td').each(function (i, el) {
+
+                var valor = $(el).children().val();
+
+                if ($(el).children().val() == '') {
+                    error++;
+                    $(el).children().css('border', '2px solid #e03f3f');
+
+                } else {
+                    $(el).children().css('border', '1px solid #cccccc');
+
+                }
+
+
+
+            });
+
+            enviarListaTalla(cadena, error);
+        });
+
+        $('#btnModif').on('click', function () {
+            var status = $('input:radio[name=EstadosArte]:checked').val();
+            var idArte = $('#IdImgArte').val();
+            var idEspecialidad = $('input:radio[name=CatEspecialidades\\.IdEspecialidad]:checked').val();
+            if (window.FormData !== undefined) {
+
+                var fileUpload = $("#chooseFile").get(0);
+                var files = fileUpload.files;
+                var fileData = new FormData();
+                var imageFile = $('#chooseFile').get(0).files[0];
+                for (var i = 0; i < files.length; i++) {
+                    fileData.append(files[i].name, files[i]);
+                }
+                fileData.append('idArte', idArte);
+                fileData.append('status', status);
+                fileData.append('idEspecialidad', idEspecialidad);
+                
+                $.ajax({
+                    url: '/Arte/ActualizarImagenArt',
+                    type: "POST",
+                    contentType: false,
+                    processData: false,
+                    data: fileData,
+                    success: function (result) {
+                        if (result.isRedirect) {
+                            window.location.href = result.redirectUrl;
+                        }
+                    },
+                    error: function (err) {
+                        alert(err.statusText);
+                    }
+                });
+            } else {
+                alert("FormData is not supported.");
+            }
+        });
+    });
+
+    function enviarListaTalla(cadena, error) {
+
+        if (error != 0) {
+            var alert = alertify.alert("Mensaje", 'Todos los campos son obligatorios.').set('label', 'Aceptar');
+            alert.set({ transition: 'zoom' });
+            alert.set('modal', false);
+        } else {
+            var id = $("#CATARTE_IdEstilo").val();
+            $.ajax({
+                url: "/POSummary/Obtener_Lista_Tallas_UPC",
+                datatType: 'json',
+                data: JSON.stringify({ ListTalla: cadena, IdSummary : id }),
+                cache: false,
+                type: 'POST',
+                contentType: 'application/json',
+                success: function (data) {
+                    $("#btnRegister").removeAttr('disabled');
+                    alertify.set('notifier', 'position', 'top-right');
+                    alertify.notify('Se registro correctamente el UPC.', 'success', 5, null);
+
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    showError(xhr.status, xhr.responseText);
+                    if (data.error == 1) {
+                        alertify.notify('Verificar.', 'error', 5, null);
+                    }
+                }
+            });
+        }
+
+    }
+
+
+    
+ 
+
+</script>
+ </div>
+@using (Html.BeginForm("FileUpload", "Arte", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+
+<div class="form-horizontal">
+
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    @Html.HiddenFor(model => model.IdEstilo)
+    @Html.HiddenFor(model => model.IdImgArte)
+    @Html.HiddenFor(model => model.CATARTE.IdEstilo)
+    @Html.HiddenFor(model => model.extensionArte)
+    @Html.HiddenFor(model => model.extensionPNL)
+    @Html.HiddenFor(model => model.StatusPNL)
+    <div class="modal fade" id="enlargeImageModal" tabindex="-1" role="dialog" aria-labelledby="enlargeImageModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="exampleModalLabel">ART</h2>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                </div>
+                <div class="modal-body">
+                    <img class="enlargeImageModalSource center" style="width: 50%;">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid" style="padding-left:20em; padding-right:10em;">
+        <div class="panel panel-primary" id="panelArte">
+            <div class="panel-heading">
+                <h2>Add Art</h2>
+            </div>
+            <br />
+            <br />
+            <hr />
+            @*<div class="row">
+            <div class="form-group">
+                <div class="col-sm-1">
+                </div>
+
+                @if (Model.extensionArte == null || Model.extensionArte == "")
+                {
+                    <div class="col-sm-5">
+                        @Html.LabelFor(model => model.imgArte, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="file-upload col-md-10">
+                            <div class="file-select">
+                                <div class="file-select-button" id="fileName">Browser File</div>
+                                <div class="file-select-name" id="noFile">No file chosen...</div>
+                                @Html.TextBoxFor(model => model.FileArte, new { type = "file", id = "chooseFile" })
+
+                            </div>
+
+                        </div>
+                        <img id="imgSalida" width="70" height="70" />
+                    </div>
+                }
+                else
+                {
+                    <div class="col-sm-5">
+                        @Html.LabelFor(model => model.imgArte, htmlAttributes: new { @class = "control-label col-md-4" })
+
+                        <img id="imgSalida" width="70" height="70" src="@Url.Action("ConvertirImagen", "Arte", new {arteCodigo = Model.IdImgArte})" />
+                    </div>
+
+                }
+                <div class="col-md-10">
+                    <br />
+                    <div class="col-md-10">
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        @Html.LabelFor(model => model.StatusArte, htmlAttributes: new { @class = "control-label " })
+                        @Html.RadioButtonFor(model => model.EstadosArte, EstatusArte.APPROVED, new { @class = "form-radio", @id = "EstatusApro", Checked = "checked" }) APPROVED
+                        @Html.RadioButtonFor(model => model.EstadosArte, EstatusArte.REVIEWED, new { @class = "form-radio", @id = "EstatusRev" }) REVIEWED
+                        @Html.RadioButtonFor(model => model.EstadosArte, EstatusArte.PENDING, new { @class = "form-radio", @id = "EstatusPend" }) PENDING
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr />
+        @if (Model.extensionArte == null || Model.extensionArte == "")
+        {
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <input type="submit" value="Save" id="btnRegister" class="btn btn-success" />
+                </div>
+            </div>
+        } *@
+            <div class="row">
+                <div class="col-sm-5 col-md-5">
+
+                    @if (Model.extensionArte == null || Model.extensionArte == "")
+                    {
+                        <div class="col-sm-6 col-md-9">
+                            @Html.LabelFor(model => model.imgArte, htmlAttributes: new { @class = "control-label col-sm-5 col-md-5" })
+                            <div class="file-upload col-sm-5 col-md-9">
+                                <div class="file-select">
+                                    <div class="file-select-button" id="fileName">Browser File</div>
+                                    <div class="file-select-name" id="noFile">No file chosen...</div>
+                                    @Html.TextBoxFor(model => model.FileArte, new { type = "file", id = "chooseFile" })
+
+                                </div>
+
+                            </div>
+                            <img id="imgSalida" width="70" height="70" />
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="col-sm-6 col-md-9">
+                            @Html.LabelFor(model => model.imgArte, htmlAttributes: new { @class = "control-label col-sm-5 col-md-5" })
+                            <div class="file-upload col-sm-5 col-md-9">
+                                <div class="file-select">
+                                    <div class="file-select-button" id="fileName">Browser File</div>
+                                    <div class="file-select-name" id="noFile">No file chosen...</div>
+                                    @Html.TextBoxFor(model => model.FileArte, new { type = "file", id = "chooseFile" })
+
+                                </div>
+
+                            </div>
+                            <img id="imgSalida" width="70" height="70" src="@Url.Action("ConvertirImagen", "Arte", new {arteCodigo = Model.IdImgArte})" />
+                        </div>
+                        /*<div class="">
+                            @Html.LabelFor(model => model.imgArte, htmlAttributes: new { @class = "control-label col-md-4" })
+
+                            <img id="imgSalida" width="70" height="70" src="@Url.Action("ConvertirImagen", "Arte", new {arteCodigo = Model.IdImgArte})" />
+                        </div>*/
+
+                    }
+
+                    <div class="col-sm-5 col-md-10">
+                        <br />
+                        <div class="col-sm-5 col-md-12">
+
+                            @Html.LabelFor(model => model.StatusArte, htmlAttributes: new { @class = "control-label " })
+                            @Html.RadioButtonFor(model => model.EstadosArte, EstatusArte.APPROVED, new { @class = "form-radio", @id = "EstatusApro", Checked = "checked" }) APPROVED
+                            @Html.RadioButtonFor(model => model.EstadosArte, EstatusArte.REVIEWED, new { @class = "form-radio", @id = "EstatusRev" }) REVIEWED
+                            @Html.RadioButtonFor(model => model.EstadosArte, EstatusArte.PENDING, new { @class = "form-radio", @id = "EstatusPend" }) PENDING
+
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-5 offset-sm-3 col-md-6 offset-md-0" >
+                    <label class="control-label">TECHNICAL SPECIALTIES</label> <br />
+                    @foreach (var item in (SelectList)ViewBag.listEspecialidad)
+                    {
+                        
+                        @Html.RadioButtonFor(model => model.CatEspecialidades.IdEspecialidad, item.Value, new { @class = "form-radio-tecnica" })
+                            <label class="control-label" id="labelTecnica">@item.Text&nbsp;&nbsp;&nbsp; </label> 
+                       
+                    }
+
+                </div>
+            </div>
+            <hr />
+            @if (Model.extensionArte == null || Model.extensionArte == "")
+            {
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10" style=" margin-left: 40%;">
+                        <input type="submit" value="Save" id="btnRegister" class="btn btn-success" />
+                    </div>
+                </div>
+            }else if (Model.StatusArte != 0 )
+            {
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10" style=" margin-left: 40%;">
+                        <button type="button" id="btnModif" class="btn btn-success">Modify Art</button>
+                    </div>
+                </div>
+            }
+        </div>
+
+        
+        <div>
+            @Html.ActionLink("Back to List", "Index")
+        </div>
+    </div>
+
+</div>
+}
+
+

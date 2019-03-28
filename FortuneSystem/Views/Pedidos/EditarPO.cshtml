@@ -1,0 +1,238 @@
+﻿@model FortuneSystem.Models.Pedidos.OrdenesCompra
+
+@{
+    ViewBag.Title = "Editar PO";
+
+}
+
+
+
+
+<script type="text/javascript">
+    function redireccionarPagina() {
+        window.location = '/pedidos/Index';
+    }
+
+    $(document).ready(function () {
+        /* $("#PO").on('input', function () {
+             var val = this.value;
+             this.value = val.replace(/[^A-Z\u00f1\u00d1\u0020\s\^0-9]/g, '');
+         });*/
+        $("#TotalUnidades").on('input', function () {
+            var val = this.value;
+            this.value = val.replace(/[^0-9]/g, '');
+        });
+
+        $('#modificarPO').click(function (e) {
+            var error = 0;
+            $(".nuevo_po").each(function () {
+                error;
+                var id = $(this).attr('id');
+                if ($(this).val() == '') {
+                    $("#" + id).css('border', '2px solid #e03f3f');
+                    error++;
+                } else {
+                    $("#" + id).css('border', '1px solid #cccccc');
+                }
+            });
+            if (error != 0) {
+                var alert = alertify.alert("Menssage", 'All fields are required.').set('label', 'Aceptar');
+                alert.set({ transition: 'zoom' });
+                alert.set('modal', false);
+            } else {
+                $("#loading").css('display', 'inline');
+                $("#modificarPO").prop("disabled", true);               
+                var idPedido = $("#IdPedido").val();
+                var po = $("#PO").val();
+                var VPO = $("#VPO").val();
+                var FechaOrdenFinal = $("#FechaOrdenFinal").val();
+                var FechaCancelada = $("#FechaCancelada").val();
+                var FechaCancel = $("#FechaCancel").val();
+                var FechaOrden = $("#FechaOrden").val();
+                var Cliente = $("#selectCliente option:selected").val();
+                var ClienteFinal = $("#selectClienteFinal option:selected").val();
+                var TipoOrden = $("#selectTipoOrden option:selected").val();
+                var TotalUnidades = $("#TotalUnidades").val();
+                $("#editarEstiloModal").modal("hide");
+                actualizarPO(idPedido, po, VPO, FechaCancelada, FechaOrdenFinal, Cliente, ClienteFinal, TotalUnidades, TipoOrden);
+                
+                alertify.set('notifier', 'position', 'top-right');
+                alertify.notify('The purchase order was modified correctly.', 'success', 5, null);
+                
+            }
+
+        });
+    });
+
+
+    function validar() {
+        if ($('#PO').val().length == 0) {
+            // $("#nuevoPO").prop("disabled", true);
+        } else {
+            $("#nuevoPO").prop("disabled", false);
+        }
+    }
+
+
+    function actualizarPO(idPedido, po, VPO, FechaCancel, FechaOrden, Cliente, ClienteFinal, TotalUnidades, TipoOrden) {
+        debugger
+        $.ajax({
+            url: "/Pedidos/ActualizarInfPO",
+            data: { id:idPedido, po: po, VPO: VPO, FechaCancel: FechaCancel, FechaOrden: FechaOrden, Cliente: Cliente, ClienteFinal: ClienteFinal, TotalUnidades: TotalUnidades, IdTipoOrden: TipoOrden },
+            cache: false,
+            type: 'GET',
+            async: true,
+            success: function (data) {               
+                //setTimeout("redireccionarPagina()", 1000);
+                setTimeout("redireccionarPagina()", function () { $("#loading").css('display', 'none'); }, 1000);
+                
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+            }
+        });
+    }
+
+    $(function () {
+        $.datepicker.regional['es'] = {
+            closeText: 'Cerrar',
+            prevText: '<Ant',
+            nextText: 'Sig>',
+            currentText: 'Hoy',
+            monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+            monthNamesShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+                'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+            dayNames: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+            dayNamesShort: ['Dom', 'Lun', 'Mar', 'Mié', 'Juv', 'Vie', 'Sáb'],
+            dayNamesMin: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'],
+            weekHeader: 'Sm',
+            dateFormat: 'mm/dd/yy',
+            firstDay: 1,
+            isRTL: false,
+            showMonthAfterYear: false,
+            yearSuffix: ''
+        };
+        $.datepicker.setDefaults($.datepicker.regional['es']);
+
+        $('#FechaOrden').datepicker();        
+        $('#FechaOrdenFinal').datepicker();
+        $('#FechaCancelada').datepicker();
+        $('#FechaCancel').datepicker();
+    })
+
+    $("#selectFechas").select2({
+    });
+
+    $('#selectCliente').select2({
+    });
+
+    $('#selectTipoOrden').select2({
+    });
+
+    $("#selectClienteFinal").select2({
+    });
+
+</script>
+<style>
+    .ui-autocomplete {
+        height: 200px;
+        overflow-y: scroll;
+        overflow-x: hidden;
+    }
+</style>
+
+</div>
+@*@using (Ajax.BeginForm("CrearPO", "Pedidos", new AjaxOptions { HttpMethod = "POST" }))*@
+@using (Html.BeginForm())
+
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.HiddenFor(model => model.IdPedido)
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h4>Purchase Order</h4>
+            </div>
+            <div class="container-fluid">
+
+                <div class="form-row">
+                    <div class="form-group col-md-4">
+                        @Html.LabelFor(model => model.PO, htmlAttributes: new { @class = "control-label " })<br />
+                        @Html.EditorFor(model => model.PO, new { htmlAttributes = new { @class = "form-control nuevo_po", @style = "text-transform:uppercase" } })
+                        @Html.ValidationMessageFor(model => model.PO, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="form-group col-md-4">
+                        @Html.LabelFor(model => model.VPO, htmlAttributes: new { @class = "control-label " })<br />
+                        @Html.EditorFor(model => model.VPO, new { htmlAttributes = new { @class = "form-control nuevo_po", @style = "text-transform:uppercase" } })
+                        @Html.ValidationMessageFor(model => model.VPO, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="form-group col-md-4">
+                        @Html.LabelFor(model => model.FechaCancel, htmlAttributes: new { @class = "control-label" })<br />
+                        @Html.EditorFor(model => model.FechaCancelada, new { htmlAttributes = new { @class = "form-control date-picker nuevo_po" } })
+                        @Html.ValidationMessageFor(model => model.FechaCancel, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="form-row">
+                    <div class="form-group col-md-4">
+                        @Html.LabelFor(model => model.FechaOrden, htmlAttributes: new { @class = "control-label" })<br />
+                        @Html.EditorFor(model => model.FechaOrdenFinal, new { htmlAttributes = new { @class = "form-control date-picker nuevo_po" } })
+                        @Html.ValidationMessageFor(model => model.FechaOrden, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="form-group col-md-4">
+                        @Html.LabelFor(model => model.Cliente, htmlAttributes: new { @class = "control-label " }) <br />
+                        @Html.DropDownList("Nombre", (SelectList)ViewBag.listCliente, new { @class = "form-control nuevo_po", @id = "selectCliente", @name = "state"})
+                        @Html.ValidationMessageFor(model => model.Cliente, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="form-group col-md-4">
+                        @Html.LabelFor(model => model.ClienteFinal, htmlAttributes: new { @class = "control-label" }) <br />
+                        @Html.DropDownList("NombreCliente", (SelectList)ViewBag.listClienteFinal, new { @class = "form-control nuevo_po", @id = "selectClienteFinal", @name = "state"})
+                        @Html.ValidationMessageFor(model => model.ClienteFinal, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+            </div>
+            <div class="container-fluid">
+
+                <div class="form-row">
+                    <div class="form-group col-md-4">
+                        @Html.LabelFor(model => model.IdTipoOrden, htmlAttributes: new { @class = "control-label" }) <br />                 
+                        @Html.DropDownList("TipoOrden", (SelectList)ViewBag.listTipoOrden, new { @class = "form-control nuevo_po", @id = "selectTipoOrden", @name = "state" })
+                        @Html.ValidationMessageFor(model => model.IdTipoOrden, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="form-group col-md-4">
+                        @Html.LabelFor(model => model.TotalUnidades, htmlAttributes: new { @class = "control-label" })
+                        @Html.EditorFor(model => model.TotalUnidades, new { htmlAttributes = new { @class = "form-control nuevo_po" } })
+                        @Html.ValidationMessageFor(model => model.TotalUnidades, "", new { @class = "text-danger" })
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+                    <br />
+                    <br />
+                    <div class="text-center margin-bottom col-sm-12">
+                        <button type="button" id="modificarPO" class="btn btn-success" data-toggle="modal">
+                            <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Modify PO
+                        </button>
+                    </div>
+                    <br />
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+
+
+
+
+
+

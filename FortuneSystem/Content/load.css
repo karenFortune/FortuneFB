@@ -1,0 +1,87 @@
+﻿.estilo_pendiente_entregar {
+    color: red;
+}
+
+h4 {
+    margin: 0px;
+}
+.alertify-notifier {
+    color: white;
+}
+
+.panel-heading {
+    color: white !important;
+    background: #3479bf !important;
+}
+
+.caja_250_scroll {
+    height: 250px;
+    overflow: auto;
+    width: 100%;
+}
+
+.modal_prueba {
+    height: 45%;
+    position: absolute;
+    border: 0;
+    padding: .5em 1em;
+    overflow: auto;
+    z-index: 999;
+    /*top: 30%;*/
+    left: 30%;
+    background: white;
+    width: 45%;
+    display: none;
+    border-radius: .5em;
+    border: #dddddd 2px solid;
+}
+.titulo_modal {
+    position: absolute;
+    width: 100%;
+    top: 0px;
+    color: white;
+    font-size: 1.25em;
+    background: #3479bf;
+    padding: .25em .5em .25em .5em;
+}
+
+.boton_cerrar_modal {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    color: white;
+    font-size: 1.25em;
+    padding: .25em .5em .25em .5em;
+    cursor: pointer;
+    font-weight: bold;
+    border-left: white .25px solid;
+}
+
+.load {
+    position: absolute;
+    z-index: 999;
+    background: white;
+    border: 0;
+    padding: .5em 1em;
+    overflow: auto;
+    top: 0%;
+    left: 0%;
+    height: 500%;
+    width: 100%;
+    display: none;
+    border: none;
+    opacity: 0.8;
+}
+.imagen_loading {
+    position: absolute;
+    top: 10%;
+    left: 43%;
+    width: 398px;
+    height: 398px;
+    background: url('../../Content/img/load.gif');
+}
+
+
+
+
+

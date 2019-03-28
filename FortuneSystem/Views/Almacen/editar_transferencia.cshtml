@@ -1,0 +1,722 @@
+﻿
+@{
+    ViewBag.Title = "EDIT TRANSFER";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link href="~/Content/base_m.css" rel="stylesheet" />
+<script>
+    $(document).on("click", "a", function () {
+        //setTimeout(function () { $("#loading").css('display', 'none'); }, 1000);
+        $("#loading").css('display', 'none');
+    });
+    var qr;
+    var artículos_carrito = '';
+    var cantidades_carrito = '';
+    var id_salidas_items = '';
+    var rows_seleccionados_edit = 0;
+    var id_temp_edit, description_temp_edit, available_temp_edit, order_temp_edit;
+    var ids_edit, cantidades_edit, pos_edit, estilos_edit, cajas_edit, codigos_edit;
+    var estado_aprobacion = 0,salida=0;
+
+    $(document).on("input", ".numeric", function () {
+        this.value = this.value.replace(/\D/g, '');
+    });
+    $(document).on("input", ".validacion", function () {
+        var c = this.selectionStart,
+            r = /[^a-zA-Z0-9áéíóúÁÉÍÓÚ .()!@@/#%-]/,
+            v = $(this).val();
+        if (r.test(v)) {
+            $(this).val(v.replace(r, ''));
+            c--;
+        }
+        this.setSelectionRange(c, c);
+    });
+    $(document).on("input", ".po", function () { $('.po').autocomplete({ source: '@Url.Action("Autocomplete_po")' }); });
+    $(document).on("input", ".estilo", function () { $('.estilo').autocomplete({ source: '@Url.Action("Autocomplete_estilos")' }); });
+    $(function () {
+        $.datepicker.regional['es'] = {
+            closeText: 'Cerrar',
+            prevText: '<Ant',
+            nextText: 'Sig>',
+            currentText: 'Hoy',
+            monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+            monthNamesShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+                'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+            dayNames: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+            dayNamesShort: ['Dom', 'Lun', 'Mar', 'Mié', 'Juv', 'Vie', 'Sáb'],
+            dayNamesMin: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'],
+            weekHeader: 'Sm',
+            dateFormat: 'yy-mm-dd',
+            firstDay: 1,
+            isRTL: false,
+            showMonthAfterYear: false,
+            yearSuffix: ''
+        };
+        $.datepicker.setDefaults($.datepicker.regional['es']);
+        $('#caja_date_trans_edit').datepicker();
+
+
+
+    });//DATEPICKER
+        
+    $(document).ready(function () {
+        $("#loading_edicion_transferencia").css('display', 'inline');
+        buscar_lista_lugares_origen_edit();
+        llenar_informacion_inicio();        
+    });
+    function buscar_lista_lugares_origen_edit() {
+        $.ajax({
+            url: "/Almacen/lista_lugares",
+            type: "POST",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                var html = '<label for="caja_from_trans" class=" col-form-label">Whse from </label>' +
+                    '  <select type="text" class="form-control" id="caja_from_trans_edit"  >';
+                html += '<option value="0">Select</option>';
+                $.each(result, function (key, item) {
+                    html += '<option value="' + item.id_lugar + '">' + item.lugar + '</option>';
+                });
+                html += '</select>';
+                $("#div_from_edit").html(html);
+            },
+            error: function (errormessage) {alert(errormessage.responseText); }
+        });
+    }
+    function buscar_lista_lugares_destino_edit(ID) {
+        $.ajax({
+            url: "/Almacen/lista_lugares_destino/" + ID,
+            type: "POST",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                var html2 = '<label for="caja_destino_trans" class=" col-form-label">Whse to </label> ' +
+                    ' <div class="form-inline"> <select type="text" class="form-control" style="width:75%;" id="caja_destino_trans_edit"  >';
+                html2 += '<option value="0">Select</option>';
+                $.each(result, function (key, item) {
+                    html2 += '<option value="' + item.id_lugar + '">' + item.lugar + '</option>';
+                });
+                html2 += '</select>';
+                html2 += '&nbsp;<button type="button" class="btn btn-danger mb-2" href="#modal_lugar_nuevo_edit" data-toggle="modal" ><b>+</b></button></div>';
+                $("#div_to_edit").html(html2);
+            },
+            error: function (errormessage) { alert(errormessage.responseText); }
+        });
+    }
+    function llenar_informacion_inicio() {
+        $.ajax({
+            url: "/Almacen/obtener_informacion_salida",
+            type: "POST",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                $.each(result, function (key, item) {
+                    estado_aprobacion = item.estado_aprobacion;
+                    buscar_lista_lugares_destino_edit(item.id_origen);
+                    salida = item.id_salida;
+                    if (item.sello == "0") { $("#caja_no_sello_edit").prop('checked', true); }//SELLO                            
+                    $("#caja_sello_trans_edit").val(item.id_origen); //SELLO
+                    $("#caja_driver_trans_edit").val(item.driver); //DRIVER
+                    $("#caja_pallet_trans_edit").val(item.pallet); //PALLET
+                    $("#caja_envio_trans_edit").val(item.id_envio); //SHIP
+                    var fecha = (item.fecha_solicitud).split(' ');
+                    $("#caja_date_trans_edit").val(fecha[0]); //DATE
+                    $("#caja_by_trans_edit").val(item.responsable); //REQUESTED BY
+                    $("#caja_car_trans_edit").val(item.auto); //CAR
+                    $("#caja_placas_trans_edit").val(item.placas); //LICENSE
+                    /*********************************************************/
+                    $.each(item.lista_salidas_item, function (key, i) {
+                        var rows = '<tr role="row">' +
+                            '<td  role="cell"><input readonly style="width:4em !important; border: none; background: none; box-shadow:none;" class="validacion form-control lectura" value="' + i.id_inventario + '" /></td>' +
+                            '<td role="cell"><input readonly style="border: none; background: none; box-shadow:none;" class="validacion form-control lectura"  value="' + i.descripcion + '" /></td>';
+                        if (estado_aprobacion == 0) {
+                            rows += '<td role="cell"><input readonly style="border: none; background: none; box-shadow:none;" class="numeric form-control check_item"  value="' + i.total_inventario + '" /></td>';
+                        } 
+                        if (estado_aprobacion == 1) {
+                            rows += '<td role="cell"><input readonly style="border: none; background: none; box-shadow:none;" class="numeric form-control check_item"  value="' + (i.total_inventario+i.cantidad) + '" /></td>';
+                        }
+                        rows+='<td role="cell"><input ondrop="return false;" onpaste="return false;"  maxlength="10" class="numeric form-control check_item"  value="' + i.cantidad + '" /></td>' +
+                            '<td role="cell"><input ondrop="return false;" onpaste="return false;"  maxlength="30" class="validacion form-control po "  value="' + i.po + '" /></td>' +
+                            '<td role="cell"><input ondrop="return false;" onpaste="return false;"  maxlength="100" class="validacion form-control estilo " value="' + i.estilo + '" /></td>' +
+                            '<td role="cell"><input ondrop="return false;" onpaste="return false;"  maxlength="100" class="numeric form-control  " value="' + i.cajas + '" /></td>' +
+                            '<td role="cell"><button type="button" class="btn btn-light deleteItemEdit"><b>-</b></button></td></tr>';
+                        $('.cuerpo_tabla_transferencia_temporal_edit').append(rows);
+                        $("#div_tabla_transferencia_temporal_edit").css('visibility', 'visible');
+                        rows_seleccionados_edit++;
+                        id_salidas_items += '*' + i.id_salida_item;
+                    });                    
+                    setTimeout(function () {
+                        $("#caja_from_trans_edit").val(item.id_origen); //ORIGEN
+                        $("#caja_destino_trans_edit").val(item.id_destino); //DESTINO
+                        buscar_inventario_edit();
+                    }, 3000);
+                    setTimeout(function () {
+                        $("#loading_edicion_transferencia").css('display', 'none');
+                    }, 3000);
+                    
+                });    
+            },
+            error: function (errormessage) { alert(errormessage.responseText); }
+        });
+    }
+    $(document).on("click", ".deleteItemEdit", function () {
+        $(this).closest("tr").remove();
+        rows_seleccionados_edit--;
+        if (rows_seleccionados_edit < 1) {
+            $("#boton_guardar_transferencia_edit").css('display', 'none');
+            $("#div_tabla_transferencia_temporal_edit").css('visibility', 'hidden');
+        } else {
+            $("#boton_guardar_transferencia_edit").css('display', 'inline');
+            $("#div_tabla_transferencia_temporal_edit").css('visibility', 'visible');
+        } 
+
+    });
+    function buscar_inventario_edit() {
+        //$("#loading").css('display', 'inline');
+        var busqueda;
+        if ($("#caja_busqueda_inventario_edit").val() != '') {
+            busqueda = $("#caja_busqueda_inventario_edit").val();
+        } else { busqueda = 'a'; }
+        var ID = $("#caja_from_trans_edit").val();
+        $.ajax({
+            url: "/Almacen/inventario_sucursal",
+            data: "{'ID':'" + ID + "','busqueda':'" + busqueda + "'}",
+            type: "POST",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                var html = '';
+                $.each(result, function (key, item) {
+                    html += '<tr>';
+                    html += '<td>' + item.id_inventario + '</td>';
+                    html += '<td>' + item.po + '</td><td>' + item.descripcion + '</td>';
+                    html += '<td>' + item.total + '</td>';
+                    html += '</tr>';
+                });
+                $(".cuerpo_tabla_edit").html(html);
+                $("#div_select_edit").css('display', 'inline');
+                $("#boton_guardar_transferencia_edit").css('display', 'inline');
+                //$("#loading").css('display', 'none');
+                //transfer_display_none
+                return false;
+            },
+            error: function (errormessage) {alert(errormessage.responseText);}
+        });
+
+    }
+    $(document).on("click", "#tabla_inventario_articulos_edit tr", function () {
+        if (this.style.background == "" || this.style.background == "white") {
+            $(this).css('background', '#46a772');
+            $(this).css('color', 'white');
+
+        } else {
+            $(this).css('background', 'white');
+            $(this).css('color', 'black');
+            $("#tabla_inventario_articulos_edit").addClass("table-hover");
+        }
+    });
+    $(document).on("dblclick", "#tabla_inventario_articulos_edit tr", function () {
+        var row = this.rowIndex;
+        //alert($('#items_recibos tr:eq('+row+') td:eq(0)').html()); //empieza las columas desde 0
+        //alert($('#items_recibos tr:eq(' + row + ') td:nth-child(2)').html());     //empieza las columnas desde 1
+        id_temp_edit = $('#tabla_inventario_articulos_edit tr:eq(' + row + ') td:eq(0)').html();
+        order_temp_edit = $('#tabla_inventario_articulos_edit tr:eq(' + row + ') td:eq(1)').html();
+        description_temp_edit = $('#tabla_inventario_articulos_edit tr:eq(' + row + ') td:eq(2)').html();
+        available_temp_edit = $('#tabla_inventario_articulos_edit tr:eq(' + row + ') td:eq(3)').html();
+        agregar_row_edit();
+    });
+    function agregar_row_edit() {
+        $.ajax({
+            url: '/Almacen/buscar_estilo_cajas',
+            data: "{'inventario':'" + id_temp_edit + "'}",
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (result) {
+                var data = result.split('*');
+                var rows = '<tr role="row">' +
+                    '<td  role="cell"><input readonly style="width:4em !important; border: none; background: none; box-shadow:none;" class="validacion form-control lectura" value="' + id_temp_edit + '" /></td>' +
+                    '<td role="cell"><input readonly style="border: none; background: none; box-shadow:none;" class="validacion form-control lectura"  value="' + description_temp_edit + '" /></td>' +
+                    '<td role="cell"><input readonly style="border: none; background: none; box-shadow:none;" class="numeric form-control check_item"  value="' + available_temp_edit + '" /></td>' +
+                    '<td role="cell"><input ondrop="return false;" onpaste="return false;"  maxlength="10" class="numeric form-control check_item"  value="' + available_temp_edit + '" /></td>' +
+                    '<td role="cell"><input ondrop="return false;" onpaste="return false;"  maxlength="30" class="validacion form-control po "  value="' + order_temp_edit + '" /></td>' +
+                    '<td role="cell"><input ondrop="return false;" onpaste="return false;"  maxlength="100" class="validacion form-control estilo " value="' + data[0] + '" /></td>' +
+                    '<td role="cell"><input ondrop="return false;" onpaste="return false;"  maxlength="100" class="numeric form-control  " value="' + data[1] + '" /></td>' +
+                    '<td role="cell"><button type="button" class="btn btn-light deleteItemEdit"><b>-</b></button></td></tr>';
+                $('.cuerpo_tabla_transferencia_temporal_edit').append(rows);
+                $('#div_tabla_transferencia_temporal_edit').css('visibility', 'visible');
+                rows_seleccionados_edit++;
+                $("#boton_guardar_transferencia_edit").css('display', 'inline');
+            }
+        });
+    }    
+    /********************************************************************************************************************************************************************************************************/
+    /********************************************************************************************************************************************************************************************************/
+    function guardar_lugar_edit(event) {
+        var error = 0;
+        if ($("#caja_nombre_lugar_edit").val() == "") { $("#caja_nombre_lugar_edit").css('border', '2px solid #e03f3f'); error++; } else { $("#caja_nombre_lugar_edit").css('border', '1px solid #cccccc'); }
+        if ($("#caja_direccion_lugar_edit").val() == "") { $("#caja_direccion_lugar_edit").css('border', '2px solid #e03f3f'); error++; } else { $("#caja_direccion_lugar_edit").css('border', '1px solid #cccccc'); }
+        if (error == 0) {
+            guardar_lugar_bd_edit();
+        } else {
+            event.preventDefault();
+            alertify.alert('Error!', 'Please check empty fields.');
+            return false;
+        }
+    }
+    function guardar_lugar_bd_edit() {
+        $("#loading").css('display', 'inline');
+        var actionData = "{'nombre':'" + $("#caja_nombre_lugar_edit").val() + "','direccion':'" + $("#caja_direccion_lugar_edit").val() + "','tipo':'" + $("#caja_tipo_lugar_edit").val() + "'}";
+        $.ajax({
+            url: '/Almacen/agregar_nuevo_lugar',
+            data: actionData,
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (jsonData) {
+                $("#loading").css('display', 'none');
+                if (jsonData == 0) {
+                    alertify.success('Succes!');
+                    alertify.set('notifier', 'position', 'top-right');
+                    $("#caja_nombre_lugar_edit").val("");
+                    $("#caja_direccion_lugar_edit").val("");
+                    $("#modal_lugar_nuevo_edit").modal("hide");
+                    buscar_lista_lugares_destino($("#caja_from_trans_edit").val());
+                } else {
+                    alertify.alert('Error!', 'This location already exists in the database, please check your information.');
+                    return false;
+                }
+            }
+        });
+    }
+    function redireccionarPagina_trans_edicion() {
+        window.location = '/Almacen/Index'
+    }
+    $(document).on("change", "#caja_no_sello_edit", function () {
+        if ($("#caja_sello_trans_edit").val() == '0') {
+            buscar_sellos_edit($("#caja_from_trans_edit").val());
+        }
+        //$("#caja_sello_trans_edit").val("0");
+    });
+    function buscar_sellos_edit(ID) {
+        $.ajax({
+            url: "/Almacen/lista_sellos/" + ID,
+            type: "POST",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                $("#caja_sello_trans").val(result.sello);
+                $("#caja_id_sello_trans").val(result.id_sello);
+            },
+            error: function (errormessage) {alert(errormessage.responseText);}
+        });
+    }
+    function limpiar_formulario_edicion() { $(".must_trans_edit").each(function () { $(this).val() == ''; }); }
+    /********************************************************************************************************************************************************************************************************/
+    /********************************************************************************************************************************************************************************************************/
+    function crear_transferencia_edit(event) {
+        var contador = 0;
+        var error = 0;
+        ids_edit = ''; cantidades_edit = ''; pos_edit = ""; estilos_edit = ""; codigos_edit = ''; cajas_edit = '';
+        $('#tabla_transferencia_temporal_edit tbody tr').each(function () {
+            if ($(this).find('td:eq(3) input').val() != "" && (parseFloat($(this).find('td:eq(3) input').val()) <= parseFloat($(this).find('td:eq(2) input').val())) && $(this).find('td:eq(3) input').val() != "0") {
+                $(this).find('td:eq(3) input').css('border', '1px #cccccc solid ');
+                ids_edit += "*" + $(this).find('td:eq(0) input').val();
+                cantidades_edit += "*" + $(this).find('td:eq(3) input').val();
+                pos_edit += "*" + $(this).find('td:eq(4) input').val();
+                estilos_edit += "*" + $(this).find('td:eq(5) input').val();
+                if ($(this).find('td:eq(6) input').val() == '') { cajas_edit += "*0"; }
+                else { cajas_edit += "*" + $(this).find('td:eq(6) input').val(); }
+                codigos_edit += '*N/A';
+            } else {
+                $(this).find('td:eq(3) input').css('border', '2px #e03f3f solid ');
+                error++;
+            }
+        });
+        if ($("#caja_date_trans_edit").val() == '') { $("#caja_date_trans_edit").css('border', '2px solid #e03f3f'); error++; } else { $("#caja_date_trans_edit").css('border', '1px solid #cccccc'); }
+        if ($("#caja_by_trans_edit").val() == '') { $("#caja_by_trans_edit").css('border', '2px solid #e03f3f'); error++; } else { $("#caja_by_trans_edit").css('border', '1px solid #cccccc'); }
+        if ($("#caja_sello_trans_edit").val() == '') { $("#caja_sello_trans_edit").css('border', '2px solid #e03f3f'); error++; } else { $("#caja_sello_trans_edit").css('border', '1px solid #cccccc'); }
+        if ($("#caja_from_trans_edit").val() == 'Select') { $("#caja_from_trans_edit").css('border', '2px solid #e03f3f'); error++; } else { $("#caja_from_trans_edit").css('border', '1px solid #cccccc'); }
+        if ($("#caja_destino_trans_edit").val() == 'Select') { $("#caja_destino_trans_edit").css('border', '2px solid #e03f3f'); error++; } else { $("#caja_destino_trans_edit").css('border', '1px solid #cccccc'); }
+        if ($("#caja_pallet_trans_edit").val() == '') { $("#caja_pallet_trans_edit").css('border', '2px solid #e03f3f'); error++; } else { $("#caja_pallet_trans_edit").css('border', '1px solid #cccccc'); }
+        if ($("#caja_driver_trans_edit").val() == '') { $("#caja_driver_trans_edit").css('border', '2px solid #e03f3f'); error++; } else { $("#caja_driver_trans_edit").css('border', '1px solid #cccccc'); }
+        if ($("#caja_envio_trans_edit").val() == '') { $("#caja_envio_trans_edit").css('border', '2px solid #e03f3f'); error++; } else { $("#caja_envio_trans_edit").css('border', '1px solid #cccccc'); }
+
+        if (error == 0) {
+            guardar_transferencia_edicion();
+        } else {
+            event.preventDefault();
+            alertify.alert('Error!', 'Please check empty fields');
+            return false;
+        }
+    }
+    function guardar_transferencia_edicion() {
+        var id_sello, sello;
+        $("#loading_edicion_transferencia").css('display', 'inline');
+        var fecha = $("#caja_date_trans_edit").val();
+        var persona = $("#caja_by_trans_edit").val();
+        if ($("#caja_no_sello_edit").is(":checked")) { sello = 0; } else { sello = $("#caja_sello_trans_edit").val() }
+        //var sello = $("#caja_sello_trans").val();
+        var origen = $("#caja_from_trans_edit").val();
+        var destino = $("#caja_destino_trans_edit").val();
+        var driver = $("#caja_driver_trans_edit").val();
+        var pallet = $("#caja_pallet_trans_edit").val();
+        var envio = $("#caja_envio_trans_edit").val();
+        if ($("#caja_no_sello_edit").is(":checked")) { id_sello = 0; } else { id_sello = $("#caja_id_sello_trans_edit").val(); }
+        // caja_car_trans   caja_placas_trans
+        var car, placas;
+        if ($("#caja_car_trans_edit").val() == "") { car = 'N/A'; } else { car = $("#caja_car_trans_edit").val(); }
+        if ($("#caja_placas_trans_edit").val() == "") { placas = 'N/A'; } else { placas = $("#caja_placas_trans_edit").val(); }
+        var informacion = ids_edit + '+' + cantidades_edit + '+' + fecha + '+' + persona + '+' + sello + '+' + origen + '+' + destino + '+' + driver + '+' + pallet + '+' + envio + '+' + id_sello + '+' + pos_edit + '+' + estilos_edit + '+' + cajas_edit + '+' + car + '+' + placas + '+' + codigos_edit;
+        //var actionData = "{'ids':'" + ids + "','cantidades':'" + cantidades + "','fecha':'" + fecha + "','persona':'" + persona + "','sello':'" + sello + "','origen':'" + origen + "','destino':'" + destino + "','driver':'" + driver + "','pallet':'" + pallet + "','envio':'" + envio + "','id_sello':'" + id_sello + "','pos':'" + pos + "','estilos':'" + estilos + "','caja':'" + cajas + "','carro':'" + car + "','placas':'" + placas + "','codigos':'" + codigos + "'}";
+        var actionData = "{'informacion':'" + informacion + "','estado':'" + estado_aprobacion + "','items_salida':'" + id_salidas_items + "'}";
+        $.ajax({
+            url: '/Almacen/guardar_edicion_transferencia',
+            data: actionData,
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (jsonData) {
+                limpiar_formulario_edicion();
+                alertify.success('Success!');
+                alertify.set('notifier', 'position', 'top-right');
+                redireccionarPagina_trans_edicion();
+            }
+        });
+        
+    }
+
+    /********************************************************************************************************************************************************************************************************/
+</script>
+
+<style>
+    @@media only screen and (max-width: 760px), (min-device-width: 768px) and (max-device-width: 1024px) {
+      /*  .table > thead > tr > th, .table > tbody > tr > th, .table > tfoot > tr > th, .table > thead > tr > td, .table > tbody > tr > td, .table > tfoot > tr > td {
+            padding: 25px;
+            line-height: 1.42857143;
+            vertical-align: top;
+            border-top: 1px solid #ddd;
+        }
+        
+        table, thead, tbody, th, td, tr {
+            display: block;
+        }
+           
+            thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+
+        tr {
+            border: 1px solid #ccc;
+        }
+
+        td {
+           
+            border: none;
+            border-bottom: 1px solid #eee;
+            position: relative;
+            padding-left: 50%;
+        }
+
+            td:before {
+               
+                position: absolute;
+                
+                top: 6px;
+                left: 6px;
+                width: 45%;
+                padding-right: 10px;
+                white-space: nowrap;
+            }
+      
+        #tabla_transferencia_temporal td:nth-of-type(1):before {
+            content: "#";
+            color: #585858;
+        }
+
+        #tabla_transferencia_temporal td:nth-of-type(2):before {
+            content: "Description";
+            color: #585858;
+        }
+
+        #tabla_transferencia_temporal td:nth-of-type(3):before {
+            content: "Available";
+            color: #585858;
+        }
+
+        #tabla_transferencia_temporal td:nth-of-type(4):before {
+            content: "Transfer Qty";
+            color: #585858;
+        }
+
+        #tabla_transferencia_temporal td:nth-of-type(5):before {
+            content: "PO";
+            color: #585858;
+        }
+
+        #tabla_transferencia_temporal td:nth-of-type(6):before {
+            content: "Style";
+            color: #585858;
+        }
+
+        #tabla_transferencia_temporal td:nth-of-type(7):before {
+            content: "Boxes";
+            color: #585858;
+        }
+
+        #tabla_transferencia_temporal td:nth-of-type(8):before {
+            content: "Delete";
+            color: #585858;
+        }*/
+    }
+       
+
+    tr {
+        cursor: pointer;
+    }
+
+    .load3 {
+        position: fixed;
+        z-index: 2001 !important;
+        height: 100%;
+        display: none;
+        border: 0;
+        padding: .5em 1em;
+        overflow: auto;
+        top: 0%;
+        left: 0%;
+        background: white;
+        width: 100%;
+        border: none;
+        opacity: 0.8;
+    }
+
+    .imagen_loading2 {
+        position: absolute;
+        z-index: 2000 !important;
+        top: 35%;
+        left: 43%;
+        width: 300px;
+        height: 300px;
+        background: url('../../Content/img/gif/loader3.gif');
+    }
+
+    .modal-header-primary {
+        color: #fff;
+        padding: 9px 15px;
+        border-bottom: 1px solid #eee;
+        background-color: #3479bf;
+        -webkit-border-top-left-radius: 5px;
+        -webkit-border-top-right-radius: 5px;
+        -moz-border-radius-topleft: 5px;
+        -moz-border-radius-topright: 5px;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+    }
+
+    .x {
+        transition: transform .25s ease-in-out;
+        color: white !important;
+    }
+
+        .x:hover {
+            transform: rotate(180deg);
+            color: white !important;
+        }
+
+        .x:before {
+            transform: rotate(45deg);
+            transform-origin: center;
+        }
+
+        .x:after {
+            transform: rotate(-45deg);
+            transform-origin: center;
+        }
+    input[type=checkbox] {
+        /* Double-sized Checkboxes */
+        -ms-transform: scale(2); /* IE */
+        -moz-transform: scale(2); /* FF */
+        -webkit-transform: scale(2); /* Safari and Chrome */
+        -o-transform: scale(2); /* Opera */
+        padding: 10px;
+        margin-top: 1em;
+    }
+
+    /* Might want to wrap a span around your checkbox text */
+    .checkboxtext {
+        /* Checkbox text */
+        font-size: 110%;
+        display: inline;
+    }
+</style>
+</div>
+<div id="loading_edicion_transferencia" class="load3">
+    <div id="spinner" class="imagen_loading2" style=""></div>
+</div>
+<div class="container-fluid" style="padding-left:8em; padding-right:3em;">
+    <h4>New transfer</h4>
+    <!----LISTADO DE INVENTARIO----->
+    <div id="formulario" class="row">
+        <div id="formulario_campos_01" class="row" style="margin-top:2em;">
+            <div class="form-group">
+                <div class="form-group col-sm-3" id="div_from_edit">
+                    <label for="" class=" col-form-label must_trans_edit">Whse from </label>
+                    <input type="text" readonly class="form-control must_trans_edit numeric " id="" value="">
+                </div>
+                <div class="form-group col-sm-3" id="div_to_edit">
+                    <label for="" class=" col-form-label must_trans">Whse to </label>
+                    <input type="text" readonly class="form-control must_trans_edit  numeric " id="" value="">
+                </div>
+                <div class="form-group col-sm-2 ">
+                    <label for="caja_sello_trans" class=" col-form-label must_trans">Seal </label>
+                    <input type="text" readonly class="form-control must_trans_edit  numeric " id="caja_sello_trans_edit" style="" value="">                    
+                </div>
+                <div class="form-group col-sm-1 ">  
+                    <br />
+                    <input type="checkbox" id="caja_no_sello_edit"  />
+                    <span class="checkboxtext">
+                        &nbsp;&nbsp;No seal
+                    </span>
+                </div>
+                <div class="form-group col-sm-3 ">
+                    <label for="caja_driver_trans" class=" col-form-label must_trans">Driver </label>
+                    <input type="text" class="form-control  must_trans_edit validacion " ondrop="return false;" onpaste="return false;" maxlength="100" id="caja_driver_trans_edit" value="">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="form-group col-sm-3 ">
+                    <label for="caja_pallet_trans" class=" col-form-label must_trans">Pallet number </label>
+                    <input type="text" class="form-control must_trans_edit  numeric " ondrop="return false;" onpaste="return false;" maxlength="10" id="caja_pallet_trans_edit" value="">
+                </div>
+                <div class="form-group col-sm-3 ">
+                    <label for="caja_envio_trans" class=" col-form-label must_trans"># Ship </label>
+                    <input type="text" class="form-control  must_trans_edit validacion " ondrop="return false;" onpaste="return false;" maxlength="10" id="caja_envio_trans_edit" value="">
+                </div>
+                <div class="form-group col-sm-3 ">
+                    <label for="caja_date_trans" class=" col-form-label validacion must_trans">Date requested </label>
+                    <input type="text" class="form-control must_trans_edit  " onkeydown="upperCaseF(this)" ondrop="return false;" onpaste="return false;" maxlength="23" id="caja_date_trans_edit">
+                </div>
+                <div class="form-group col-sm-3 ">
+                    <label for="caja_by_trans" class=" col-form-label validacion must_trans">Requested by </label>
+                    <input type="text" class="form-control  must_trans_edit validacion" ondrop="return false;" onpaste="return false;" maxlength="150" id="caja_by_trans_edit">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="form-group col-sm-3 ">
+                    <label for="caja_car_trans" class=" col-form-label ">Car number </label>
+                    <input type="text" class="form-control must_trans_edit  validacion " ondrop="return false;" onpaste="return false;" maxlength="10" id="caja_car_trans_edit" value="">
+                </div>
+                <div class="form-group col-sm-3 ">
+                    <label for="caja_placas_trans" class=" col-form-label ">License plate</label>
+                    <input type="text" class="form-control  must_trans_edit validacion " ondrop="return false;" onpaste="return false;" maxlength="10" id="caja_placas_trans_edit" value="">
+                </div>
+
+                
+            </div>
+        </div>
+    </div>
+    <div id="div_select_edit" style="margin-top:2em; display:none; ">
+        <br />
+        <div class="form-group row">
+            <label class=" col-form-label" style="float:left; margin-top:.5em;">Type to search&nbsp;</label>
+            <input type="text" class="search form-control validacion" placeholder="Search" id="caja_busqueda_inventario_edit" onkeyup="buscar_inventario_edit()">
+        </div>
+
+        <div id="div_tabla_inventario_edit" class="row panel panel-default panel-primary" style="margin-top:2em; overflow:auto; height:200px;">
+            <div class="panel-heading">Available Items</div>
+                <div style="overflow:auto; padding:0px; padding-left:15px;" class=" row">
+                    <table class="table table-striped table-hover " id="tabla_inventario_articulos_edit">
+                        <thead style="background:#3479bf; color:white;">
+                            <tr>
+                                <th>#</th>
+                                <th>ORDER</th>
+                                <th>DESCRIPTION</th>
+                                <th>AVAILABLE</th>
+                            </tr>
+                        </thead>
+                        <tbody class="cuerpo_tabla_edit"></tbody>
+                    </table>
+                 </div>
+            </div>
+        </div>
+
+
+    <input type="text" style="visibility:hidden;" class="form-control numeric " id="caja_id_sello_trans_edit" value="">
+
+    <div id="div_tabla_transferencia_temporal_edit" class="row panel panel-default panel-primary" style="   visibility:hidden; ">
+        <div class="panel-heading">Transfer list</div>
+        <div style="overflow:auto; padding:1.5em;" class=" row">
+            <table id="tabla_transferencia_temporal_edit" class="data-Talla table table-striped table-hover " style="" role="table">
+                <thead role="rowgroup">
+                    <tr role="row">
+                        <th role="columnheader" >#</th>
+                        <th role="columnheader">Description</th>
+                        <th role="columnheader">Available</th>
+                        <th role="columnheader">Transfer qty</th>
+                        <th role="columnheader">PO</th>
+                        <th role="columnheader">Style</th>
+                        <th role="columnheader"># Boxes</th>
+                        <th role="columnheader">Delete</th>
+                    </tr>
+                </thead>
+                <tbody class="cuerpo_tabla_transferencia_temporal_edit"></tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <button type="button" class="btn btn-primary mb-2" style="display:none;" id="boton_guardar_transferencia_edit" onclick="crear_transferencia_edit(event)">Save</button>
+    <br /> <br />
+    <a type="button" class="btn btn-secondary btn-sm " id="boton_regresar_inventario_edit" href="@Url.Action("Index", "Almacen")" style="float:left; "> << Back </a>
+
+
+
+    <div class="modal fade" id="modal_lugar_nuevo_edit" data-target="#modal_lugar_nuevo_edit">
+        <div class="modal-dialog">
+            <div class="modal-content" style="overflow:auto; width:50% !important; height:100% !important;">
+                <div class="modal-header orange modal-header-primary">
+                    <button type="button" class="close x" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"><strong></strong>New transfer location</h4>
+                </div>
+                <div class="modal-body " id="contenedor_modal_lugares">
+                    <div class="form-group">
+                        <label for="caja_nombre_lugar">Location name</label>
+                        <input type="text" class="form-control" id="caja_nombre_lugar_edit" maxlength="150" placeholder="Enter name">
+                    </div>
+                    <div class="form-group">
+                        <label for="caja_direccion_lugar">Address</label>
+                        <input type="text" class="form-control" id="caja_direccion_lugar_edit" maxlength="250" placeholder="Enter address">
+                    </div>
+                    <div class="form-group">
+                        <label for="caja_tipo_lugar">Type</label>
+                        <select class="form-control" id="caja_tipo_lugar_edit">
+                            <option value="0">Local</option>
+                            <option value="1">Contractor</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="boton_guardar_lugar_edit" onclick="guardar_lugar_edit(event)" style="float:right; margin:1em;">Save</button>
+
+
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+   
+
+
+
+</div>
+

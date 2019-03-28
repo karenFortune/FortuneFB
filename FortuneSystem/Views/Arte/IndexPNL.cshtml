@@ -1,0 +1,130 @@
+﻿@model IEnumerable<FortuneSystem.IMAGEN_ARTE_PNL>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+<style>
+
+    .center {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .edit_driver {
+    }
+
+        .edit_driver:hover {
+            color: white !important;
+            background: #3479bf !important;
+            border-radius: 15px;
+        }
+</style>
+
+@{
+    if (TempData["imagArteOK"] != null)
+    {
+        <script type="text/javascript">
+            alertify.set('notifier', 'position', 'top-right');
+            alertify.notify(@Html.Raw(Json.Encode(TempData["imagArteOK"])), 'success', 5, null);
+
+        </script>
+    }
+
+    if (TempData["imagPnlOK"] != null)
+    {
+        <script type="text/javascript">
+            alertify.set('notifier', 'position', 'top-right');
+            alertify.notify(@Html.Raw(Json.Encode(TempData["imagPnlOK"])), 'success', 5, null);
+
+        </script>
+    }
+
+    if (TempData["imagArtePNLOK"] != null)
+    {
+        <script type="text/javascript">
+            alertify.set('notifier', 'position', 'top-right');
+            alertify.notify(@Html.Raw(Json.Encode(TempData["imagArtePNLOK"])), 'success', 5, null);
+
+        </script>
+    }
+
+
+
+}
+</div>
+<div class="container-fluid" style="padding-left:20em; padding-right:10em;">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h4>
+                INVENTORY ART PNL
+            </h4>
+
+        </div>
+        <br />
+        <table id="tablaArtePNLInventario" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Estilo)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.DescripcionEstilo)
+                    </th>
+                    <th>ACTIONS</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Estilo)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.DescripcionEstilo)
+                        </td>
+                        @* <td>
+                                 <img width="70" height="70" src="@Url.Action("ConvertirImagenPNL", "Arte", new {pnlCodigo= item.IdImgArtePNL})" />
+                            </td>*@
+                        <td>
+                            <a href="#" class="btn edit_driver edicion_driver btnConsulta" data-value="@item.IdEstilo " title="Check Art List"><span class="glyphicon glyphicon-search " aria-hidden="true" style="padding: 0px !important;"></span></a>
+                            @*<a href="@Url.Action("FileUpload", "Arte",  new { idArte = item.IdImgArtePNL }) " class="btn edit_driver edicion_driver" Title="Art"> <span class="glyphicon glyphicon-check " aria-hidden="true" style="padding: 0px !important;"></span></a>*@
+
+                        </td>
+
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <br />
+    </div>
+
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h4>
+                LIST ART PNL
+            </h4>
+        </div>
+        <br />
+        <div id="ContenedorModal"></div>
+        <br />
+    </div>
+    <a href='@Url.Action("CatalogoArte", "Arte")'>
+        <img src='@Url.Content("~/Content/img/backToPage.png")' id="flecha" title="Go Back" />
+    </a>
+</div>
+
+<script type="text/javascript">
+    $(document).on('click', '.btnConsulta', function () {
+        $("#loading").css('display', 'inline');
+        var id = $(this).data("value");
+        $("#ContenedorModal").load("/Arte/ListaImgArtePNL/" + id, function () {
+            $("#loading").css('display', 'none');
+        });
+    });
+
+
+</script>

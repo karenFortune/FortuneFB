@@ -1,0 +1,342 @@
+﻿@model IEnumerable<FortuneSystem.Models.Shipping.Pk>
+@{ Layout = null; }
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="~/Scripts/jquery-3.3.1.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Scripts/bootstrap.js"></script>
+    <link href="@Server.MapPath("~/Content/bootstrap-theme.css")" rel="stylesheet" />
+    <link href="@Server.MapPath("~/Content/bootstrap.min.css")" rel="stylesheet" />
+    <link href="@Server.MapPath("~/Content/base_m.css")" rel="stylesheet" />
+    <style>
+    </style>
+</head>
+<body>
+    @{ //VARIABLES
+        int pallets = 0, cajas = 0, piezas = 0;
+        double peso =0;
+    }
+    <div class="container-fluid">
+        @foreach (var item in Model)
+        {
+            <div class="row " style="padding: 0px; margin: 0px; ">
+                <br />
+                <div class="col-md-3 r1_1">
+                    <label class="primer_row label_r1_1">DATE</label>:<p style="font-size:12px; padding: 0px; margin: 0px;">@item.fecha</p>
+                </div>
+                <div class="col-md-3 r1_2">
+                    BILL OF LOADING
+                </div>
+                <div class="col-md-3 r3_3" style="text-align:right; font-size: 12px !important; padding-top:2em;">
+                    <label class="label_r3">PAGE 1 OF 1</label>
+                </div>
+            </div>
+
+            <div class="row r2_1">
+                <div class="r2_2">
+                    <div class="titulo_caja_gris" style="border-right: 1px solid black;"><center>SHIPPING FROM</center></div>
+                    <div style="text-align:left;">
+                        <p>FORTUNE FASHIONS BAJA,S.R.L. DE C.V.</p>
+                        <p>CALLE TORTUGA No 313-A</p>
+                        <p>MANEADERO CP 22790</p>
+                        <p>BAJA CALIFORNIA</p>
+                    </div>
+                </div>
+                <div class="medio_columna ">
+                    <div class="titulo_caja_gris" style="background:white !important;"><center>BILL OF LADING NUMBER:</center></div>
+                    <div style="text-align:left;">
+                        <p><b>PK: &nbsp;@item.packing</b></p>
+                        <p><b>PO:</b> &nbsp;@item.pedido</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row rows">
+                <div class="r2_2">
+                    <div class="titulo_caja_gris" style="border-right: 1px solid black; "><center>SHIP TO:</center></div>
+                    <div style="text-align:left;">
+                        <p>@item.destino.nombre</p>
+                        <p>@item.destino.direccion</p>
+                        <p>@item.destino.ciudad @item.destino.zip</p>
+                    </div>
+                </div>
+                <div style="width:50%; float:left; padding-top:.5em; ">
+                    <table>
+                        <tr><td class="td_1">&nbsp;CARRIER NAME:</td><td>&nbsp; @item.conductor.carrier</td></tr>
+                        <tr><td class="td_1">&nbsp;TRACTOR:</td><td>&nbsp; @item.conductor.tractor</td></tr>
+                        <tr><td class="td_1">&nbsp;PLACAS:</td><td>&nbsp; @item.conductor.plates</td></tr>
+                        <tr><td class="td_1">&nbsp;NO. ECO:</td><td>&nbsp; @item.contenedor.eco</td></tr>
+                        <tr><td class="td_1">&nbsp;PLACAS:</td><td>&nbsp; @item.contenedor.plates</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="row rows">
+                <div class="medio_columna  ">
+                    <div class="titulo_caja_gris" style="border-right:.5px solid black; border-top:.5px solid black;">
+                        <center>THIRD PARTY FREIGHT CHARGES BILL TO</center>
+                    </div>
+                    <div style="text-align:left;"></div>
+                </div>
+                <div class=" div_tabla_1">
+                    <table>
+                        <tr><td class="td_1">&nbsp;CHOFER:</td><td>&nbsp; @item.conductor.driver_name</td></tr>
+                        <tr><td class="td_1">&nbsp;SCAC:</td><td>&nbsp; @item.conductor.scac</td></tr>
+                        <tr><td class="td_1">&nbsp;CAAT:</td><td>&nbsp; @item.conductor.caat</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="row rows">
+                <div class="medio_columna ">
+                    <div class="special_intruction"> &nbsp;SPECIAL INSTRUCTION:</div>
+                    <div class="vacio_r5"></div>
+                    <div class="fondo1_r5"><center>SIGNATURE OF WAREHOUSE DELIVERY IN THIS AREA:</center></div>
+                </div>
+
+                <div class="medio_columna" style="padding-top:.5em; ">
+                    <div style="font-size:9px; ">&nbsp;<b>Freight Charge Terms </b> (Freight charges are prepaid unless marked otherwise):</div>
+                    <div>
+                        <table style="width:100%; margin-top:1em;">
+                            <tr><td>&nbsp;Prepaid  Ø</td><td>Collect  O</td><td>3rd Party O</td></tr>
+                        </table>
+                    </div>
+                    <div class="fondo2_r5">&nbsp;Master bill of lading with attached underlying bills of lading</div>
+                </div>
+            </div>
+
+            <div class="row rows">
+                <div class="titulo_caja_gris_full"><center>CUSTOMER ORDER INFORMATION</center></div>
+                <div class="medio_columna ">
+                    &nbsp;CUSTOMER ORDER #<br />
+                    &nbsp;PK: @item.packing<br />
+                    &nbsp;PO: @item.pedido
+                </div>
+                <div class="medio_columna   ">
+                    <table id="tabla_customer_information" class="tabla_customer_information">
+                       @{ /*if (item.tipo_empaque == 1){
+                               foreach (var tarimas in item.lista_tarimas){
+                                   pallets++;
+                                   foreach (var estilos in tarimas.lista_estilos){
+                                       if (estilos.tipo != "NONE" && estilos.tipo != "INITIAL"){
+                                           foreach (var ratio in estilos.lista_ratio){
+                                               piezas += ratio.ratio;
+                                           }
+                                           cajas++;
+                                       }else {
+                                           piezas += estilos.boxes;
+                                           cajas += (estilos.boxes / estilos.piezas);
+                                       }
+                                   }
+                               }
+                           }
+                           if (item.tipo_empaque == 2){
+                               foreach (var tarimas in item.lista_tarimas){
+                                   pallets++;
+                                   foreach (var estilos in tarimas.lista_estilos){
+                                       if (estilos.tipo != "NONE" && estilos.tipo != "INITIAL"){
+                                           cajas++;
+                                           foreach (var ratio in estilos.lista_ratio){
+                                               piezas += ratio.ratio;
+                                           }
+                                       }else {
+                                           foreach (var ratio in estilos.lista_ratio){
+                                               piezas += ratio.ratio * estilos.boxes;
+                                           }
+                                           cajas += estilos.boxes;
+                                       }
+
+                                   }
+                               }
+                           }
+                           int extra = 0;
+                           if (item.tipo_empaque == 3) {
+                               foreach (var tarima in item.lista_tarimas) {
+                                   pallets++;
+                                   foreach (var assort in tarima.lista_assortments) {
+                                       foreach (var estilo in assort.lista_estilos) {
+                                           if (estilo.tipo != "NONE" && estilo.tipo != "INITIAL"){
+                                               extra++;
+                                               foreach (var ratio in estilo.lista_ratio){
+                                                   piezas += ratio.ratio;
+                                               }
+                                           }else{
+
+                                               foreach (var ratio in estilo.lista_ratio){
+                                                   piezas += ratio.ratio * estilo.boxes;
+                                               }
+                                           }
+                                       }
+                                       if (extra != 0) { cajas++; } else { cajas += assort.cartones; }
+                                   }
+                               }
+                           }
+                       }*/
+                        peso = Math.Round(((item.total_piezas* 0.225) / 0.45359), 2, MidpointRounding.AwayFromZero); }
+                        <tr style="font-weight:bold; ">
+                            <td rowspan="2" class="tabla_customer_information_r1"># Of<br /> Packages</td>
+                            <td rowspan="2" class="tabla_customer_information_r1">Weight LBS</td>
+                            <td colspan="3" class="tabla_customer_information_r1" style=" padding:.5em;">Aditional Shipper Information</td>
+                        </tr>
+                        <tr style="font-size:13px !important;">
+                            <td class="tabla_customer_information_r2">PCS</td>
+                            <td class="tabla_customer_information_r2">BOXES</td>
+                            <td style="border-bottom:1px solid black; border-left:1px solid black;">PALLET</td>
+                        </tr>
+                        <tr style="font-size:13px !important;">
+                            <td class="borde_izquierdo_negro">&nbsp;&nbsp;</td>
+                            <td class="borde_izquierdo_negro">@peso</td>
+                            <td class="borde_izquierdo_negro">@item.total_piezas</td>
+                            <td class="borde_izquierdo_negro">@item.total_cajas</td>
+                            <td class="borde_izquierdo_negro">@item.total_tarimas</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="row rows" style="">
+                <div class="titulo_caja_gris_full" style="margin-right:0px;"><center>CARRIER INFORMATION</center></div>
+                <table id="tabla_vacia" style="table-layout: fixed; width:100%;">
+                    <tr style="font-weight:bold; text-align:center;">
+                        <td rowspan="2" colspan="2" class="tabla_vacia_td_1">HANDLING UNIT</td>
+                        <td rowspan="2" colspan="2" style=" border-top:none !important;">PACKAGE</td>
+                        <td rowspan="2" colspan="4" class="tabla_vacia_td_3" style="font-family:'Times New Roman'; font-style:italic; ">SEAL:<br />REPLACEMENT:</td>
+                        <td rowspan="2" colspan="8" class="tabla_vacia_td_3 " style="text-align:left; border-left:none;">&nbsp;@item.seal<br />&nbsp;@item.replacement</td>
+                        <td rowspan="2" colspan="4" style=" border-top:none; border-right:none;">LTL ONLY</td>
+                    </tr>
+                    <tr></tr>
+                    <tr style="text-align:center;">
+                        <td style=" border-left:none;">QTY</td>
+                        <td>TYPE</td>
+                        <td>QTY</td>
+                        <td>TYPE</td>
+                        <td colspan="2">WEIGHT</td>
+                        <td colspan="2">HM (X)</td>
+                        <td rowspan="3" colspan="8" style="word-wrap:break-word; font-size:9px;padding:0em .5em;">
+                            <b>Commodity Description</b><br />
+                            Commodities requiring special or additional care or attention in handling or stowing must be so
+                            marked and packaged as to ensure safe transportation with ordinary care. See Section 2(e) of NMFC item 360
+                        </td>
+                        <td rowspan="3" colspan="2">NMFC NO.</td>
+                        <td rowspan="3" colspan="2" style=" border-right:none;">CLASS</td>
+                    </tr>
+                    <tr><td style=" border-left:none;">&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td style=" border-left:none;">&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr style="text-align:center;">
+                        <td style=" border-left:none;">&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td rowspan="2" colspan="8"><b>T-SHIRT PRINTED</b></td>
+                        <td colspan="2"></td>
+                        <td colspan="2" style=" border-right:none;"></td>
+                    </tr>
+                    <tr>
+                        <td style=" border-left:none;">&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td colspan="2"></td>
+                        <td colspan="2" style=" border-right:none;"></td>
+                    </tr>
+                    <tr>
+                        <td style=" border-left:none;">&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td colspan="12" style=" border-right:none;"><center><b>GRAND TOTAL</b></center></td>
+                    </tr>
+                    <tr>
+                        <td style="  border-bottom:none; border-left:none;">&nbsp;</td>
+                        <td style=" border-bottom:none;  background:#d9d9d9;">&nbsp;</td>
+                        <td style=" border-bottom:none;">&nbsp;</td>
+                        <td style=" border-bottom:none;  background:#d9d9d9;">&nbsp;</td>
+                        <td style=" border-bottom:none;">&nbsp;</td>
+                        <td style=" border-bottom:none;">&nbsp;</td>
+                        <td style=" border-bottom:none;">&nbsp;</td>
+                        <td style=" border-bottom:none;">&nbsp;</td>
+                        <td colspan="4" style=" border-bottom:none;"><center><b>@item.total_piezas PCS</b></center></td>
+                        <td colspan="4" style=" border-bottom:none;"><center><b>@item.total_cajas BOXES</b></center></td>
+                        <td colspan="4" style=" border-right:none; border-bottom:none; "><center><b>@item.total_tarimas PALLET</b></center></td>
+                    </tr>
+                </table>
+            </div>
+        }
+        <div class="row r6_1">
+            <div class="r6_texto_1 ">
+                <br />Where the rate is dependent on value, shippers are required to state specifically in writing the agreed or<br />declared value of the property as follows: “The agreed or declared value of the property is specifically stated by the shipper to be not exceeding ___________________________________ per ___________________.
+            </div>
+            <div class="r6_texto_2 ">
+                <br /><br /><p>COD Amount: $___________________________________________________</p>
+                <p>Fee terms: Collect Ø Prepaid O Customer check acceptable O</p>
+            </div>
+        </div>
+
+        <div class="row penultimo_row" style="">
+            <div class="titulo_penultimo"><center>Note: Liability limitation for loss or damage in this shipment may be applicable. See 49 USC § 14706(c)(1)(A) and (B).</center></div>
+            <div class="texto_diferente ">
+                Received, subject to individually determined rates or contracts that have been agreed upon<br />in writing between the carrier and shipper, if applicable, otherwise to the rates,<br />classifications, and rules that have been established by the carrier and are available to the<br />shipper, on request, and to all applicable state and federal regulations.
+
+            </div>
+            <div style="width:50%; float:left;   padding-top:.5em; ">
+                <div style="text-align:left; height:2em; text-align:center; font-size:10px; ">
+                    The carrier shall not make delivery of this shipment without payment of charges and all other lawful fees.
+                </div>
+                <div style="font-size:11px; margin-top:4em; font-weight:bold;">
+                    &nbsp;Shipper Signature________________________________________
+                </div>
+            </div>
+        </div>
+        
+                       <div class="row " style="padding:0px; margin:0px; border:1px solid black; border-top:none; height:1em; ">
+                           <div style="width:50%; float:left; border-right:1px solid black;  "> </div>
+                           <div style="width:50%; float:left;   "></div>
+                       </div>
+          
+        <div class="row " style="padding:0px; margin:0px;  border:1px solid black; border-top:none; height:11em; ">
+            <div style="float:left; width:35%; padding:0px; margin:0px;  height:100%; border-right:1px solid black;">                
+                <p style="font-size:10px;font-weight:bold; text-align:center;">Shipper Signature/Date</p>
+                <p style="font-size:7px; padding-top:13em; ">
+                    This is to certify that the above named materials are properly classified, packaged, marked, and labeled,
+                    and are in proper condition for transportation according to the applicable regulations of the DOT.
+                </p>
+            </div>
+            <div style="float:left; width:15%;  height:100%; border-right:1px solid black;">
+                <p style="font-size:10px; text-align:center; font-weight:bold;">Trailer Loaded:</p>
+                <p style="">Ø By Shipper</p>
+                <p style="">O By Driver</p>
+            </div>
+            <div style="float:left; width:25%;  height:100%; border-right:1px solid black;">
+                <p style="font-size:10px; text-align:center;font-weight:bold;">Freight Counted:</p>
+                <p>Ø By Shipper</p>
+                <p>O By Driver/Pallets </p>
+                <p>Ø By Driver/Pieces</p>
+            </div>
+            <div style="float:left; width:25%;  height:100%;">
+                <p style="font-size:10px !important; text-align:center; font-weight:bold;">Carrier Signature/Pickup Date</p>
+                <p style="font-size:7px; padding-top:10em; ">
+                    Carrier acknowledges receipt of packages and required placards. Carrier certifies emergency response information
+                    was made available and/or carrier has the DOT emergency response guidebook or equivalent documentation in the vehicle.
+                    Property described above is received in good order, except as noted.
+                </p>
+            </div>
+
+        </div>
+
+
+    </div>
+</body>
+</html>

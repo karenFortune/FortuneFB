@@ -1,0 +1,48 @@
+﻿@model FortuneSystem.Models.Catalogos.CatColores
+
+@{
+    ViewBag.Title = "Details Color";
+    
+}
+
+<style>
+    #flecha {
+        cursor: auto;
+    }
+</style>
+
+<div>
+
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.IdColor)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.IdColor)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CodigoColor)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CodigoColor)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DescripcionColor)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DescripcionColor)
+        </dd>
+
+    </dl>
+</div>
+<p>
+
+    @* <a href='@Url.Action("Editar", "Colores", new { id = Model.IdColor })'>
+            <img src='@Url.Content("~/Content/img/Edit.png")' id="flecha" title="Edit" />
+        </a>*@
+</p>

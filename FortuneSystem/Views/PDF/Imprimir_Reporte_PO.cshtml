@@ -1,0 +1,283 @@
+﻿@model IEnumerable<FortuneSystem.Models.POSummary.POSummary>
+@{ Layout = null; }
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="~/Scripts/jquery-3.3.1.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Scripts/bootstrap.js"></script>
+    <link href="~/Content/bootstrap-theme.css" rel="stylesheet" />
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css" integrity="sha384-y3tfxAZXuh4HwSYylfB+J125MxIs6mR5FOHamPBG064zB+AFeWH94NdvaCBm8qnd" crossorigin="anonymous">
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+
+        .under_line {
+            border-bottom: 1px solid black;
+            text-align: center;
+            padding-left: 1em;
+            padding-right: 1em;
+        }
+
+        .texto_t {
+            color: black;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .texto_cabecera_derecha {
+            font-weight: bold;
+            text-align: right;
+        }
+
+        .texto {
+            font-size: 10px;
+        }
+
+        .table_tallas {
+            border-collapse: collapse;
+            font-size: 9px;
+        }
+
+            .table_tallas td {
+                border: 1px solid black;
+                text-align: center;
+            }
+
+        .texto_izquiera {
+            text-align: left !important;
+        }
+
+        tr.spaceTop > td {
+            padding-top: 1em;
+        }
+
+        .table_inventario td {
+            border: 1px solid black;
+            text-align: center;
+        }
+
+        table.table-bordered {
+            border: 1px solid #337ab7;
+            margin-top: 20px;
+        }
+
+            table.table-bordered > thead > tr > th {
+                border: 0px solid #337ab7;
+            }
+
+   
+
+        table.table-bordered > tbody > tr > td {
+            border: 1px solid #0c0c0c;
+        }
+
+        table.table-bordered > tbody > tr > th {
+            border: 1px solid #0c0c0c;
+        } 
+
+        #tablaSize > tbody > tr > th {
+            border: 1px solid #0c0c0c;
+            width: 190px;
+        }
+
+        #tablaSize > tbody > tr > td {
+            border: 1px solid #0c0c0c;
+            width: 190px;
+        }
+     
+
+        .cabecera_inventario {
+            color: white;
+            background: #337ab7;
+            text-align: center;
+        }
+
+        .encabezado {
+            text-align: center;
+        }
+
+        .esp {
+            color: darkred;
+        }
+    </style>
+</head>
+<body>
+    @{ //VARIABLES
+        int cantQty = 0, cantExtra = 0, totalPcs = 0, numCTN = 0, numUPC = 0;
+
+    }
+
+    @foreach (var item in Model)
+    {
+    <div class="container-fluid">
+        @*Informacion de datos para encabezado *@
+        <div style="margin: 0 auto;">
+            <div class="col-md-1" style=" float:left; width: 100px;">
+
+
+                @foreach (var item_Tallas in item.ListarTallasPorEstilo)
+                {
+
+                    totalPcs += @item_Tallas.Cantidad;
+                }
+
+                <p style="font-size:35px; font-family:'Times New Roman', Times, serif; font-weight:normal;text-shadow: 0px 1px 2px #777;">@totalPcs</p>
+            </div>
+            <div class="col-md-8" style="width:650px; float:left;">
+                <p><center><h2 style=" font-size:35px; font-family:'Times New Roman', Times, serif; font-weight:normal;text-shadow: 0px 1px 2px #777;">@Html.DisplayFor(modelItem => item.Pedidos.PO)</h2></center></p>
+            </div>
+            <div class="col-md-2" style="width:100px; float:left; ">
+
+                <p style="font-size:35px; font-family:'Times New Roman', Times, serif; font-weight:normal;text-shadow: 0px 1px 2px #777;"> @Html.DisplayFor(modelItem => item.Pedidos.FechaFinalOrden)</p>
+            </div>
+        </div>
+        @*Tabla de informacion del estilo*@
+        <table class="table table-bordered" id="tablaRepEstilo" style="padding: 20px; margin: 5px auto;">
+            <thead class="cabecera_inventario">
+                <tr>
+                    <th class="encabezado">
+                        ITEM #
+                    </th>
+                    <th class="encabezado">
+                        ITEM DESCRIPTION
+                    </th>
+                    <th class="encabezado">
+                        @Html.DisplayNameFor(model => model.CatColores.CodigoColor)
+                    </th>
+                    <th class="encabezado">
+                        COLOR DESCRIPTION
+                    </th>
+                    <th class="encabezado">
+                        @Html.DisplayNameFor(model => model.Cantidad)
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="texto_t">
+                        @Html.DisplayFor(modelItem => item.EstiloItem)
+                    </td>
+                    <td class="texto_t">
+                        @Html.DisplayFor(modelItem => item.ItemDescripcion.Descripcion)
+                    </td>
+                    <td class="texto_t">
+                        @Html.DisplayFor(modelItem => item.CatColores.CodigoColor)
+                    </td>
+                    <td class="texto_t">
+                        @Html.DisplayFor(modelItem => item.CatColores.DescripcionColor)
+                    </td>
+                    <td class="texto_t">
+                        @Html.DisplayFor(modelItem => item.Cantidad)
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="row">
+            <div class="col-md-1" style=" float:left; width: 750px; height: 250px; border: 0px solid #0c0c0c; ">
+                @*Tabla de informacion de datos del estilo*@
+                <table class="table table-bordered" id="tablaDatEstilo" style="padding: 25px; margin: 0 auto;">
+                    <thead class="cabecera_inventario">
+                        <tr>
+                            <th class="encabezado">
+                                FABRIC TYPE
+                            </th>
+                            <th class="encabezado">
+                                FIBER
+                            </th>
+                            <th class="encabezado">
+                                YARN SIZE
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        <tr>
+                            <td class="texto_t">
+                                -
+                            </td>
+                            <td class="texto_t">
+                                -
+                            </td>
+                            <td class="texto_t">
+                                -
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                @*Descripcion de especialidad*@
+                    <center><h3 class="esp"> @Html.DisplayFor(modelItem => item.CatEspecialidades.Especialidad)</h3></center>
+                 @*Tabla de lista de tallas*@
+                <table class="" id="tablaSize" style="padding: 20px; margin: 5px auto;" >
+                    <thead>  </thead>
+                    <tbody>
+                        <tr>
+                            <th class="cabecera_inventario"  style="text-align:right; ">SIZE:</th>
+
+                            @foreach (var item_Tallas in item.ListarTallasPorEstilo)
+                            {
+                                <th class="cabecera_inventario">@item_Tallas.Talla </th>
+                            }
+
+                            <th class="cabecera_inventario" > TOTAL </th>
+                        </tr>
+                        <tr>
+                            <th class="cabecera_inventario" width="190px;"  style="text-align:right">QUANTITY:</th>
+
+                            @foreach (var item_Tallas in item.ListarTallasPorEstilo)
+                            {
+                                <th class="texto_t" >@item_Tallas.Cantidad </th>
+                                cantQty += @item_Tallas.Cantidad;
+                            }
+
+                            <td class="texto_t">@cantQty</td>
+                        </tr>
+                        <tr>
+                            <th class="cabecera_inventario" width="190px;" style="text-align:right">EXTRAS/DAÑADAS:</th>
+
+                            @foreach (var item_Tallas in item.ListarTallasPorEstilo)
+                            {
+                                <th class="texto_t">@item_Tallas.Extras </th>
+                                cantExtra += @item_Tallas.Extras;
+                            }
+
+                            <td class="texto_t">@cantExtra</td>
+                        </tr>
+                        <tr>
+                            <th class="cabecera_inventario" width="190px;" style="text-align:right">QTY/CTN:</th>
+
+                            @foreach (var item_Tallas in item.ListarTallasPorEstilo)
+                            {
+                                <th class="texto_t">0 </th>
+                                numCTN += 0;
+                            }
+
+                            <td class="texto_t">@numCTN</td>
+                        </tr>
+                        <tr>
+                            <th class="cabecera_inventario" width="190px;" style="text-align:right">UPC:</th>
+
+                            @foreach (var item_Tallas in item.ListarTallasPorEstilo)
+                            {
+                                <th class="texto_t">0 </th>
+                                numUPC += 0;
+                            }
+
+                            <td class="texto_t">@numUPC</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-1" style="width: 200px; height: 250px; float:left; border: 0px solid #0c0c0c;">
+                <br />
+                <img src="@Url.Action("ConvertirImagenArteEstilo", "Arte", new {nombreEstilo= item.EstiloItem})" style="width:180px;height:200px;" />
+            </div>
+        </div>
+
+    </div>
+    }
+</body>
+</html>

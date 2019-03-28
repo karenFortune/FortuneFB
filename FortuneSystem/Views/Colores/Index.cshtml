@@ -1,0 +1,242 @@
+﻿@model IEnumerable<FortuneSystem.Models.Catalogos.CatColores>
+
+@{
+    ViewBag.Title = "List Colors";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    tr.highlighted td {
+        background: #b3e0ff;
+    }
+
+    table thead {
+        color: #fff;
+        background-color: #006bb3;
+    }
+
+    th {
+        color: #fff;
+        background-color: #006bb3;
+    }
+
+    #nuevo-color {
+        margin-left: 50px;
+        margin-top: 1px;
+        width: 170px;
+        height: 40px;
+        border: none;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    .edit_driver {
+    }
+
+   .edit_driver:hover {
+     color: white !important;
+     background: #3479bf !important;
+     border-radius: 15px;
+   }
+</style>
+@{
+    if (TempData["colorOK"] != null)
+    {
+        <script type="text/javascript">
+            alertify.set('notifier', 'position', 'top-right');
+            alertify.notify(@Html.Raw(Json.Encode(TempData["colorOK"])), 'success', 5, null);
+
+        </script>
+    }
+    if (TempData["colorError"] != null)
+    {
+        <script type="text/javascript">
+            alertify.set('notifier', 'position', 'top-right');
+            alertify.notify(@Html.Raw(Json.Encode(TempData["colorError"])), 'error', 5, null);
+
+        </script>
+    }
+    if (TempData["colorEditar"] != null)
+    {
+        <script type="text/javascript">
+            alertify.set('notifier', 'position', 'top-right');
+            alertify.notify(@Html.Raw(Json.Encode(TempData["colorEditar"])), 'success', 5, null);
+
+        </script>
+    }
+    if (TempData["colorEditarError"] != null)
+    {
+        <script type="text/javascript">
+            alertify.set('notifier', 'position', 'top-right');
+            alertify.notify(@Html.Raw(Json.Encode(TempData["colorEditarError"])), 'error', 5, null);
+
+        </script>
+    }
+    if (TempData["colorEliminar"] != null)
+    {
+        <script type="text/javascript">
+            alertify.set('notifier', 'position', 'top-right');
+            alertify.notify(@Html.Raw(Json.Encode(TempData["colorEliminar"])), 'success', 5, null);
+
+        </script>
+    }
+
+}
+</div>
+<div class="modal fade" id="consulColorModal" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="consulColorModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="exampleModalLabel">DETAILS COLOR</h2>
+            </div>
+            <div class="modal-body">
+                <div id="ContenedorModal"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="editarColorModal" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="editarColorModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="exampleModalLabel">EDIT COLOR</h2>
+            </div>
+            <div class="modal-body">
+                <div id="ContenedorEditModal"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="crearColorModal" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="crearColorModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="exampleModalLabel">ADD COLOR</h2>
+            </div>
+            <div class="modal-body">
+                <div id="ContenedorCrearModal"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="deleteColorModal" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="deleteColorModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="exampleModalLabel">Are you sure to eliminate the color?</h2>
+            </div>
+            <div class="modal-body">
+                <div id="ContenedorDeleteModal"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container-fluid" style="padding-left:20em; padding-right:10em;">
+    <div class="panel panel-primary" id="consultaPO">
+        <div class="panel-heading">
+            <h3>
+                Administration of Colors
+            </h3>
+        </div>
+        <br />
+        <p>
+          <button type="button" class="btn btn-primary" id="nuevo-color" data-toggle="modal">
+             <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> ADD NEW COLOR
+          </button>            
+        </p>
+        <br />
+        <table class="table table-striped" id="tablaColores">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.IdColor)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.CodigoColor)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.DescripcionColor)
+                    </th>
+                    <th>ACTIONS</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.IdColor)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CodigoColor)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.DescripcionColor)
+                        </td>
+                        <td>
+
+
+                            <a href="#" class="btn edit_driver edicion_driver btnEdit" data-value="@item.IdColor" title="Edit Color"><span class="glyphicon glyphicon-edit " aria-hidden="true" style="padding: 0px !important;"></span></a>
+                            <a href="#" class="btn edit_driver edicion_driver btnSearch" data-value="@item.IdColor" title="Details Color"><span class="glyphicon glyphicon-search " aria-hidden="true" style="padding: 0px !important;"></span></a>
+                            <a href="#" class="btn edit_driver edicion_driver btnDelete" data-value="@item.IdColor" title="Delete Color"><span class="glyphicon glyphicon-trash " aria-hidden="true" style="padding: 0px !important;"></span></a>
+
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+
+    $(document).ready(function () {
+        $('#table').DataTable();
+    });
+
+    $('#tablaColores tr').click(function (e) {
+        $('#tablaColores tr').removeClass('highlighted');
+        $(this).addClass('highlighted');
+    });
+    $(document).on('click', '.btnSearch', function () {
+        $("#loading").css('display', 'none');
+        var id = $(this).data("value");
+        $('#consulColorModal').modal('show');
+        $("#ContenedorModal").load("/Colores/Detalles/" + id, function () {
+        });
+    });
+
+    $(document).on('click', '.btnEdit', function () {
+        $("#loading").css('display', 'none');
+        var id = $(this).data("value");
+        $('#editarColorModal').modal('show');
+        $("#ContenedorEditModal").load("/Colores/Editar/" + id, function () {
+        });
+    });
+
+    $(document).on('click', '.btnDelete', function () {
+        $("#loading").css('display', 'none');
+        var id = $(this).data("value");
+        $('#deleteColorModal').modal('show');
+        $("#ContenedorDeleteModal").load("/Colores/Eliminar/" + id, function () {
+        });
+    });
+
+    $(document).on('click', '#nuevo-color', function () {
+        $("#loading").css('display', 'none');
+        var id = $(this).data("value");
+        $('#crearColorModal').modal('show');
+        $("#ContenedorCrearModal").load("/Colores/CrearColor/" + id, function () {
+        });
+    });
+</script>

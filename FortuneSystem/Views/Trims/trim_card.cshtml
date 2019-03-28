@@ -1,0 +1,305 @@
+﻿@model IEnumerable<FortuneSystem.Models.Trims.Trim>
+@{ Layout = null; }
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="~/Scripts/jquery-3.3.1.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Scripts/bootstrap.js"></script>
+    <link href="~/Content/bootstrap-theme.css" rel="stylesheet" />
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+        td {
+            margin-right:1em;
+        }
+    </style>
+</head>
+@{
+    int total_estilos = 0, total_generos = 0, contador;
+} 
+<body>
+    <div class="container-fluid" style="margin-right:0px; padding-right:0px;">
+        @{ 
+            foreach (var item in Model)
+            {
+
+
+        <div style=" width:100%; ">
+            <div style="width:35%; float:left; border-right:solid 1px black;" class="row">
+                <div style="margin:0px; font-weight:bold;">
+                    <div style="font-size:1.5em; float:left; text-align:center; margin-right:2em;">FFB<p style="font-size:0.5em;">FORTUNE FASHIONS BAJA</p></div>
+                    <div style="font-size:1.5em; float:left; text-align:center; margin-right:1em;">TRIM CARD</div>
+                    <div><img src="~/Content/img/logo_small.png" style="width:100px; height:55px; " /></div>
+                </div><!--ROW 1-->
+
+                <div id="po_estilos" class="row" style="width:100%; margin:0px; font-size:0.9em;">
+                    <div style="float:left;  width:49%;  ">
+                        <p>PO# <label style="text-decoration:underline;">@item.pedido </label> </p>
+                        <p>CUSTOMER: <label style="text-decoration:underline;">@item.customer </label></p>
+                        <p>
+                            STYLES: <label style="text-decoration:underline; letter-spacing: -1.4px; word-spacing: -1.4px;">
+                                @foreach (var e in item.lista_estilos)
+                                {
+                                    total_estilos++;
+                                }
+                                @foreach (var e in item.lista_generos)
+                                {
+                                    total_generos++;
+                                }
+                                @{ contador = 1;
+                                }
+                                @foreach (var e in item.lista_estilos)
+                                {
+                                    @e.descripcion
+                                    if (contador != total_estilos)
+                                    {
+                                        <label>, </label>
+                                    }
+                                    contador++;
+                                }
+                            </label>
+                        </p>
+                    </div>
+                    <div style="float:left;  width:49%; padding-right:2em; ">
+                        <p>MADE BY:</p>
+                        <p style="text-decoration:underline;"> @item.usuario</p>
+                        <p>GENDER:</p>
+                        <p style="text-decoration:underline;">
+                            @{ contador = 1;
+                            }
+                            @foreach (var e in item.lista_generos)
+                            {
+                                @e.genero
+                                if (contador != total_generos)
+                                {
+                                    <label>, </label>
+                                }
+                                contador++;
+                            }
+                        </p>
+                    </div>
+                </div><!--ROW 2-->
+
+                <div id="price_ticket" class="row" style="margin:0px; width:100%; height:40em;  font-size:0.9em; border-top:1px solid black; padding-top:1em;">
+                    <div style="width:25%; float:left; "> PRICE TICKET </div>
+                    <div style="float:right; width:65%;  ">
+                        <table style="padding:.5em !important;">
+                            <tr><td><b>Apply PT:&nbsp;</b> </td><td>@@CNL/Neck Label&nbsp;</td> <td style="border: solid 2px black; padding-left:1.5em;"> </td> <td>&nbsp;Sleeve&nbsp;</td><td style="border: solid 2px black; padding-left:1.5em;"> </td></tr>
+                            <tr><td></td><td>Arm Hole\Armpit&nbsp;</td> <td style="border: solid 2px black; padding-left:1.5em;"> </td> <td>&nbsp;Shoulder&nbsp;</td><td style="border: solid 2px black;  padding-left:1.5em;"> </td></tr>
+                        </table>
+                    </div>
+                </div><!--ROW 3-->
+
+                <div id="price_ticket" class="row" style="margin:0px; width:100%;  font-size:1em; border-top:1px solid black; word-wrap: break-word; padding-top:1em;">
+                    NOTES: ________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________
+                </div><!--ROW 4-->
+            </div><!--COLUMNA 1-->
+            <!------------------------------------------------------------------>
+            <div style="width:60%; float:left; margin-left:0em; padding-left:1em;  ">
+                <div class="row" style="margin-left:0em; padding-left:0em; ">
+                    <div style="width:40%; height:45em; float:left; margin-left:1em;  ">
+                        <div class="row" style=" padding-left:1em; height:16em; border-bottom:1px solid black;">
+                            <!--ROW 1-->
+                            <div style=" float:left; ">HOUSE LABEL</div>
+                            <div style="float:right;   margin-right:2em; ">
+                                <table style="padding:.5em !important;">
+                                    <tr><td>ECOM:&nbsp; </td><td style="border: solid 2px black; padding-left:1.5em;"> </td> </tr>
+                                </table>
+                            </div>
+                        </div><!--ROW 1-->
+
+                        <div class="row" style=" padding-left:1em; height:15em; padding-top:0.5em; border-bottom:1px solid black; ">
+                            <!--ROW 2-->
+                            <div style=" float:left; ">GLOW IN THE DARK</div>
+                            <div style="float:right;  margin-right:2em; ">
+                                <table style="padding:.5em !important;">
+                                    <tr><td>N/A:&nbsp; </td><td style="border: solid 2px black; padding-left:1.5em;"> </td> </tr>
+                                </table>
+                            </div>
+                        </div><!--ROW 2-->
+
+                        <div class="row" style=" padding-left:1em; height:5em; padding-top:0.5em; border-bottom:1px solid black; ">
+                            <!--ROW 3-->
+                            BULLET:
+                        </div><!--ROW 3-->
+
+                        <div class="row" style=" padding-left:1em;  padding-top:0.5em;  ">
+                            <!--ROW 4-->
+                            <table style="padding:.5em !important;">
+                                <tr>
+                                    <td>BULK:&nbsp; </td>
+                                    <td style="border: solid 2px black; padding-left:1.5em;"> </td>
+                                    <td style=" padding-left:1.5em;"> </td>
+                                    <td>PPK:&nbsp; </td>
+                                    <td style="border: solid 2px black; padding-left:1.5em;"> </td>
+                                    <td style=" padding-left:1.5em;"> </td>
+                                    <td>ASSORT:&nbsp; </td>
+                                    <td style="border: solid 2px black; padding-left:1.5em;"> </td>
+                                </tr>
+                            </table>
+                            <br /><p>RATIO: ______________________________</p>
+                            <p>FOLD SIZE: ___________________________</p>
+                        </div><!--ROW 4-->
+                    </div><!--columna 1-->
+
+                    <div style="width:27%; height:45em; float:left; margin-left:1em; border-left:solid 1px black; ">
+                        <div class="row" style="margin:0px; padding:0px;">
+                            <table style="padding:.5em !important;">
+                                <tr>
+                                    <td>SIZE STRIP &nbsp; </td>
+                                    <td style="border: solid 2px black; padding-left:1.5em;"> </td>
+                                    <td style=" padding-left:1em;"> </td>
+                                    <td>N/A &nbsp; </td>
+                                    <td style="border: solid 2px black; padding-left:1.5em;"> </td>
+                                    <td style=" padding-left:1em;"> </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div><!--columna 2-->
+
+                    <div style="width:28%;height:45em; float:left;  ">
+                        <div class="row" style=" padding-left:1em; height:16em; border-bottom:1px solid black;">
+                            <!--ROW 1-->
+                        </div><!--ROW 1-->
+                        <div class="row" style=" padding-left:1em; height:17em; padding-top:0.5em; border-bottom:1px solid black;  border-left:1px solid black; ">
+                            <!--ROW 2-->
+                            <table style="padding:.5em !important;">
+                                <tr>
+                                    <td>SIZER &nbsp; </td>
+                                    <td style="border: solid 2px black; padding-left:1.5em;"> </td>
+                                    <td style=" padding-left:1em;"> </td>
+                                    <td>N/A &nbsp; </td>
+                                    <td style="border: solid 2px black; padding-left:1.5em;"> </td>
+                                    <td style=" padding-left:1em;"> </td>
+                                </tr>
+                            </table>
+                        </div><!--ROW 2-->
+                        <div class="row" style=" padding-left:1em; height:12em; padding-top:0.5em;  border-left:1px solid black; border-left:1px solid black; ">
+                            <table style="padding:.5em !important;">
+                                <tr>
+                                    <td>HANGERS: &nbsp; </td>
+                                    <td>N/A &nbsp; </td>
+                                    <td style="border: solid 2px black; padding-left:1em;"> </td>
+                                    <td> &nbsp;CHECK &nbsp; </td>
+                                    <td style="border: solid 2px black; padding-left:1em;"> </td>
+                                </tr>
+                            </table>
+                            <br />
+                            <table style="padding:.5em !important; float:right;">
+                                <tr>
+                                    <td>Rubber band &nbsp; </td>
+                                    <td style="border: solid 2px black; padding-left:1em;"> </td>
+                                </tr>
+                            </table>
+                            <br /><br />
+                            <table style="padding:.5em !important; font-size:0.8em; ">
+                                <tr>
+                                    <td>&nbsp;TYPE&nbsp; </td>
+                                    <td>&nbsp;SIZE &nbsp; </td>
+                                    <td>&nbsp;COLOR&nbsp; </td>
+                                </tr>
+                            </table>
+                        </div><!--ROW 3-->
+                    </div><!--columna 3-->
+                </div><!--ROW 1-->
+
+
+
+
+                <div class="row" style="width:100%;  border-top: solid 1px black; margin-left:0.1em; ">
+
+                    <div style="width:40%; height:20em; /*background:red;*/ float:left; ">
+
+                        <div class="row" style="padding-left:1em !important; border-bottom: solid 1px black; margin-left:0.1em;  margin-right:0.10em; padding-bottom:0.5em !important; padding-top:0.5em;">
+                           <table style="">
+                                <tr>
+                                    <td>POLYBAG: &nbsp; </td>
+                                    <td style=" padding-left:1em;"> </td>
+                                    <td>N/A &nbsp; </td>
+                                    <td style="border: solid 2px black; padding-left:1.5em;"> </td>
+                                    <td style=" padding-left:1em;"> </td>
+                                    <td>CHECK &nbsp; </td>
+                                    <td style="border: solid 2px black; padding-left:1.5em;"> </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="row" style="padding-left:0.5em !important; border-bottom: solid 1px black; margin-left:0.1em; padding-top:0.5em !important;margin-right:0.10em;">
+                            <table style="padding:1.5em !important;">
+                                <tr>
+                                    <td>&nbsp;BOX:&nbsp; </td>
+                                    <td style=" padding-left:1em;"> </td>
+                                    <td style=" padding-left:1em;"> </td>
+                                    <td>FILL &nbsp; </td>
+                                    <td style="border: solid 2px black; padding-left:1.5em;"> </td>
+                                    <td style=" padding-left:1em;"> </td>
+                                </tr>
+                            </table>
+                            <p>___________________________________</p>
+                            <p>___________________________________</p>
+                        </div>
+                        <div class="row" style="padding-left:0.1em !important; border-bottom: solid 1px black; margin-left:0.1em; margin-right:.10em;">
+                            <p>&nbsp;DATE:</p><p></p>
+                        </div>
+                        <div class="row" style="padding-left:0.5em !important; border-bottom: solid 1px black; margin-left:0.1em; margin-right:.10em;">
+                            <p>&nbsp;CHECKED BY TRIMS</p><p></p>
+                        </div>
+                        <div class="row" style="padding-left:0.5em !important; border-bottom: solid 1px black; margin-left:0.1em; margin-right:.10em;">
+                            <p>&nbsp;CHECKED BY QC</p><p></p>
+                        </div>
+                        <div class="row" style="padding-left:1em !important;">
+                            <p>&nbsp;CHECKED BY PACKING</p>
+                        </div>
+
+                    </div><!--columna 1-->
+
+
+
+
+                    <div style="width:30%; height:20em; /*background:green*/; float:left; border-left: solid 1px black; padding-top:0.5em;">
+                        <table style="padding:.5em !important;">
+                            <tr>
+                                <td>&nbsp;POLYBAG STICKER&nbsp; </td>
+                                <td style=" padding-left:1em;">&nbsp;&nbsp; </td>
+                                <td>N/A &nbsp; </td>
+                                <td style="border: solid 2px black; padding-left:1em;"> </td>
+                                <td style=" padding-left:1em;"> </td>
+                            </tr>
+                        </table>
+                    </div><!--columna 2-->
+
+                    <div style="width:30%; height:20em; /*background:yellow;*/ float:left; border-left: solid 1px black; padding-top:0.5em;">
+                        <table style="padding:.5em !important;">
+                            <tr>
+                                <td>&nbsp;HANG TAG&nbsp; </td>
+                                <td style=" padding-left:1em;"> </td>
+                                <td style=" padding-left:1em;"> </td>
+                                <td style=" padding-left:1em;"> </td>
+                                <td style=" padding-left:1em;"> </td>
+                                <td>N/A &nbsp; </td>
+                                <td style="border: solid 2px black; padding-left:1.5em;"> </td>
+                                <td style=" padding-left:1em;"> </td>
+                            </tr>
+                        </table>
+                    </div><!--columna 3-->
+
+                </div><!--renglón 2-->
+            </div><!--COLUMNA 2-->
+            <p style="float:right;">DOCUMENTO CONTROLADO - ÚNICAMENTE SE PUEDE MODIFICAR POR EL SUPERVISOR DE TRIMS</p>
+
+        </div><!--TODO-->
+            
+
+
+
+       
+            }
+
+        }
+
+        
+</body>
+</html>

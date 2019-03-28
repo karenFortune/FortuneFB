@@ -1,0 +1,138 @@
+﻿@model FortuneSystem.Models.Usuarios.CatUsuario
+
+@{
+    ViewBag.Title = "Login";
+}
+
+<link rel="stylesheet" href="~/Content/alertifyjs/css/alertify.min.css" />
+<link rel="stylesheet" href="~/Content/alertifyjs/css/themes/default.min.css" />
+<link type="text/css" href="~/Content/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+<script src="~/Content/alertifyjs/alertify.min.js"></script>
+
+
+@Styles.Render("~/Content/css")
+@Scripts.Render("~/bundles/modernizr")
+
+<style>
+
+
+    body {
+        background: #456;
+        font-family: 'Open Sans', sans-serif;
+    }
+
+    .login {
+        width: 450px;
+        margin: 80px auto;
+        font-size: 20px;
+    }
+
+
+        .login-header,
+        .login p {
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+
+    /* The triangle form is achieved by a CSS hack */
+    .login-triangle {
+        width: 0;
+        margin-right: auto;
+        margin-left: auto;
+        border: 12px solid transparent;
+        border-bottom-color: #28d;
+    }
+
+    .login-header {
+        background: #28d;
+        padding: 20px;
+        font-size: 1.4em;
+        font-weight: normal;
+        text-align: center;
+        text-transform: uppercase;
+        color: #fff;
+    }
+
+    .login-container {
+        background: #ebebeb;
+        padding: 60px;
+    }
+
+    /* Every row inside .login-container is defined with p tags */
+    .login p {
+        padding: 12px;
+    }
+
+    .login input {
+        box-sizing: border-box;
+        display: block;
+        width: 100%;
+        border-width: 1px;
+        border-style: solid;
+        padding: 16px;
+        outline: 0;
+        font-family: inherit;
+        font-size: 0.95em;
+    }
+
+
+        .login input[type="submit"] {
+            background: #28d;
+            border-color: transparent;
+            color: #fff;
+            cursor: pointer;
+            margin-left:6%;
+        }
+
+            .login input[type="submit"]:hover {
+                background: #17c;
+            }
+
+            /* Buttons' focus effect */
+            .login input[type="submit"]:focus {
+                border-color: #05a;
+            }
+</style>
+
+@using (Html.BeginForm())
+{
+
+
+    if (TempData["loginError"] != null)
+    {
+        <script type="text/javascript">
+            alertify.set('notifier', 'position', 'top-right');
+            alertify.notify(@Html.Raw(Json.Encode(TempData["loginError"])), 'error', 5, null);
+
+        </script>
+    }
+
+    <div class="container">
+        <div class="login">
+            <div class="login-triangle"></div>
+
+            <h2 class="login-header">Sing In</h2>
+
+            <div class="login-container">
+
+                <p>
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-addon" style="width:15%; background: gainsboro;"><i class="glyphicon glyphicon-user"></i></span>
+                        <!--<input type="text" name="username" id="username" tabindex="1" class="form-control" placeholder="Username" value="">-->
+                        @Html.EditorFor(model => model.NoEmpleado, new { htmlAttributes = new { @type = "number", @class = "form-control", @placeholder = "Employee number", @style = "height:50px;" } })
+                        @Html.ValidationMessageFor(model => model.NoEmpleado, "", new { @class = "text-danger" })
+                    </div>
+                </p>
+                <div class="input-group input-group-lg">
+                    <span class="input-group-addon" style="width:15%; background: gainsboro;"><i class="glyphicon glyphicon-lock"></i></span>
+                    <!--<input type="password" name="password" id="password" tabindex="2" class="form-control" placeholder="Password">-->
+                    @Html.EditorFor(model => model.Contrasena, new { htmlAttributes = new { @type = "password", @class = "form-control", @placeholder = "Password", @style = "height:50px;" } })
+                    @Html.ValidationMessageFor(model => model.Contrasena, "", new { @class = "text-danger" })
+                </div>
+
+                <br>
+                <p><input type="submit" value="Log in"></p>
+            </div>
+        </div>
+    </div>
+}

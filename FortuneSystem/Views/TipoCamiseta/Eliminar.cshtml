@@ -1,0 +1,46 @@
+﻿@model FortuneSystem.Models.Catalogos.CatTipoCamiseta
+
+@{
+    ViewBag.Title = "Delete T-Shirt Type";
+
+}
+
+
+<div>
+
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.TipoProducto)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.TipoProducto)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DescripcionTipo)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DescripcionTipo)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.TipoGrupo)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.TipoGrupo)
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Delete" class="btn btn-danger" /> 
+        </div>
+    }
+</div>

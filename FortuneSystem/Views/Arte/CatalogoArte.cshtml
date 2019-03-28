@@ -1,0 +1,60 @@
+﻿
+@{
+    ViewBag.Title = "Catalogs";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+</div>
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<div class="container-fluid" style="padding-left:20em; padding-right:10em;">
+    <div class="panel panel-primary"  id="catalagoGrlArt">
+        <div class="panel-heading">
+            <h2 style="text-align:center">CATALOGS ART</h2>
+        </div>
+        <br />
+        <br />
+        <div class="contendorCatal" style="padding-left: 25%;">
+            <div class="row">
+                @if ((int)Session["id_Empleado"] == 2057)
+                {
+                    <div class="col-lg-4">            
+                        <a href="@Url.Action("Index", "colores")" id="cat"> <img width="200" height="200" class="rounded-circle" alt="Generic placeholder image" src="~/Content/img/IconoPnl.png"> </a>
+                        <h2 style="padding-left: 10%;">PNL ART</h2>
+                    </div>
+                }
+                else if ((int)Session["idCargo"] == 1 || (int)Session["idCargo"] == 12)
+                {
+
+                    <div class="col-lg-4">                  
+                      
+                        <a href="@Url.Action("Index", "arte")" id="cat"> <img width="200" height="200" class="rounded-circle" alt="Generic placeholder image" src="~/Content/img/IconoArte.png"> </a>
+                      
+                    </div>
+                    <div class="col-lg-3">
+                       
+                        <a href="@Url.Action("IndexPNL", "arte")" id="cat"> <img width="200" height="200" class="rounded-circle" alt="Generic placeholder image" src="~/Content/img/IconoPnl.png"> </a>
+                        
+                    </div>
+
+                }
+            </div>
+            <br />
+            <br />
+            </div>
+   
+        </div>
+        </div>
+    </div>
+<script>
+    $(document).on("click", "a", function () {
+        //setTimeout(function () { $("#loading").css('display', 'none'); }, 1000);
+        $("#loading").css('display', 'inline');
+    });
+
+    /*$(document).ready(function () {
+        $("#cat").click(function (event) {
+            $("#loading").css('display', 'inline');
+        });
+    });*/
+    
+
+</script>

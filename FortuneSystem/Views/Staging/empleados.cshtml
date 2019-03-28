@@ -1,0 +1,161 @@
+﻿
+<script>
+    $(document).ready(function () {
+        load_inicial();
+    });
+    $(document).ready(function () {
+        $(".search_empleados").keyup(function () {
+            var searchTerm = $(".search_empleados").val();
+            var listItem = $('.results_empleados tbody').children('tr');
+            var searchSplit = searchTerm.replace(/ /g, "'):containsi('")
+            $.extend($.expr[':'], {
+                'containsi': function (elem, i, match, array) {
+                    return (elem.textContent || elem.innerText || '').toLowerCase().indexOf((match[3] || "").toLowerCase()) >= 0;
+                }
+            });
+            $(".results_empleados tbody tr").not(":containsi('" + searchSplit + "')").each(function (e) {
+                $(this).attr('visible', 'false');
+            });
+            $(".results_empleados tbody tr:containsi('" + searchSplit + "')").each(function (e) {
+                $(this).attr('visible', 'true');
+            });
+            var jobCount = $('.results_empleados tbody tr[visible="true"]').length;
+            $('.counter_empleados').text(jobCount + ' item');
+            if (jobCount == '0') { $('.no-result_empleados').show(); }
+            else { $('.no-result').hide(); }
+        });
+    });
+
+
+    $(document).on("click", "a", function () {
+        //setTimeout(function () { $("#loading").css('display', 'none'); }, 1000);
+        $("#loading").css('display', 'none');
+    });
+    function load_inicial() {
+       /* $("#loading_recibos").css('display', 'inline');
+        $.ajax({
+            url: '/Almacen/obtener_recibos_lista',
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (result) {
+                var html = '';
+                $.each(result, function (key, item) {
+                    html += '<tr>' +
+                        '<td>' + item.id_recibo + '</td> ' +
+                        '<td>' + item.mp_number + '</td> ' +
+                        '<td>' + item.fecha + '</td> ' +
+                        '<td>' + item.items + '</td> ' +
+                        '<td>' + item.total + '</td> ' +
+                        '<td>' + item.usuario + '</td> ' +
+                        '<td>' + item.sucursal + '</td> ' +
+                        '<td>' + item.mill_po + '</td> ' +
+                        '<td>' + item.po_referencia + '</td> ' +
+                        '<td> <button type="button" title="Print labels" id="btn_imprimir_etiquetas" class="btn btn-success  classAdd agregar" onclick="imprimir_tags(' + item.id_recibo + ')" style=" padding:0px 5px !important; margin:0px;"><span class="glyphicon glyphicon-print" aria-hidden="true"></span></button> </td> '+
+                        '<td> <button type="button" title="See receive details" id="btn_ver_recibo" class="btn btn-success  classAdd agregar" onclick="ver_recibo(' + item.id_recibo + ')" style="visibility:hidden; padding:0px 5px !important; margin:0px;"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button> </td> ';
+
+                    if (item.mp_number != 'n/a') {
+                        html += '<td> <button type="button" title="Add MP" id="btn_ver_recibo" class="btn btn-success  classAdd agregar" onclick="agregar_mp(' + item.id_recibo + ')" style=" visibility:hidden; padding:0px 5px !important; margin:0px;"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button> </td> ';
+
+                    } else {
+                        html += '<td> <button type="button" title="Add MP" id="btn_ver_recibo" class="btn btn-success  classAdd agregar" onclick="agregar_mp(' + item.id_recibo + ')" style="padding:0px 5px !important; margin:0px;"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button> </td> ';
+                    }
+                    html += '</tr>';
+                });
+                $(".resultados_recibos").html(html);
+                $("#loading_recibos").css('display', 'none');
+            }
+        });
+    }*/
+
+
+</script>
+<style>
+
+    .panel_sobrepuesto {
+        position: absolute;
+        z-index: 9999;
+        top: 20%;
+        left: 30%;
+        width: 350px;
+        height: 300px;
+        background: white;
+        padding: 1.5em;
+        display: none;
+        border-radius: 10px;
+        border: solid #5cb85c 2px;
+    }
+
+    tr {
+        cursor: pointer;
+    }
+
+    .load_recibos {
+        position: fixed;
+        z-index: 2001 !important;
+        height: 100% !important;
+        display: none;
+        border: 0;
+        padding: .5em 1em;
+        overflow: auto;
+        top: 11%;
+        left: 3%;
+        background: white;
+        width: 94%;
+        border: none;
+        opacity: 0.8;
+        height: 85% !important;
+    }
+
+    .imagen_loading2 {
+        position: absolute;
+        z-index: 2000 !important;
+        top: 25%;
+        left: 35%;
+        width: 300px;
+        height: 300px;
+        background: url('../../Content/img/gif/loader3.gif');
+    }
+
+    .results_recibos tr[visible='false'],
+    .no-result_lr {
+        display: none;
+    }
+
+    .results_recibos tr[visible='true'] {
+        display: table-row;
+    }
+
+    .counter_recibos {
+        padding: 8px;
+        color: #ccc;
+    }
+</style>
+<div id="loading_recibos" class="load_recibos">
+    <div id="spinner" class="imagen_loading2" style=""></div>
+</div>
+<div class="row" style="padding:.5em;">
+    <div class="form-group pull-left" style="margin-left: 1em;">
+        <label class=" col-form-label">Type to search</label>
+        <input type="text" class="search_empleados form-control validacion" placeholder="Search something">
+    </div>
+    <span class="counter_empleados pull-left"></span><br />
+</div>
+<div style="overflow:auto; height:250px; margin:.5em;" class="row panel-default panel-primary panel">
+    <table id="tabla_listado_empleados" class="table table-striped results_empleados">
+        <thead style="background:#3479bf; color:white;">
+            <tr>
+                <th>#</th>
+                <th>Nombre</th>
+                <th>Departamento</th>
+                <th>Turno</th>                
+                <th></th>
+            </tr>
+        </thead>
+        <tbody class="resultados_recibos"></tbody>
+    </table>
+
+    
+
+</div>
+

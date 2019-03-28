@@ -1,0 +1,247 @@
+﻿@model IEnumerable<FortuneSystem.Models.Catalogos.CatTipoCamiseta>
+
+@{
+    ViewBag.Title = "Tipo de Camiseta";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    tr.highlighted td {
+        background: #b3e0ff;
+    }
+
+    table thead {
+        color: #fff;
+        background-color: #006bb3;
+    }
+
+    th {
+        color: #fff;
+        background-color: #006bb3;
+    }
+
+    #nuevo-usuario {
+        margin-left: 50px;
+        margin-top: 1px;
+        width: 220px;
+        height: 40px;
+        border: none;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    .edit_driver {
+    }
+
+        .edit_driver:hover {
+            color: white !important;
+            background: #3479bf !important;
+            border-radius: 15px;
+        }
+</style>
+@{
+    if (TempData["camisetaOK"] != null)
+    {
+        <script type="text/javascript">
+            alertify.set('notifier', 'position', 'top-right');
+            alertify.notify(@Html.Raw(Json.Encode(TempData["camisetaOK"])), 'success', 5, null);
+
+        </script>
+    }
+    if (TempData["camisetaError"] != null)
+    {
+        <script type="text/javascript">
+            alertify.set('notifier', 'position', 'top-right');
+            alertify.notify(@Html.Raw(Json.Encode(TempData["camisetaError"])), 'error', 5, null);
+
+        </script>
+    }
+    if (TempData["camisetaEditar"] != null)
+    {
+        <script type="text/javascript">
+            alertify.set('notifier', 'position', 'top-right');
+            alertify.notify(@Html.Raw(Json.Encode(TempData["camisetaEditar"])), 'success', 5, null);
+
+        </script>
+    }
+    if (TempData["camisetaEditarError"] != null)
+    {
+        <script type="text/javascript">
+            alertify.set('notifier', 'position', 'top-right');
+            alertify.notify(@Html.Raw(Json.Encode(TempData["camisetaEditarError"])), 'error', 5, null);
+
+        </script>
+    }
+    if (TempData["camisetaEliminar"] != null)
+    {
+        <script type="text/javascript">
+            alertify.set('notifier', 'position', 'top-right');
+            alertify.notify(@Html.Raw(Json.Encode(TempData["camisetaEliminar"])), 'success', 5, null);
+
+        </script>
+    }
+
+}
+</div>
+<div class="modal fade" id="consulModal" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="consulModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="exampleModalLabel">DETAILS T-SHIRT TYPE</h2>
+            </div>
+            <div class="modal-body">
+                <div id="ContenedorModal"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="editarModal" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="editarModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="exampleModalLabel">EDIT T-SHIRT TYPE</h2>
+            </div>
+            <div class="modal-body">
+                <div id="ContenedorEditModal"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="crearModal" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="crearModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="exampleModalLabel">ADD T-SHIRT TYPE</h2>
+            </div>
+            <div class="modal-body">
+                <div id="ContenedorCrearModal"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="deleteModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="exampleModalLabel">Are you sure to eliminate the T-Shirt Type?</h2>
+            </div>
+            <div class="modal-body">
+                <div id="ContenedorDeleteModal"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container-fluid" style="padding-left:20em; padding-right:10em;">
+    <div class="panel panel-primary" id="consultaPO">
+        <div class="panel-heading">
+            <h3>Administration Type of T-Shirts</h3>
+        </div>
+        <br />
+        <p>
+
+                <button type="button" class="btn btn-primary" id="nuevo-usuario" data-toggle="modal">
+                    <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> ADD NEW T-SHIRT TYPE
+                </button>
+           
+        </p>
+        <br />
+        <table class="table table-striped" id="tablaTipoCamiseta">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.IdTipo)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.TipoProducto)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.DescripcionTipo)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.TipoGrupo)
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.IdTipo)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.TipoProducto)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.DescripcionTipo)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.TipoGrupo)
+                        </td>
+                        <td>
+                            <a href="#" class="btn edit_driver edicion_driver btnEdit" data-value="@item.IdTipo " title="Edit T-Shirt Type"><span class="glyphicon glyphicon-edit " aria-hidden="true" style="padding: 0px !important;"></span></a>
+                            <a href="#" class="btn edit_driver edicion_driver btnSearch" data-value="@item.IdTipo " title="Details T-Shirt Type"><span class="glyphicon glyphicon-search " aria-hidden="true" style="padding: 0px !important;"></span></a>
+                            <a href="#" class="btn edit_driver edicion_driver btnDelete" data-value="@item.IdTipo " title="Delete T-Shirt Type"><span class="glyphicon glyphicon-trash " aria-hidden="true" style="padding: 0px !important;"></span></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    $('#tablaTipoCamiseta tr').click(function (e) {
+        $('#tablaTipoCamiseta tr').removeClass('highlighted');
+        $(this).addClass('highlighted');
+    });
+    $(document).ready(function () {
+        $('#tablaTipoCamiseta').dataTable({
+            responsive: true
+        });
+    });
+
+    $(document).on('click', '.btnSearch', function () {
+        $("#loading").css('display', 'none');
+        var id = $(this).data("value");
+        $('#consulModal').modal('show');
+        $("#ContenedorModal").load("/TipoCamiseta/Detalles/" + id, function () {
+        });
+    });
+
+    $(document).on('click', '.btnEdit', function () {
+        $("#loading").css('display', 'none');
+        var id = $(this).data("value");
+        $('#editarModal').modal('show');
+        $("#ContenedorEditModal").load("/TipoCamiseta/Editar/" + id, function () {
+        });
+    });
+
+    $(document).on('click', '.btnDelete', function () {
+        $("#loading").css('display', 'none');
+        var id = $(this).data("value");
+        $('#deleteModal').modal('show');
+        $("#ContenedorDeleteModal").load("/TipoCamiseta/Eliminar/" + id, function () {
+        });
+    });
+
+    $(document).on('click', '#nuevo-usuario', function () {
+        $("#loading").css('display', 'none');
+        var id = $(this).data("value");
+        $('#crearModal').modal('show');
+        $("#ContenedorCrearModal").load("/TipoCamiseta/CrearCamiseta/" + id, function () {
+        });
+    });
+</script>

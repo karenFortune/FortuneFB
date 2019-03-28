@@ -1,0 +1,383 @@
+﻿@model IEnumerable<FortuneSystem.Models.Shipping.Pk>
+@{ Layout = null; }
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="~/Scripts/jquery-3.3.1.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Scripts/bootstrap.js"></script>
+    <link href="~/Content/bootstrap-theme.css" rel="stylesheet" />
+    <link href="@Server.MapPath("~/Content/bootstrap.min.css")" rel="stylesheet" />
+    <style>
+        .breakhere {
+            page-break-after:always;
+        }
+        body {
+            font-family: sans-serif;
+        }
+
+        .under_line {
+            border-bottom: 1px solid black;
+            text-align: center;
+            padding-left: 1em;
+            padding-right: 1em;
+        }
+
+        .texto_cabecera_derecha {
+            font-weight: bold;
+            text-align: right;
+        }
+
+        .texto {
+            font-size: 10px;
+        }
+
+        .table_tallas {
+            border-collapse: collapse;
+            font-size: 9px;
+        }
+
+            .table_tallas td  {
+                border: 1px solid black;
+                text-align: center;
+            }
+            .table_tallas th {
+                border: 1px solid black;
+                text-align: center;
+            }
+            .table_tallas tr {
+                /*border-top: 1px solid black;*/
+                text-align: center;
+            }
+
+        .texto_izquiera {
+            text-align: left !important;
+            padding-right: .5em !important;
+            width: 7em !important;
+        }
+
+       
+        #img1 {
+            /*background-image: url("/Content/img/logo_fortune_contratistas.jpg");*/
+            width:150px;
+            height:120px;
+        }
+
+        p {
+            /*   border: 1px solid black !important;*/
+        margin: .5em !important;
+        }
+        .primer_row {
+            font-size: 10px;
+        }
+
+        .pie_pk_izq {
+            text-align:right;
+            font-weight:bold;
+        }
+        .pie_pk_der {
+            padding: 0em 5em;
+            border-bottom:1px solid black;
+            text-align:center;
+        }
+    </style>
+</head>
+<body>
+    @{ //VARIABLES
+        int estilos_total, rows, total_ratio, contador, total_talla, tarima_contador, contador_tallas = 0, pallets = 0;
+        string descripcion_final="";
+    }
+    <div class="container-fluid">
+        @foreach (var item in Model){
+            <div class="row " style="padding: 0px; margin: 0px;">
+                <div class="col-md-3 primer_row" style=" float:left; font-size:10px;width:30%; ">
+                    <p>FORTUNE FASHIONS BAJA, S.R.L. DE C.V</p>
+                    <p>CALLE TORTUGA No 313-A</p>
+                    <p>MANEADERO CP 22790</p>
+                    <p>BAJA CALIFORNIA</p>
+                    <div style="margin-top:5em;">
+                        <p>CUSTOMER: @item.customer</p>
+                        @if (item.dc == 0)
+                        {
+                            <p>P.O.: @item.pedido (PO#@item.number_po) Without UCC Labels, @item.parte</p>
+                        }
+                        else
+                        {
+                            <p>P.O.: @item.pedido (PO#@item.number_po) With UCC Labels, @item.parte</p>
+                        }
+                        <p>RETAILER: @item.customer_po</p>
+                    </div>
+                </div>
+
+                <div class="col-md-3 primer_row" style="float:left;width:50%; font-size:15px;">
+                    <div id="img1" style="margin-left:20%;">
+                        <center><img src="~/Content/img/LOGO FORTUNE.png" style="width:100%;height:100%; " /></center>
+                        <p style="margin-top:4em;">PK: <label style="border-bottom:solid 1px black;">@item.packing</label></p>
+                    </div>
+                </div>
+
+                <div class="col-md-3 primer_row" style=" float:right;width:20%; ">
+                    <p>SHIP TO:</p>
+                    <p>@item.destino.nombre</p>
+                    <p>@item.destino.direccion</p>
+                    <p>@item.destino.ciudad @item.destino.zip</p>
+                    <div class="primer_row" style=" margin-top:5em; ">
+                        <p>DATE: @item.fecha</p>
+                    </div>
+                </div>
+            </div>
+        }
+        @foreach (var item in Model){
+            if (item.tipo == "Samples" || item.tipo == "Damages")
+            {
+                <div class="row" style="text-transform: uppercase;">
+                    <center><h2>@item.tipo</h2></center>
+                </div>
+            }
+        }
+        <!--------------------TABLA-DE-TARIMAS-Y-ESTILOS------------------------------------------------------------------------------------------------------------>
+        <div class="row " style="padding: 0px; margin: 0px;">
+            <center>
+                <table class=" table_tallas" style="width:90%; ">
+                    <thead style="background:#d9d9d9; color:black; font-weight:bold;">
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <th>ID</th>
+                                <th>P.O NUM</th>
+                                <th>TYPE</th>
+                                <th>STYLE</th>
+                                <th>COLOR</th>
+                                <th>DESCRIPTION</th>
+                                @if (item.dc != 0)
+                                {
+                                    <th>DC</th>
+                                }
+                                <th>PPK</th>
+                                @{ contador = 0; }
+                                @foreach (var tarimas in item.lista_tarimas)
+                                {
+                                    foreach (var estilos in tarimas.lista_estilos)
+                                    {
+                                        if (contador == 0)
+                                        {
+                                            foreach (var ratio in estilos.lista_ratio)
+                                            {
+                                                <th>@ratio.talla</th>
+                                            }
+                                        }
+                                        contador++;
+                                    }
+                                }
+                                <th>BXS</th>
+                                <th>PALLETS</th>
+                            </tr>
+                        }
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            foreach (var tarimas in item.lista_tarimas)
+                            {
+                                if (contador_tallas == 0)
+                                {
+                                    foreach (var estilos in tarimas.lista_estilos)
+                                    {
+                                        if (contador_tallas == 0)
+                                        {
+                                            foreach (var ratio in estilos.lista_ratio)
+                                            {
+                                                contador_tallas++;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            foreach (var tarimas in item.lista_tarimas) { pallets++; }
+                            int[] sumas_tallas = new int[contador_tallas + 1];
+                            for (int i = 0; i < contador_tallas + 1; i++) { sumas_tallas[i] = 0; }
+
+
+                            foreach (var tarima in item.lista_tarimas)
+                            {
+                                estilos_total = 0; rows = 0; tarima_contador = 0;
+                                if (tarima_contador == 0)
+                                {
+                                    <tr>
+                                        @foreach (var estilos in tarima.lista_estilos) { estilos_total++; }
+                                        <td rowspan="@estilos_total">@tarima.id_tarima</td>
+                                        @foreach (var estilos in tarima.lista_estilos)
+                                        {
+                                        if (tarima_contador == 0)
+                                        {
+                                                <td>@estilos.number_po</td>
+                                                <td></td>
+                                                <td>@estilos.estilo</td>
+                                                <td>@estilos.color</td>
+                                                <td>@estilos.descripcion</td>
+                                                if (item.dc != 0)
+                                            {
+                                                    <td>@estilos.dc</td>
+                                                }
+                                                <td>
+                                                    @{ total_ratio = 0;
+                                                foreach (var ratio in estilos.lista_ratio) { total_ratio++; }
+                                                contador = 0;
+                                                foreach (var ratio in estilos.lista_ratio)
+                                                {
+                                                    contador++;
+                                                            <label style="font-weight:lighter;">@ratio.ratio</label>
+                                                            if (contador < total_ratio)
+                                                    {
+                                                                <label>-</label>
+                                                            }
+                                                }
+                                            }
+                                                </td>
+                                                int i = 0;
+                                            foreach (var ratio in estilos.lista_ratio)
+                                            {
+                                                total_talla = ratio.ratio * estilos.boxes;
+                                                sumas_tallas[i] += total_talla;
+                                                i++;
+                                                    <td>@total_talla</td>
+                                                }
+                                            sumas_tallas[i] += estilos.boxes;
+                                                <td>@estilos.boxes</td>
+                                                <td rowspan="@estilos_total">1</td>
+                                                tarima_contador++;
+                                        }//if
+                                    }
+                                    </tr>
+                                }
+                                if (tarima_contador > 0)
+                                {
+
+                                    foreach (var estilos in tarima.lista_estilos)
+                                    {
+                                        if (rows > 0)
+                                        {
+                                        <tr>
+                                            <td>@estilos.number_po</td>
+                                            <td></td>
+                                            <td>@estilos.estilo</td>
+                                            <td>@estilos.color</td>
+                                            <td>@estilos.descripcion</td>
+                                            @if (item.dc != 0)
+                                                {
+                                                <td>@estilos.dc</td>
+                                            }
+                                            <td>
+                                                    @{ total_ratio = 0; }
+                                            @foreach (var ratio in estilos.lista_ratio) { total_ratio++; }
+                                                @{contador = 0;}
+                                            @foreach (var ratio in estilos.lista_ratio)
+                                                    {
+                                                contador++;
+                                                @ratio.ratio
+                                                    if (contador < total_ratio)
+                                                {
+                                                        <label>-</label>
+                                                    }
+                                            }
+                                            </td>
+                                                @{ int i = 0;}
+                                            @foreach (var ratio in estilos.lista_ratio)
+                                                {
+                                                total_talla = ratio.ratio * estilos.boxes;
+                                                sumas_tallas[i] += total_talla;
+                                                i++;
+                                                <td>@total_talla</td>
+                                            }
+                                            @{ sumas_tallas[i] += estilos.boxes; }
+                                            <td>@estilos.boxes</td>
+                                        </tr>
+                                        }
+                                        rows++;
+                                    }
+                                }//if
+                            }//tarima
+                             //ÚILTIMO ROW CON LOS ESTILOS (GENERO,PRODUCT TYPE Y FABRIC TYPE), TOTALES POR TALLA, TOTAL DE CAJAS Y PALLETS
+                            contador = 0;
+                            foreach (var tarimas in item.lista_tarimas)
+                            {
+                                if (contador == 0)
+                                {
+                                    foreach (var estilos in tarimas.lista_estilos)
+                                    {
+                                        descripcion_final += estilos.descripcion_final + " ";
+                                    }
+                                }
+                            }
+                        <tr style="background:#d9d9d9; color:black; font-weight:bold;">
+                            <td colspan="4">@descripcion_final</td>
+                            <td colspan="4">TOTAL</td>
+                            @for (int i = 0; i < contador_tallas + 1; i++)
+                            {
+                                <td>@sumas_tallas[i]</td>
+                            }
+                            <td>@pallets</td>
+                        </tr>
+                    }
+                        </tbody>
+                    </table>
+            </center>
+        </div>
+        <!---------------------------------------------------------------------------------------------------------------------------------------------------------->
+        @foreach (var item in Model){
+            <div class="row " style="padding: 0px; margin:2em 5em 0em 10em;">
+                <div class="col-md-3 primer_row" style="float:left;width:50%; ">
+                    <table>
+                        <tr><td class="pie_pk_izq">DRIVER NAME:</td><td class="pie_pk_der">@item.conductor.driver_name</td></tr>
+                        <tr><td class="pie_pk_izq">TRAILER/PLATES:</td><td class="pie_pk_der">@item.conductor.tractor/@item.conductor.plates</td></tr>
+                        <tr><td class="pie_pk_izq">CONTAINER/PLATES:</td><td class="pie_pk_der">@item.contenedor.eco/@item.contenedor.plates</td></tr>
+                    </table>
+                </div>
+
+                <div class="col-md-3 primer_row" style=" float:right;width:50%; ">
+                    <table>
+                        <tr><td class="pie_pk_izq">SHIPPING MANAGER:</td><td class="pie_pk_der">@item.shipping_manager</td></tr>
+                        <tr><td class="pie_pk_izq">SEAL:</td><td class="pie_pk_der">@item.seal</td></tr>
+                        <tr><td class="pie_pk_izq">REPLACEMENT:</td><td class="pie_pk_der">@item.replacement</td></tr>
+                    </table>
+                </div>
+            </div>
+        }
+
+        <p class="breakhere"></p>
+        <!----------------------------------------------------------------------------------------------------------------------------------------------------------->
+
+        <div class="row">
+            <table class="table table-striped">
+                <thead>
+                    <tr><th>ORIGEN</th><th>%</th><th>TOTAL</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        foreach (var tarimas in item.lista_tarimas)
+                        {
+                            foreach (var estilos in tarimas.lista_estilos)
+                            {
+                                foreach (var ratio in estilos.lista_ratio)
+                                {
+                                    <tr>
+                                        <td>@ratio.pais</td>
+                                        <td>@ratio.porcentaje</td>
+                                        @{ total_ratio = ratio.ratio * estilos.boxes; }
+                                        <td>@total_ratio</td>
+                                    </tr>
+                                }
+                            }
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+
+
+
+    </div>
+</body>
+</html>

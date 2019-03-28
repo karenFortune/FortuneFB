@@ -1,0 +1,712 @@
+﻿
+@{
+    ViewBag.Title = "NEW TRANSFER";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link href="~/Content/base_m.css" rel="stylesheet" />
+<script>
+    $(document).on("click", "a", function () {
+        //setTimeout(function () { $("#loading").css('display', 'none'); }, 1000);
+        $("#loading").css('display', 'none');
+    });
+    var qr;
+    $(document).on("input", ".numeric", function () {
+        this.value = this.value.replace(/\D/g, '');
+    });
+    $(document).on("input", ".validacion", function () {
+        var c = this.selectionStart,
+            r = /[^a-zA-Z0-9áéíóúÁÉÍÓÚ .()!@@/#%-]/,
+            v = $(this).val();
+        if (r.test(v)) {
+            $(this).val(v.replace(r, ''));
+            c--;
+        }
+        this.setSelectionRange(c, c);
+    });
+    $(document).on("input", ".po", function () { $('.po').autocomplete({ source: '@Url.Action("Autocomplete_po")' }); });
+    $(document).on("input", ".estilo", function () { $('.estilo').autocomplete({ source: '@Url.Action("Autocomplete_estilos")' }); });
+    $(function () {
+        $.datepicker.regional['es'] = {
+            closeText: 'Cerrar',
+            prevText: '<Ant',
+            nextText: 'Sig>',
+            currentText: 'Hoy',
+            monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+            monthNamesShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+                'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+            dayNames: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+            dayNamesShort: ['Dom', 'Lun', 'Mar', 'Mié', 'Juv', 'Vie', 'Sáb'],
+            dayNamesMin: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'],
+            weekHeader: 'Sm',
+            dateFormat: 'yy-mm-dd',
+            firstDay: 1,
+            isRTL: false,
+            showMonthAfterYear: false,
+            yearSuffix: ''
+        };
+        $.datepicker.setDefaults($.datepicker.regional['es']);
+        $('#caja_date_trans').datepicker();
+
+
+
+    });//DATEPICKER
+    var artículos_carrito = '';
+    var cantidades_carrito = '';
+    $(document).ready(function () {
+        buscar_lista_lugares_origen();
+    });
+    function buscar_lista_lugares_origen() {
+        $.ajax({
+            url: "/Almacen/lista_lugares",
+            type: "POST",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                var html = '<label for="caja_from_trans" class=" col-form-label">Whse from </label>' +
+                    '  <select type="text" class="form-control" id="caja_from_trans"  >';
+                html += '<option value="0">Select</option>';
+                $.each(result, function (key, item) {
+                    html += '<option value="' + item.id_lugar + '">' + item.lugar + '</option>';
+                });
+                html += '</select>';
+                $("#div_from").html(html);
+            },
+            error: function (errormessage) {
+                alert(errormessage.responseText);
+            }
+        });
+    }
+
+    function limpiar_formulario() {
+        $(".must_trans").each(function () {
+            $(this).val() == '';
+            /*if ($(this).val() == '') {
+                var id = $(this).attr('id');
+                $("#" + id).css('border', '2px solid #e03f3f');
+                error++;
+            } else {
+                $("#" + id).css('border', '1px solid #cccccc');
+            }*/
+        });
+    }
+    function buscar_sellos(ID) {
+        $.ajax({
+            url: "/Almacen/lista_sellos/" + ID,
+            type: "POST",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                $("#caja_sello_trans").val(result.sello);
+                $("#caja_id_sello_trans").val(result.id_sello);
+            },
+            error: function (errormessage) {
+                alert(errormessage.responseText);
+            }
+        });
+    }
+    function buscar_lista_lugares_destino(ID) {
+        $.ajax({
+            url: "/Almacen/lista_lugares_destino/" + ID,
+            type: "POST",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                var html2 = '<label for="caja_destino_trans" class=" col-form-label">Whse to </label> ' +
+                    ' <div class="form-inline"> <select type="text" class="form-control" style="width:75%;" id="caja_destino_trans"  >';
+                html2 += '<option value="0">Select</option>';
+                $.each(result, function (key, item) {
+                    html2 += '<option value="' + item.id_lugar + '">' + item.lugar + '</option>';
+                });
+                html2 += '</select>';
+                html2 += '&nbsp;<button type="button" class="btn btn-danger mb-2" href="#modal_lugar_nuevo" data-toggle="modal" ><b>+</b></button></div>';
+                $("#div_to").html(html2);
+            },
+            error: function (errormessage) {
+                alert(errormessage.responseText);
+            }
+        });
+    }
+    function buscar_inventario() {
+        //$("#loading").css('display', 'inline');
+        var busqueda;
+        if ($("#caja_busqueda_inventario").val() != '') {
+            busqueda = $("#caja_busqueda_inventario").val();
+        } else {
+            busqueda = 'a';
+        }
+        var ID = $("#caja_from_trans").val();
+        $.ajax({
+            url: "/Almacen/inventario_sucursal",
+            data: "{'ID':'" + ID + "','busqueda':'" + busqueda + "'}",
+            type: "POST",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                var html = '';
+                $.each(result, function (key, item) {
+                    html += '<tr>';
+                    html += '<td>' + item.id_inventario + '</td>';
+                    html += '<td>' + item.po + '</td><td>' + item.descripcion + '</td>';
+                    html += '<td>' + item.total + '</td>';
+                    html += '</tr>';
+                });
+
+                $(".cuerpo_tabla").html(html);
+                $("#div_select").css('display', 'inline');
+                $("#boton_guardar_transferencia").css('display', 'inline');
+                //$("#loading").css('display', 'none');
+                //transfer_display_none
+                return false;
+
+            },
+            error: function (errormessage) {
+                alert(errormessage.responseText);
+            }
+        });
+
+    }
+    $(document).on("input", "#caja_from_trans", function () {
+        $("#caja_from_trans").change(function () {
+            if ($("#caja_from_trans").val() != "Select") {
+                $("#loading").css('display', 'inline');
+
+                buscar_sellos($("#caja_from_trans").val());
+                buscar_lista_lugares_destino($("#caja_from_trans").val());
+                buscar_inventario();
+                $("#loading").css('display', 'none');
+            } else {
+                $("#div_select").css('display', 'none');
+                $("#boton_guardar_transferencia").css('display', 'none');
+            }
+        });
+    });
+
+    var ids, cantidades,pos,estilos,cajas,codigos;
+    function crear_transferencia(event) {
+        var contador = 0;
+        var error = 0;
+        ids = ''; cantidades = ''; pos = ""; estilos = ""; codigos = '';
+        $('#tabla_transferencia_temporal tbody tr').each(function () {
+            if ($(this).find('td:eq(3) input').val() != "" && (parseFloat($(this).find('td:eq(3) input').val()) <= parseFloat($(this).find('td:eq(2) input').val())) && $(this).find('td:eq(3) input').val() != "0") {
+                $(this).find('td:eq(3) input').css('border', '1px #cccccc solid ');
+                ids += "*" + $(this).find('td:eq(0) input').val();
+                cantidades += "*" + $(this).find('td:eq(3) input').val();
+                pos += "*" + $(this).find('td:eq(4) input').val();
+                estilos += "*" + $(this).find('td:eq(5) input').val();
+                if ($(this).find('td:eq(6) input').val() == '') { cajas += "*0"; }
+                else { cajas += "*" + $(this).find('td:eq(6) input').val(); }
+                codigos += '*N/A';
+            } else {
+                $(this).find('td:eq(3) input').css('border', '2px #e03f3f solid ');
+                error++;
+            }
+
+        });
+        if ($("#caja_date_trans").val() == '') { $("#caja_date_trans").css('border', '2px solid #e03f3f'); error++; } else { $("#caja_date_trans").css('border', '1px solid #cccccc'); }
+        if ($("#caja_by_trans").val() == '') { $("#caja_by_trans").css('border', '2px solid #e03f3f'); error++; } else { $("#caja_by_trans").css('border', '1px solid #cccccc'); }
+        if ($("#caja_sello_trans").val() == '') { $("#caja_sello_trans").css('border', '2px solid #e03f3f'); error++; } else { $("#caja_sello_trans").css('border', '1px solid #cccccc'); }        
+        if ($("#caja_from_trans").val() == 'Select') { $("#caja_from_trans").css('border', '2px solid #e03f3f'); error++; } else { $("#caja_from_trans").css('border', '1px solid #cccccc'); }
+        if ($("#caja_destino_trans").val() == 'Select') { $("#caja_destino_trans").css('border', '2px solid #e03f3f'); error++; } else { $("#caja_destino_trans").css('border', '1px solid #cccccc'); }
+        if ($("#caja_pallet_trans").val() == '') { $("#caja_pallet_trans").css('border', '2px solid #e03f3f'); error++; } else { $("#caja_pallet_trans").css('border', '1px solid #cccccc'); }
+        if ($("#caja_driver_trans").val() == '') { $("#caja_driver_trans").css('border', '2px solid #e03f3f'); error++; } else { $("#caja_driver_trans").css('border', '1px solid #cccccc'); }
+        if ($("#caja_envio_trans").val() == '') { $("#caja_envio_trans").css('border', '2px solid #e03f3f'); error++; } else { $("#caja_envio_trans").css('border', '1px solid #cccccc'); }
+
+        if (error == 0) {
+            guardar_transferencia();
+        } else {
+            event.preventDefault();
+            alertify.alert('Error!', 'Please check empty fields');
+            return false;
+        }
+    }
+    $(document).on("change", "#caja_no_sello", function () {
+        //$("#caja_id_sello_trans").val("0");
+        //$("#caja_sello_trans").val("0");
+    });
+
+    function guardar_transferencia() {
+        var id_sello,sello;
+        $("#loading").css('display', 'inline');
+        var fecha = $("#caja_date_trans").val();
+        var persona = $("#caja_by_trans").val();
+        if ($("#caja_no_sello").is(":checked")) { sello = 0; } else { sello = $("#caja_sello_trans").val() }
+        //var sello = $("#caja_sello_trans").val();
+        var origen = $("#caja_from_trans").val();
+        var destino = $("#caja_destino_trans").val();
+        var driver = $("#caja_driver_trans").val();
+        var pallet = $("#caja_pallet_trans").val();
+        var envio = $("#caja_envio_trans").val();
+        if ($("#caja_no_sello").is(":checked")) { id_sello = 0; } else { id_sello = $("#caja_id_sello_trans").val(); }
+        // caja_car_trans   caja_placas_trans
+        var car, placas;
+        if ($("#caja_car_trans").val() == "") { car = 'N/A'; } else { car = $("#caja_car_trans").val(); }
+        if ($("#caja_placas_trans").val() == "") { placas = 'N/A'; } else { placas = $("#caja_placas_trans").val(); }
+
+        var actionData = "{'ids':'" + ids + "','cantidades':'" + cantidades + "','fecha':'" + fecha + "','persona':'" + persona + "','sello':'" + sello + "','origen':'" + origen + "','destino':'" + destino + "','driver':'" + driver + "','pallet':'" + pallet + "','envio':'" + envio + "','id_sello':'" + id_sello + "','pos':'" + pos + "','estilos':'" + estilos + "','caja':'" + cajas + "','carro':'"+car+"','placas':'"+placas+"','codigos':'"+codigos+"'}";
+        $.ajax({
+            url: '/Almacen/guardar_transferencia',
+            data: actionData,
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (jsonData) {
+                limpiar_formulario();
+                alertify.success('Success!');
+                alertify.set('notifier', 'position', 'top-right'); 
+                redireccionarPagina_trans();
+            }
+        });
+        $("#loading").css('display', 'none');
+    }
+    function redireccionarPagina_trans() {
+        window.location = '/Almacen/Index'
+    }
+
+    var rows_seleccionados = 0;
+    var id_temp, description_temp, available_temp,order_temp;
+    //SELECCIONA DESPUÉS DEL DOBLE CLICK
+    $(document).on("dblclick", "#tabla_inventario_articulos tr", function () {
+        var row = this.rowIndex;
+        //alert($('#items_recibos tr:eq('+row+') td:eq(0)').html()); //empieza las columas desde 0
+        //alert($('#items_recibos tr:eq(' + row + ') td:nth-child(2)').html());     //empieza las columnas desde 1
+        id_temp = $('#tabla_inventario_articulos tr:eq(' + row + ') td:eq(0)').html();
+        order_temp = $('#tabla_inventario_articulos tr:eq(' + row + ') td:eq(1)').html();
+        description_temp = $('#tabla_inventario_articulos tr:eq(' + row + ') td:eq(2)').html();
+        available_temp = $('#tabla_inventario_articulos tr:eq(' + row + ') td:eq(3)').html();
+        agregar_row();
+    });
+    
+    //CAMBIAR LOS ROW DE COLOR
+    $(document).on("click", "#tabla_inventario_articulos tr", function () {
+        if (this.style.background == "" || this.style.background == "white") {
+            $(this).css('background', '#46a772');
+            $(this).css('color', 'white');
+
+        } else {
+            $(this).css('background', 'white');
+            $(this).css('color', 'black');
+            $("#tabla_inventario_articulos").addClass("table-hover");
+        }
+    });
+    function agregar_row() {
+        $.ajax({
+            url: '/Almacen/buscar_estilo_cajas',  
+            data: "{'inventario':'" + id_temp+"'}",
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (result) {
+                var data = result.split('*');
+                var rows = '<tr role="row">' +
+                    '<td  role="cell"><input readonly style="width:4em !important; border: none; background: none; box-shadow:none;" class="validacion form-control lectura" value="' + id_temp + '" /></td>' +
+                    '<td role="cell"><input readonly style="border: none; background: none; box-shadow:none;" class="validacion form-control lectura"  value="' + description_temp + '" /></td>' +
+                    '<td role="cell"><input readonly style="border: none; background: none; box-shadow:none;" class="numeric form-control check_item"  value="' + available_temp + '" /></td>' +
+                    '<td role="cell"><input ondrop="return false;" onpaste="return false;"  maxlength="10" class="numeric form-control check_item"  value="' + available_temp + '" /></td>' +
+                    '<td role="cell"><input ondrop="return false;" onpaste="return false;"  maxlength="30" class="validacion form-control po "  value="' + order_temp + '" /></td>' +
+                    '<td role="cell"><input ondrop="return false;" onpaste="return false;"  maxlength="100" class="validacion form-control estilo " value="'+data[0]+'" /></td>' +
+                    '<td role="cell"><input ondrop="return false;" onpaste="return false;"  maxlength="100" class="numeric form-control  " value="'+data[1]+'" /></td>' +
+                    '<td role="cell"><button type="button" class="btn btn-light delete_row"><b>-</b></button></td></tr>';
+                $('#tabla_transferencia_temporal').append(rows);
+                $('#div_tabla_transferencia_temporal').css('visibility', 'visible');
+                rows_seleccionados++;
+                $("#boton_guardar_transferencia").css('display', 'inline');
+            }
+        }); 
+    }
+    //BORRAR ELEMENTO DEL TRANSFER LIST
+    $(document).on("click", ".delete_row", function () {
+        //var id_table = $(this).closest('table').attr('id');
+        //var div = $(this).closest("tr").find('td:eq(0) input').val();
+        //$('#panel_cajas_' + div).remove();
+        $(this).closest("tr").remove();
+        rows_seleccionados--;
+        if (rows_seleccionados < 1) {
+            $("#boton_guardar_transferencia").css('display', 'none');
+            $("#div_tabla_transferencia_temporal").css('visibility', 'hidden');
+        } else {
+            $("#boton_guardar_transferencia").css('display', 'inline');
+            $("#div_tabla_transferencia_temporal").css('visibility', 'visible');
+        }
+
+    });
+
+    function guardar_lugar(event) {
+        var error = 0;
+        if ($("#caja_nombre_lugar").val() == "") { $("#caja_nombre_lugar").css('border', '2px solid #e03f3f'); error++; } else { $("#caja_nombre_lugar").css('border', '1px solid #cccccc'); }
+        if ($("#caja_direccion_lugar").val() == "") { $("#caja_direccion_lugar").css('border', '2px solid #e03f3f'); error++; } else { $("#caja_direccion_lugar").css('border', '1px solid #cccccc'); }
+        if (error == 0) {
+            guardar_lugar_bd();
+        } else {
+            event.preventDefault();
+            alertify.alert('Error!', 'Please check empty fields.');
+            return false;
+        }
+    }
+    function guardar_lugar_bd() {
+        $("#loading").css('display', 'inline');
+
+        var actionData = "{'nombre':'" + $("#caja_nombre_lugar").val() + "','direccion':'" + $("#caja_direccion_lugar").val() + "','tipo':'" + $("#caja_tipo_lugar").val() + "'}";
+        $.ajax({
+            url: '/Almacen/agregar_nuevo_lugar',
+            data: actionData,
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (jsonData) {
+                $("#loading").css('display', 'none');
+                if (jsonData == 0) {
+                    alertify.success('Succes!');
+                    alertify.set('notifier', 'position', 'top-right');
+                    $("#caja_nombre_lugar").val("");
+                    $("#caja_direccion_lugar").val("");
+                    $("#modal_lugar_nuevo").modal("hide");
+                    buscar_lista_lugares_destino($("#caja_from_trans").val());
+
+                } else {
+                    alertify.alert('Error!', 'This location already exists in the database, please check your information.');
+                    return false;
+                }
+            }
+        });
+    }
+
+    /********************************************************************************************************************************************************************************************************/
+    /********************************************************************************************************************************************************************************************************/
+    /********************************************************************************************************************************************************************************************************/
+
+
+
+    /********************************************************************************************************************************************************************************************************/
+</script>
+
+<style>
+    @@media only screen and (max-width: 760px), (min-device-width: 768px) and (max-device-width: 1024px) {
+      /*  .table > thead > tr > th, .table > tbody > tr > th, .table > tfoot > tr > th, .table > thead > tr > td, .table > tbody > tr > td, .table > tfoot > tr > td {
+            padding: 25px;
+            line-height: 1.42857143;
+            vertical-align: top;
+            border-top: 1px solid #ddd;
+        }
+        
+        table, thead, tbody, th, td, tr {
+            display: block;
+        }
+           
+            thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+
+        tr {
+            border: 1px solid #ccc;
+        }
+
+        td {
+           
+            border: none;
+            border-bottom: 1px solid #eee;
+            position: relative;
+            padding-left: 50%;
+        }
+
+            td:before {
+               
+                position: absolute;
+                
+                top: 6px;
+                left: 6px;
+                width: 45%;
+                padding-right: 10px;
+                white-space: nowrap;
+            }
+      
+        #tabla_transferencia_temporal td:nth-of-type(1):before {
+            content: "#";
+            color: #585858;
+        }
+
+        #tabla_transferencia_temporal td:nth-of-type(2):before {
+            content: "Description";
+            color: #585858;
+        }
+
+        #tabla_transferencia_temporal td:nth-of-type(3):before {
+            content: "Available";
+            color: #585858;
+        }
+
+        #tabla_transferencia_temporal td:nth-of-type(4):before {
+            content: "Transfer Qty";
+            color: #585858;
+        }
+
+        #tabla_transferencia_temporal td:nth-of-type(5):before {
+            content: "PO";
+            color: #585858;
+        }
+
+        #tabla_transferencia_temporal td:nth-of-type(6):before {
+            content: "Style";
+            color: #585858;
+        }
+
+        #tabla_transferencia_temporal td:nth-of-type(7):before {
+            content: "Boxes";
+            color: #585858;
+        }
+
+        #tabla_transferencia_temporal td:nth-of-type(8):before {
+            content: "Delete";
+            color: #585858;
+        }*/
+    }
+       
+
+    tr {
+        cursor: pointer;
+    }
+
+    .load3 {
+        position: fixed;
+        z-index: 2001 !important;
+        height: 100%;
+        display: none;
+        border: 0;
+        padding: .5em 1em;
+        overflow: auto;
+        top: 0%;
+        left: 0%;
+        background: white;
+        width: 100%;
+        border: none;
+        opacity: 0.8;
+    }
+
+    .imagen_loading2 {
+        position: absolute;
+        z-index: 2000 !important;
+        top: 35%;
+        left: 43%;
+        width: 300px;
+        height: 300px;
+        background: url('../../Content/img/gif/loader3.gif');
+    }
+
+    .modal-header-primary {
+        color: #fff;
+        padding: 9px 15px;
+        border-bottom: 1px solid #eee;
+        background-color: #3479bf;
+        -webkit-border-top-left-radius: 5px;
+        -webkit-border-top-right-radius: 5px;
+        -moz-border-radius-topleft: 5px;
+        -moz-border-radius-topright: 5px;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+    }
+
+    .x {
+        transition: transform .25s ease-in-out;
+        color: white !important;
+    }
+
+        .x:hover {
+            transform: rotate(180deg);
+            color: white !important;
+        }
+
+        .x:before {
+            transform: rotate(45deg);
+            transform-origin: center;
+        }
+
+        .x:after {
+            transform: rotate(-45deg);
+            transform-origin: center;
+        }
+    input[type=checkbox] {
+        /* Double-sized Checkboxes */
+        -ms-transform: scale(2); /* IE */
+        -moz-transform: scale(2); /* FF */
+        -webkit-transform: scale(2); /* Safari and Chrome */
+        -o-transform: scale(2); /* Opera */
+        padding: 10px;
+        margin-top: 1em;
+    }
+
+    /* Might want to wrap a span around your checkbox text */
+    .checkboxtext {
+        /* Checkbox text */
+        font-size: 110%;
+        display: inline;
+    }
+</style>
+</div>
+<div id="loading" class="load3">
+    <div id="spinner" class="imagen_loading2" style=""></div>
+</div>
+<div class="container-fluid" style="padding-left:8em; padding-right:3em;">
+    <h4>New transfer</h4>
+    <!----LISTADO DE INVENTARIO----->
+    <div id="formulario" class="row">
+        <div id="formulario_campos_01" class="row" style="margin-top:2em;">
+            <div class="form-group">
+                <div class="form-group col-sm-3" id="div_from">
+                    <label for="" class=" col-form-label must_trans">Whse from </label>
+                    <input type="text" readonly class="form-control numeric " id="" value="">
+                </div>
+                <div class="form-group col-sm-3" id="div_to">
+                    <label for="" class=" col-form-label must_trans">Whse to </label>
+                    <input type="text" readonly class="form-control numeric " id="" value="">
+                </div>
+                <div class="form-group col-sm-2 ">
+                    <label for="caja_sello_trans" class=" col-form-label must_trans">Seal </label>
+                    <input type="text" readonly class="form-control numeric " id="caja_sello_trans" style="" value="">
+                    
+                </div>
+                <div class="form-group col-sm-1 ">  
+                    <br />
+                    <input type="checkbox" id="caja_no_sello"  />
+                    <span class="checkboxtext">
+                        &nbsp;&nbsp;No seal
+                    </span>
+                </div>
+                <div class="form-group col-sm-3 ">
+                    <label for="caja_driver_trans" class=" col-form-label must_trans">Driver </label>
+                    <input type="text" class="form-control validacion " ondrop="return false;" onpaste="return false;" maxlength="100" id="caja_driver_trans" value="">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="form-group col-sm-3 ">
+                    <label for="caja_pallet_trans" class=" col-form-label must_trans">Pallet number </label>
+                    <input type="text" class="form-control numeric " ondrop="return false;" onpaste="return false;" maxlength="10" id="caja_pallet_trans" value="">
+                </div>
+                <div class="form-group col-sm-3 ">
+                    <label for="caja_envio_trans" class=" col-form-label must_trans"># Ship </label>
+                    <input type="text" class="form-control validacion " ondrop="return false;" onpaste="return false;" maxlength="10" id="caja_envio_trans" value="">
+                </div>
+                <div class="form-group col-sm-3 ">
+                    <label for="caja_date_trans" class=" col-form-label validacion must_trans">Date requested </label>
+                    <input type="text" class="form-control " onkeydown="upperCaseF(this)" ondrop="return false;" onpaste="return false;" maxlength="23" id="caja_date_trans">
+                </div>
+                <div class="form-group col-sm-3 ">
+                    <label for="caja_by_trans" class=" col-form-label validacion must_trans">Requested by </label>
+                    <input type="text" class="form-control validacion" ondrop="return false;" onpaste="return false;" maxlength="150" id="caja_by_trans">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="form-group col-sm-3 ">
+                    <label for="caja_car_trans" class=" col-form-label ">Car number </label>
+                    <input type="text" class="form-control validacion " ondrop="return false;" onpaste="return false;" maxlength="10" id="caja_car_trans" value="">
+                </div>
+                <div class="form-group col-sm-3 ">
+                    <label for="caja_placas_trans" class=" col-form-label ">License plate</label>
+                    <input type="text" class="form-control validacion " ondrop="return false;" onpaste="return false;" maxlength="10" id="caja_placas_trans" value="">
+                </div>
+
+                
+            </div>
+        </div>
+    </div>
+    <div id="div_select" style="margin-top:2em; display:none; ">
+        <br />
+        <div class="form-group row">
+            <label class=" col-form-label" style="float:left; margin-top:.5em;">Type to search&nbsp;</label>
+            <input type="text" class="search form-control validacion" placeholder="Search" id="caja_busqueda_inventario" onkeyup="buscar_inventario()">
+        </div>
+
+        <div id="div_tabla_inventario" class="row panel panel-default panel-primary" style="margin-top:2em; overflow:auto; height:200px;">
+            <div class="panel-heading">Available Items</div>
+                <div style="overflow:auto; padding:0px; padding-left:15px;" class=" row">
+                    <table class="table table-striped table-hover " id="tabla_inventario_articulos">
+                        <thead style="background:#3479bf; color:white;">
+                            <tr>
+                                <th>#</th>
+                                <th>ORDER</th>
+                                <th>DESCRIPTION</th>
+                                <th>AVAILABLE</th>
+                            </tr>
+                        </thead>
+                        <tbody class="cuerpo_tabla"></tbody>
+                    </table>
+                 </div>
+            </div>
+        </div>
+
+    <input type="text" style="visibility:hidden;" class="form-control numeric " id="caja_id_sello_trans" value="">
+
+    <div id="div_tabla_transferencia_temporal" class="row panel panel-default panel-primary" style="   visibility:hidden; ">
+        <div class="panel-heading">Transfer list</div>
+        <div style="overflow:auto; padding:1.5em;" class=" row">
+            <table id="tabla_transferencia_temporal" class="data-Talla table table-striped table-hover " style="" role="table">
+                <thead role="rowgroup">
+                    <tr role="row">
+                        <th role="columnheader" >#</th>
+                        <th role="columnheader">Description</th>
+                        <th role="columnheader">Available</th>
+                        <th role="columnheader">Transfer qty</th>
+                        <th role="columnheader">PO</th>
+                        <th role="columnheader">Style</th>
+                        <th role="columnheader"># Boxes</th>
+                        <th role="columnheader">Delete</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <button type="button" class="btn btn-primary mb-2" style="display:none;" id="boton_guardar_transferencia" onclick="crear_transferencia(event)">Save</button>
+    <br /> <br />
+    <a type="button" class="btn btn-secondary btn-sm " id="boton_regresar_inventario" href="@Url.Action("Index", "Almacen")" style="float:left; "> << Back </a>
+
+
+
+    <div class="modal fade" id="modal_lugar_nuevo" data-target="#modal_lugar_nuevo">
+        <div class="modal-dialog">
+            <div class="modal-content" style="overflow:auto; width:50% !important; height:100% !important;">
+                <div class="modal-header orange modal-header-primary">
+                    <button type="button" class="close x" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"><strong></strong>New transfer location</h4>
+                </div>
+                <div class="modal-body " id="contenedor_modal_lugares">
+                    <div class="form-group">
+                        <label for="caja_nombre_lugar">Location name</label>
+                        <input type="text" class="form-control" id="caja_nombre_lugar" maxlength="150" placeholder="Enter name">
+                    </div>
+                    <div class="form-group">
+                        <label for="caja_direccion_lugar">Address</label>
+                        <input type="text" class="form-control" id="caja_direccion_lugar" maxlength="250" placeholder="Enter address">
+                    </div>
+                    <div class="form-group">
+                        <label for="caja_tipo_lugar">Type</label>
+                        <select class="form-control" id="caja_tipo_lugar">
+                            <option value="0">Local</option>
+                            <option value="1">Contractor</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="boton_guardar_lugar" onclick="guardar_lugar(event)" style="float:right; margin:1em;">Save</button>
+
+
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+   
+
+
+
+</div>
+

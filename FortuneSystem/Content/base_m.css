@@ -1,0 +1,364 @@
+﻿.estilo_pendiente_entregar {
+    color: red;
+}
+
+h4 {
+    margin: 0px;
+}
+.alertify-notifier {
+    color: white;
+}
+
+.panel-heading {
+    color: white !important;
+    background: #3479bf !important;
+}
+
+.caja_250_scroll {
+    height: 250px;
+    overflow: auto;
+    width: 100%;
+}
+
+.modal_prueba {
+    height: 45%;
+    position: fixed;
+    border: 0;
+    padding: .5em 1em;
+    overflow: auto;
+    z-index: 999999;
+    /*top: 30%;*/
+    left: 30%;
+    background: white;
+    width: 45%;
+    display: none;
+    border-radius: .5em;
+    border: #dddddd 2px solid;
+}
+.titulo_modal {
+    position: absolute;
+    width: 100%;
+    top: 0px;
+    color: white;
+    font-size: 1.25em;
+    background: #3479bf;
+    padding: .25em .5em .25em .5em;
+}
+
+.boton_cerrar_modal {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    color: white;
+    font-size: 1.25em;
+    padding: .25em .5em .25em .5em;
+    cursor: pointer;
+    font-weight: bold;
+    border-left: white .25px solid;
+}
+
+.load {
+    position: absolute;
+    z-index: 2001 !important;
+    height: 100%;
+    display: none;
+    border: 0;
+    padding: .5em 1em;
+    overflow: auto;
+    top: 0%;
+    left: 0%;
+    background: white;
+    width: 100%;
+    border: none;
+    opacity: 0.8;
+}
+.imagen_loading {
+    position: absolute;
+    z-index: 2000 !important;
+    top: 35%;
+    left: 43%;
+    width: 300px;
+    height: 300px;
+    background: url('../../Content/img/gif/loader3.gif');
+}
+
+.caja_lista_inventario {
+    width: 100%;
+    left: 0%;
+    display: inline-block;
+    height: 30px;
+    font-size: small;
+    color: Black;
+    font-family: 'Montserrat', sans-serif;
+    text-align: center;
+}
+ul.lista_inventario {
+    padding: 0;
+    left: 0px;
+    height: auto;
+    position: relative;
+    list-style-type: none;
+    width: 100%;
+}
+
+    ul.lista_inventario li {
+        display: list-item;
+        margin-top: 10px;
+        text-decoration: none;
+        position: relative;
+    }
+.etiquetas_lista_inventario {
+    position: relative;
+    margin-left: 5px;
+    display: inline-block;
+    font-size: small;
+    color: Black;
+    font-family: 'Montserrat', sans-serif;
+}
+
+
+.botones_tabla {
+    color: black ;
+    border-radius: 20px !important;
+    padding: 0px 5px 0px 5px !important;
+}
+
+    .botones_tabla:hover {
+        color: white !important;
+        border-radius: 20px;
+        padding: 0px 5px 0px 5px;
+        background: #3479bf !important;
+    }
+
+/**************************************************************************************/
+.breakhere {
+    page-break-after: always;
+}
+
+body {
+    font-family: sans-serif;
+}
+
+p {
+    margin: .5em !important;
+}
+
+#tabla_customer_information td {
+    text-align: center;
+    font-size: 16px;
+}
+
+#tabla_vacia td {
+    border: 1px solid black;
+}
+/*******************PRIMER*ROW*********************************************************************/
+.r1_1 {
+    float: left;
+    font-size: 10px;
+    width: 20%;
+}
+
+.label_r1_1 {
+    margin-left: 2em;
+}
+
+.r1_2 {
+    float: left;
+    width: 50%;
+    font-size: 19px;
+    margin-left: 10%;
+    padding-top: .5em;
+    padding-left: 5em;
+}
+
+.r3_3 {
+    float: left;
+    width: 20%;
+}
+
+.label_r3 {
+    text-align: right;
+   
+}
+/*******************SEGUNDO*ROW*********************************************************************/
+.r2_1 {
+    padding: 0px;
+    margin: 0px;
+    border: 1px solid black;
+}
+
+.r2_2 {
+    width: 50%;
+    float: left;
+    border-right: 1px solid black;
+}
+
+.titulo_caja_gris {
+    border-bottom: 1px solid black;
+    background: #d9d9d9;
+    color: black;
+    font-weight: bold;
+}
+
+.medio_columna {
+    width: 50%;
+    float: left;
+}
+/*******************TERCER**ROW*********************************************************************/
+.rows {
+    padding: 0px;
+    margin: 0px;
+    border: 1px solid black;
+    border-top: none;
+}
+
+.td_1 {
+    font-weight: bold;
+    text-align: right;
+}
+/**************************4to**ROW*********************************************************************/
+.div_tabla_1 {
+    width: 50%;
+    float: left;
+    border-left: 1px solid black;
+    padding-top: .5em;
+    margin-left: -1px;
+}
+/**************************5to**ROW*********************************************************************/
+.special_intruction {
+    text-align: left;
+    border-top: none;
+    border-right: 1px solid black;
+    color: black;
+    font-weight: bold;
+}
+
+.vacio_r5 {
+    text-align: left;
+    height: 3em;
+    border-right: 1px solid black;
+}
+
+.fondo1_r5 {
+    font-size: 9px;
+    border-right: 1px solid black;
+}
+
+.fondo2_r5 {
+    font-size: 9px;
+    border-top: 1px solid black;
+    padding-top: .5em;
+}
+
+.titulo_caja_gris_full {
+    width: 100%;
+    border-top: none;
+    border-bottom: 1px solid black;
+    border-right: .5px solid black;
+    margin-right: -1px;
+    background: #d9d9d9;
+    color: black;
+    font-weight: bold;
+    /**/
+}
+/**************************************************************************************************************/
+.tabla_customer_information {
+    width: 100%;
+    height: 100%;
+    border-left: 1px solid black;
+    border-right: none;
+}
+
+.tabla_customer_information_r1 {
+    border-left: 1px solid black;
+    border-bottom: 1px solid black;
+    font-size: 12px !important;
+}
+
+.tabla_customer_information_r2 {
+    border-left: 1px solid black;
+    border-bottom: 1px solid black;
+}
+
+.borde_izquierdo_negro {
+    border-left: 1px solid black;
+}
+
+.tabla_vacia_td_1 {
+    font-size: 10px;
+    border-left: none !important;
+    border-top: none !important;
+}
+
+.tabla_vacia_td_3 {
+    border-top: none !important;
+    border-right: none !important;
+    text-align: right;
+    font-size: 1.4em;
+}
+#tabla_customer_information td {
+    font-size: 12px !important;
+}
+/*************************************/
+.r6_1 {
+    padding: 0px;
+    margin: 0px;
+    border-top: none;
+}
+
+.r6_texto_1 {
+    width: 50%;
+    float: left;
+    font-size: 8.5px;
+}
+
+.r6_texto_2 {
+    width: 50%;
+    float: left;
+    font-size: 11px;
+}
+/****************************************************************************************/
+.penultimo_row {
+    padding: 0px;
+    margin: 0px;
+    border: 1px solid black;
+    margin-top: 1em;
+}
+
+.titulo_penultimo {
+    width: 100%;
+    font-size: 12px;
+    border-top: none;
+    border-bottom: 1px solid black;
+    color: black;
+    font-weight: bold;
+}
+
+.texto_diferente {
+    width: 50%;
+    float: left;
+    text-align: center;
+    font-size: 10px;
+    padding: 2em .2em;
+    border-right: 1px solid black;
+}
+
+.x {
+    transition: transform .25s ease-in-out;
+    color: white !important;
+}
+
+    .x:hover {
+        transform: rotate(180deg);
+        color: white !important;
+    }
+
+    .x:before {
+        transform: rotate(45deg);
+        transform-origin: center;
+    }
+
+    .x:after {
+        transform: rotate(-45deg);
+        transform-origin: center;
+    }

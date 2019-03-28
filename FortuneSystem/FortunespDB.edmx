@@ -1,0 +1,205 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="FortuneTestModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012.Azure" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="ARTE">
+          <Key>
+            <PropertyRef Name="IdArte" />
+          </Key>
+          <Property Name="IdArte" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdImgArte" Type="int" />
+          <Property Name="IdSummary" Type="int" />
+        </EntityType>
+        <EntityType Name="IMAGEN_ARTE">
+          <Key>
+            <PropertyRef Name="IdImgArte" />
+          </Key>
+          <Property Name="IdImgArte" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdEstilo" Type="int" />
+          <Property Name="StatusArte" Type="int" />
+          <Property Name="StatusPNL" Type="int" />
+          <Property Name="extensionArte" Type="varchar" MaxLength="100" />
+          <Property Name="extensionPNL" Type="varchar" MaxLength="100" />
+        </EntityType>
+        <EntityType Name="IMAGEN_ARTE_PNL">
+          <Key>
+            <PropertyRef Name="IdImgArtePNL" />
+          </Key>
+          <Property Name="IdImgArtePNL" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdEstilo" Type="int" />
+          <Property Name="StatusPNL" Type="int" />
+          <Property Name="extensionPNL" Type="varchar" MaxLength="100" />
+          <Property Name="IdSummary" Type="int" />
+        </EntityType>
+        <EntityType Name="UPC">
+          <Key>
+            <PropertyRef Name="IdUPC" />
+          </Key>
+          <Property Name="IdUPC" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdTalla" Type="int" />
+          <Property Name="IdSummary" Type="int" />
+          <Property Name="UPC" Type="bigint" />
+        </EntityType>
+        <Association Name="FK__ARTE__IdImgArte__467D75B8">
+          <End Role="IMAGEN_ARTE" Type="Self.IMAGEN_ARTE" Multiplicity="0..1" />
+          <End Role="ARTE" Type="Self.ARTE" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="IMAGEN_ARTE">
+              <PropertyRef Name="IdImgArte" />
+            </Principal>
+            <Dependent Role="ARTE">
+              <PropertyRef Name="IdImgArte" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="FortuneTestModelStoreContainer">
+          <EntitySet Name="ARTE" EntityType="Self.ARTE" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="IMAGEN_ARTE" EntityType="Self.IMAGEN_ARTE" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="IMAGEN_ARTE_PNL" EntityType="Self.IMAGEN_ARTE_PNL" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="UPC" EntityType="Self.UPC" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK__ARTE__IdImgArte__467D75B8" Association="Self.FK__ARTE__IdImgArte__467D75B8">
+            <End Role="IMAGEN_ARTE" EntitySet="IMAGEN_ARTE" />
+            <End Role="ARTE" EntitySet="ARTE" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="FortuneTestModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="ARTE">
+          <Key>
+            <PropertyRef Name="IdArte" />
+          </Key>
+          <Property Name="IdArte" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdImgArte" Type="Int32" />
+          <Property Name="IdSummary" Type="Int32" />
+          <NavigationProperty Name="IMAGEN_ARTE" Relationship="Self.FK__ARTE__IdImgArte__467D75B8" FromRole="ARTE" ToRole="IMAGEN_ARTE" />
+        </EntityType>
+        <EntityType Name="IMAGEN_ARTE">
+          <Key>
+            <PropertyRef Name="IdImgArte" />
+          </Key>
+          <Property Name="IdImgArte" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdEstilo" Type="Int32" />
+          <Property Name="StatusArte" Type="Int32" />
+          <Property Name="StatusPNL" Type="Int32" />
+          <NavigationProperty Name="ARTE" Relationship="Self.FK__ARTE__IdImgArte__467D75B8" FromRole="IMAGEN_ARTE" ToRole="ARTE" />
+          <Property Name="extensionArte" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="extensionPNL" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="UPC">
+          <Key>
+            <PropertyRef Name="IdUPC" />
+          </Key>
+          <Property Name="IdUPC" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdTalla" Type="Int32" />
+          <Property Name="IdSummary" Type="Int32" />
+          <Property Name="UPC1" Type="Int64" />
+        </EntityType>
+        <Association Name="FK__ARTE__IdImgArte__467D75B8">
+          <End Role="IMAGEN_ARTE" Type="Self.IMAGEN_ARTE" Multiplicity="0..1" />
+          <End Role="ARTE" Type="Self.ARTE" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="IMAGEN_ARTE">
+              <PropertyRef Name="IdImgArte" />
+            </Principal>
+            <Dependent Role="ARTE">
+              <PropertyRef Name="IdImgArte" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="Fortune" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="ARTEs" EntityType="Self.ARTE" />
+          <EntitySet Name="IMAGEN_ARTE" EntityType="Self.IMAGEN_ARTE" />
+          <EntitySet Name="UPCs" EntityType="Self.UPC" />
+          <AssociationSet Name="FK__ARTE__IdImgArte__467D75B8" Association="Self.FK__ARTE__IdImgArte__467D75B8">
+            <End Role="IMAGEN_ARTE" EntitySet="IMAGEN_ARTE" />
+            <End Role="ARTE" EntitySet="ARTEs" />
+          </AssociationSet>
+          <EntitySet Name="IMAGEN_ARTE_PNL" EntityType="FortuneTestModel.IMAGEN_ARTE_PNL" />
+        </EntityContainer>
+        <EntityType Name="IMAGEN_ARTE_PNL">
+          <Key>
+            <PropertyRef Name="IdImgArtePNL" />
+          </Key>
+          <Property Name="IdImgArtePNL" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdEstilo" Type="Int32" />
+          <Property Name="StatusPNL" Type="Int32" />
+          <Property Name="extensionPNL" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="IdSummary" Type="Int32" />
+        </EntityType>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="FortuneTestModelStoreContainer" CdmEntityContainer="Fortune">
+          <EntitySetMapping Name="ARTEs">
+            <EntityTypeMapping TypeName="FortuneTestModel.ARTE">
+              <MappingFragment StoreEntitySet="ARTE">
+                <ScalarProperty Name="IdArte" ColumnName="IdArte" />
+                <ScalarProperty Name="IdImgArte" ColumnName="IdImgArte" />
+                <ScalarProperty Name="IdSummary" ColumnName="IdSummary" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="IMAGEN_ARTE">
+            <EntityTypeMapping TypeName="FortuneTestModel.IMAGEN_ARTE">
+              <MappingFragment StoreEntitySet="IMAGEN_ARTE">
+                <ScalarProperty Name="extensionPNL" ColumnName="extensionPNL" />
+                <ScalarProperty Name="extensionArte" ColumnName="extensionArte" />
+                <ScalarProperty Name="IdImgArte" ColumnName="IdImgArte" />
+                <ScalarProperty Name="IdEstilo" ColumnName="IdEstilo" />
+                <ScalarProperty Name="StatusArte" ColumnName="StatusArte" />
+                <ScalarProperty Name="StatusPNL" ColumnName="StatusPNL" />
+                </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="UPCs">
+            <EntityTypeMapping TypeName="FortuneTestModel.UPC">
+              <MappingFragment StoreEntitySet="UPC">
+                <ScalarProperty Name="IdUPC" ColumnName="IdUPC" />
+                <ScalarProperty Name="IdTalla" ColumnName="IdTalla" />
+                <ScalarProperty Name="IdSummary" ColumnName="IdSummary" />
+                <ScalarProperty Name="UPC1" ColumnName="UPC" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="IMAGEN_ARTE_PNL">
+            <EntityTypeMapping TypeName="FortuneTestModel.IMAGEN_ARTE_PNL">
+              <MappingFragment StoreEntitySet="IMAGEN_ARTE_PNL">
+                <ScalarProperty Name="IdSummary" ColumnName="IdSummary" />
+                <ScalarProperty Name="extensionPNL" ColumnName="extensionPNL" />
+                <ScalarProperty Name="StatusPNL" ColumnName="StatusPNL" />
+                <ScalarProperty Name="IdEstilo" ColumnName="IdEstilo" />
+                <ScalarProperty Name="IdImgArtePNL" ColumnName="IdImgArtePNL" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

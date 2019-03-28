@@ -1,0 +1,35 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Menu</title>
+</head>
+<body>
+    <div th:fragment="nav-bar">
+        <nav class="main-menu">
+            <p class="text-small text-center">MEN&Uacute;</p>
+            <ul>
+                <li><a th:href="@{/}"><i class="glyphicon glyphicon-home fa_menu"></i> <span class="nav-text">Inicio</span></a></li>
+                <p class="text-small menu-title text-center"></p>
+                <li class="has-subnav"><a th:href="@{/administracion/adminBibliotecasInicio}"> <i class="glyphicon glyphicon-calendar fa_menu"></i> <span class="nav-text">Administraci&oacute;n Bibliotecas</span></a></li>
+                <li class="has-subnav"><a th:href="@{/administracion/adminMotivosInicio}"><i class="glyphicon glyphicon-calendar fa_menu"></i><span class="nav-text">Administraci&oacute;n Motivos</span></a></li>
+
+
+            </ul>
+            <ul class="logout">
+                <li>
+                    <a href="#">
+                        <i class="glyphicon glyphicon-log-out fa_menu"></i> <span class="nav-text">Logout</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</body>
+</html>

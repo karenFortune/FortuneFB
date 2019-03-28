@@ -1,0 +1,293 @@
+﻿@model FortuneSystem.Models.Pedidos.OrdenesCompra
+
+@{
+    ViewBag.Title = "Style PO";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script src="~/Scripts/general/obtenerListadoPnl.js"></script>
+<script src="~/Scripts/general/calculosPrintShop.js"></script>
+<link type="text/css" href="~/Content/cssGeneral/estiloRadioButtonPrintS.css" rel="stylesheet" />
+<style>
+    tr.highlighted td {
+        background: #b3e0ff;
+    }
+
+    input[type=number] {
+        width: 50%;
+        text-align: center;
+    }
+
+    input.numeric {
+        width: 50%;
+        text-align: center;
+    }
+
+    input.number {
+        width: 50%;
+        text-align: center;
+    }
+
+    /*th, td {
+        border: 1px solid blue;
+        width: 100px;
+        word-wrap: break-word;
+    }
+    */
+    #guardarBatch {
+        margin-left: 1000px;
+        margin-top: 1px;
+        width: 100px;
+        height: 40px;
+        border: none;
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    #registrarNuevo {
+        margin-left: 50px;
+        margin-top: 1px;
+        width: 170px;
+        height: 40px;
+        border: none;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    #modificarBatch {
+        margin-left: 750px;
+        margin-top: 1px;
+        width: 120px;
+        height: 40px;
+        border: none;
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    input.txtDes {
+        background-color: transparent;
+        border: 0px;
+        outline: none;
+        -webkit-box-shadow: none;
+        -moz-box-shadow: none;
+        box-shadow: none;
+        width: 50%;
+        text-align: center;
+    }
+
+
+
+    .center {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 60%;
+        height: 25%;
+    }
+
+    .tImagen {
+        text-align: center;
+        font-size: 20px;
+    }
+
+    #flecha {
+        cursor:auto;
+    }
+
+    img {
+        cursor: zoom-in;
+    }
+  
+
+</style>
+<script>
+    $(function () {
+        $('#imagenArte').on('click', function () {
+            $('.enlargeImageModalSource').attr('src', $(this).attr('src'));
+            $('#enlargeImageModal').modal('show');
+        });
+        $('#imagenPNL').on('click', function () {
+            $('.enlargeImageModalSource').attr('src', $(this).attr('src'));
+            $('#enlargeImageModal').modal('show');
+        });
+    });
+</script>
+</div>
+    <div class="modal fade" id="enlargeImageModal" tabindex="-1" role="dialog" aria-labelledby="enlargeImageModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="exampleModalLabel">ART</h2>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                </div>
+                <div class="modal-body">
+                    <img class="enlargeImageModalSource center" style="width: 80%;">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid" style="padding-left:18em; padding-right:10em;">
+        <div class="panel panel-primary" id="consultaPO">
+            <div class="panel-heading">
+                <h2>Reference Order: @Html.DisplayFor(model => model.PO, new { @class = "control-label col-md-6" })  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      Purchase Order: @Html.DisplayFor(model => model.VPO, new { @class = "control-label col-md-6" })</h2>
+            </div>
+            @Html.HiddenFor(model => model.IdPedido)
+
+        </div>
+
+        <div class="container-fluid">
+            <div class="form-row">
+                <div class="form-group col-sm-4 estilo">
+                    <label style="font-size: x-large; font-weight: 500">
+                        @Html.LabelFor(model => model.CatCliente.Nombre, new { @class = "control-label" }):
+                        <label style="font-size: x-large; font-weight: 500">@Html.DisplayFor(model => model.CatCliente.Nombre, new { @class = "control-label col-md-6" })</label>
+                    </label>
+                </div>
+                <div class="form-group col-sm-7 estilo">
+                    <label style="font-size: x-large; font-weight: 500">
+                        @Html.LabelFor(model => model.CatClienteFinal.NombreCliente, new { @class = "control-label" }):
+                        <label style="font-size: x-large; font-weight: 300">@Html.DisplayFor(model => model.CatClienteFinal.NombreCliente, new { @class = "control-label col-md-6" })</label>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-primary" id="consultaPO">
+            <div class="panel-heading">
+                <h4>STYLES</h4>
+            </div>
+            <div id="div_tabla_estilos" style="width: 100%; height:250px; overflow:auto; ">
+                <table id="tabless" class="table table-sm table-striped table-hover ">
+                    <thead>
+                        <tr>
+                            <th style="border-top-left-radius:0px !important;">#</th>
+                            <th>ITEM</th>
+                            <th>ITEM DESCRIPTION</th>
+                            <th>COLOR CODE</th>
+                            <th>COLOR DESCRIPTION</th>
+                            <th>QTY</th>
+                            <th>PRICE</th>
+                            <th>TOTAL</th>
+                            @* <th>ACTIONS</th>*@
+                        </tr>
+                    </thead>
+                    <tbody class="tbody"></tbody>
+                </table>
+            </div>
+
+        </div>
+
+        <br />
+        <br />
+        <div class="row" style="display:none;" id="panelPNL" >
+            <div class="col-sm-11">
+                <div class="panel panel-primary" id="consultaTalla" style="visibility:hidden;  height: 1550px;">
+
+                    <div class="panel-heading">
+                        <h4>PNL</h4>
+                    </div>
+                    <div id="div_tabla_tallas" style="width: 100%; height:490px; overflow:auto;  ">
+                        <div id="div_datos_staging" style=" overflow:auto; visibility:hidden; background-color:lightblue; text-align:center; font:bold; "></div>
+                        <div id="div_estilo" style=" overflow:auto; visibility:hidden; background-color:lightblue; text-align:center "></div>
+                        <table id="tableGeneral" class="table table-sm table-striped table-hover ">
+                            <thead class="encabezado"></thead>
+                            <tbody class="tbodys"></tbody>
+                        </table>
+                    </div>
+
+                    <br />
+                    <div id="div_tabla_talla" style="width: 100%; height:250px; overflow:auto;  ">
+                        <div id="div_estilo_batch" style=" overflow:auto; visibility:visible; ">
+                        </div>
+                        <table id="tableBatch" class="table table-sm table-striped table-hover " style=" overflow:auto;">
+                            <thead class="encabezado"></thead>
+                            <tbody class="tbodyBatch"></tbody>
+                        </table>
+                    </div>
+                    @if ((int)Session["idCargo"] == 8 || (int)Session["idCargo"] == 1)
+                    {
+                        <div id="div_tabla_pnl" style="width: 100%; height:800px; overflow:auto;  ">
+                            <div id="div_estilo_pnl" style=" overflow:auto; visibility:hidden; ">
+                            </div>
+                            <button type="button" class="btn btn-primary" id="registrarNuevo" data-toggle="modal">
+                                <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> ADD NEW BATCH
+                            </button>
+                            <br />
+                            <div class="container-fluid">
+                                <div class="form-row">
+                                    <div class="form-group col-sm-4 ">
+                                        @Html.LabelFor(model => model.PNL.Turnos, htmlAttributes: new { @class = "control-label " })
+                                        @Html.EnumDropDownListFor(model => model.PNL.Turnos, "Select Turn", new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.PNL.Turnos, "", new { @class = "text-danger" })
+
+                                    </div>
+                                    <div class="form-group col-sm-4 ">
+                                        @Html.LabelFor(model => model.PNL.Maquina, htmlAttributes: new { @class = "control-label " })
+                                        @Html.EnumDropDownListFor(model => model.PNL.Maquinas, "Select Machine", new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.PNL.Maquinas, "", new { @class = "text-danger" })
+
+                                    </div>
+                                    <div class="form-group col-sm-4 ">
+                                        @Html.LabelFor(model => model.PNL.EstadoPallet, htmlAttributes: new { @class = "control-label " })
+                                        <br />
+                                        @Html.RadioButtonFor(model => model.PNL.EstadoPallet, "true", new { @class = "form-radio" }) @Html.Label("Complete")
+                                        @Html.RadioButtonFor(model => model.PNL.EstadoPallet, "false", new { @class = "form-radio", Checked = "checked" }) @Html.Label("Incomplete")
+                                        @Html.ValidationMessageFor(model => model.PNL.EstadoPallet, "", new { @class = "text-danger" })
+
+                                    </div>
+                                    <div class="form-group col-sm-5 ">
+                                        @Html.LabelFor(model => model.PNL.Comentarios, htmlAttributes: new { @class = "control-label " })
+                                        <br />
+                                        @Html.TextAreaFor(model => model.PNL.Comentarios, new { rows = 2, @style = "margin: 0px; width: 424px; height: 86px;", htmlAttributes = new { @class = "form-control" } })
+                                        @Html.ValidationMessageFor(model => model.PNL.Comentarios, "", new { @class = "text-danger" })
+
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <br />
+                            <table id="tablePnl" class="table table-sm table-striped table-hover ">
+                                <thead class="encabezado"></thead>
+                                <tbody class="tbodyprint"></tbody>
+                            </table>
+
+                            <button type="button" class="btn btn-success btn-md pull-right btn-sm" id="guardarBatch" onclick="registrarBatchPNL();"><span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Save</button>
+                            <button type="button" class="btn btn-success btn-md pull-right btn-sm" id="modificarBatch" onclick="event.preventDefault(); ConfirmRev(this);"><span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Modify</button>
+
+                        </div>
+                    }
+                    </div>
+            </div>
+            <div class="col-sm-1">
+                <div class="panel panel-primary" id="arte" style=" visibility:hidden; width:150px; height: 450px; ">
+                    <div class="panel-heading">
+                        <h4>ART</h4>
+                    </div>
+                    <p class="tImagen">STYLE IMAGE</p>
+                    <br />
+                    <img id="imagenArte" class="center" />
+                    <br />
+                    <br />
+                    <p class="tImagen">PNL IMAGE</p>
+                    <br />
+                    <img id="imagenPNL" class="center" />
+                </div>
+            </div>
+        </div>
+        <br />
+        <br />
+        <br />           
+       <a href='@Url.Action("Index", "Packing")'>
+          <img src='@Url.Content("~/Content/img/backToPage.png")' id="flecha" title="Go Back"/>
+       </a>
+   
+    </div>
+        <script>
+            $('#tabless tr').click(function (e) {
+                $('#tabless tr').removeClass('highlighted');
+                $(this).addClass('highlighted');
+            });
+        </script>

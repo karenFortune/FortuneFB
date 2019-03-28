@@ -1,0 +1,103 @@
+﻿@model IEnumerable<FortuneSystem.Models.Pedidos.OrdenesCompra>
+
+@{
+    ViewBag.Title = "PrintShop";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    tr.highlighted td {
+        background: #b3e0ff;
+    }
+
+    #tablaPOPrint .po {
+        color: #fff;
+        background-color: #006bb3;
+    }
+</style>
+
+
+</div>
+<div class="container-fluid" style="padding-left:20em; padding-right:10em;">
+    <div class="panel panel-primary" id="listaPO">
+        <div class="panel-heading">
+            <h2>PRINTSHOP</h2>
+        </div>
+        <br />
+        <br />
+        <div id="div_tabla_estilos" style="width: 100%; height:500px; overflow:auto; ">
+            <table align="center" class="table table-striped" id="tablaPOPrint">
+                <thead class="po">
+                    <tr>
+                        <th>
+                            @Html.DisplayNameFor(model => model.PO)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.VPO)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.CatClienteFinal.NombreCliente)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.FechaCancel)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.TotalUnidades)
+                        </th>
+                        @*<th>
+                            @Html.DisplayNameFor(model => model.CatStatus.Estado)
+                          </th>
+                         <th>ACTIONS</th>*@
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                    <tr ondblclick="location.href = '@(Url.Action("Detalles", "PrintShop", new { id = item.IdPedido }))'">
+                        <td>
+                            @Html.DisplayFor(modelItem => item.PO)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.VPO)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CatClienteFinal.NombreCliente)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.FechaCancel)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.TotalUnidades)
+                        </td>
+                        @*
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CatStatus.Estado)
+                        </td>**@
+                        @*<td>
+        @Html.ActionLink(" ", "Detalles", new { id = item.IdPedido }, new { @class = "btn btn-default glyphicon glyphicon-search", @style = "color:black", @Title = "Details Style" })
+
+
+                        </td>*@
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+    <script>
+        $('#tablaPOPrint tr').click(function (e) {
+            $('#tablaPOPrint tr').removeClass('highlighted');
+            $(this).addClass('highlighted');
+        })
+               
+        $(function () {
+            // $('#tablaPOPrint td:last-child:contains(REGISTERED)').closest('tr').css('background-color', '#ffb3b3');
+            //$('#tablaPOPrint td:last-child:contains(COMPLETED)').closest('tr').css('background-color', '#99ffbb');
+            //$('#tablaPOPrint td:last-child:contains(CANCELLED)').closest('tr').css('background-color', '#cceeff');
+           
+        });
+     
+
+
+
+    </script>

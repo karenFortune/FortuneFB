@@ -1,0 +1,1089 @@
+﻿
+@{
+    ViewBag.Title = "FANTASY";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+</div>
+<link href="~/Content/base_m.css" rel="stylesheet" />
+<script src="~/Content/Chart.js-master/Chart.bundle.js"></script>
+<script src="~/Content/Chart.js-master/Chart.bundle.min.js"></script>
+<script src="~/Content/Chart.js-master/Chart.min.js"></script>
+<script src="~/Content/Chart.js-master/moment.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+<link href="~/Content/base_m.css" rel="stylesheet" />
+<script>
+    var id_cliente, ids, estados, id_estilo;
+    var rows_estilos;
+    $(document).ready(function () { 
+        //$("#load_fantasy").css('display', 'inline');
+        rows_estilos = 0;
+        llenar_tabla_inicio_bravado(1);
+        llenar_tabla_inicio_fea(2);
+        llenar_tabla_inicio_merch(3);
+    });
+    //VALIDACIONES
+    $(document).on("input", ".numeric", function () {
+        this.value = this.value.replace(/\D/g, '');
+    });
+    $(document).on("input", ".validacion", function () {
+        var c = this.selectionStart,
+            r = /[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ .()!@@/#%-]/,
+            v = $(this).val();
+        if (r.test(v)) {
+            $(this).val(v.replace(r, ''));
+            c--;
+        }
+        this.setSelectionRange(c, c);
+    });
+    
+   //*****************************************************************
+    $(function () {
+        $.datepicker.regional['en'] = {
+            /*closeText: 'Cerrar',
+            prevText: '<Ant',
+            nextText: 'Sig>',
+            currentText: 'Hoy',
+            monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+            monthNamesShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+                'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+            dayNames: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+            dayNamesShort: ['Dom', 'Lun', 'Mar', 'Mié', 'Juv', 'Vie', 'Sáb'],
+            dayNamesMin: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'],
+            weekHeader: 'Sm',*/
+            dateFormat: 'yy-mm-dd',
+            firstDay: 1,
+            isRTL: false,
+            showMonthAfterYear: false,
+            yearSuffix: ''
+        };
+        $.datepicker.setDefaults($.datepicker.regional['en']);
+        $('#caja_ship_date').datepicker();
+    });
+        
+//*************CLIENTES*********************************************************************************
+    function llenar_tabla_inicio_bravado(cliente) {
+        $("#load_fantasy_inventory").css('display', 'inline');
+        $.ajax({
+            url: '/Fantasy/datos_tabla_inicio',
+            data:"{'cliente':'"+cliente+"'}",
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (result) {
+                var html = '';
+                var piezas;               
+                $.each(result, function (key, item) {
+                    piezas = 0;
+                    html += '<tr><td>' + item.fecha + '</td><td>' + item.ship_date + '</td><td>' + item.pedido + '</td>';
+                    html += '<td> ' + item.estilo.estilo + ' ' + item.estilo.descripcion + '</td><td> ' + item.tipo + '</td> ';
+                    $.each(item.lista_cantidades, function (key, i) {
+                        html += '<td>' + i.total + '</td>';
+                        piezas += i.total;
+                    });
+                    html += '<td>' + piezas+ '</td>';
+                    html += '<td>' + (piezas/6)+ '</td>';
+                    html += '</tr>';
+                });
+                $(".body_tabla_inicio_fantasy_bravado").html(html);
+                $("#load_fantasy_inventory").css('display', 'none');
+            }
+        });
+    }
+    function llenar_tabla_inicio_fea(cliente) {
+        $("#load_fantasy_inventory").css('display', 'inline');
+        $.ajax({
+            url: '/Fantasy/datos_tabla_inicio',
+            data: "{'cliente':'" + cliente + "'}",
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (result) {
+                var html = '';
+                var piezas;
+                $.each(result, function (key, item) {
+                    piezas = 0;
+                    html += '<tr><td>' + item.fecha + '</td><td>' + item.ship_date + '</td><td>' + item.pedido + '</td>';
+                    html += '<td> ' + item.estilo.estilo + ' ' + item.estilo.descripcion + '</td><td> ' + item.tipo + '</td> ';
+                    $.each(item.lista_cantidades, function (key, i) {
+                        html += '<td>' + i.total + '</td>';
+                        piezas += i.total;
+                    });
+                    html += '<td>' + piezas + '</td>';
+                    html += '<td>' + (piezas / 6) + '</td>';
+                    html += '</tr>';                   
+                });
+                $(".body_tabla_inicio_fantasy_fea").html(html);
+                $("#load_fantasy_inventory").css('display', 'none');
+            }
+        });
+    }
+    function llenar_tabla_inicio_merch(cliente) {
+        $("#load_fantasy_inventory").css('display', 'inline');
+        $.ajax({
+            url: '/Fantasy/datos_tabla_inicio',
+            data: "{'cliente':'" + cliente + "'}",
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (result) {
+                var html = '';
+                var piezas;
+               $.each(result, function (key, item) {
+                    piezas = 0;
+                   html += '<tr><td>' + item.fecha + '</td><td>' + item.ship_date + '</td><td>' + item.pedido + '</td>';
+                   html += '<td> ' + item.estilo.estilo+' '+item.estilo.descripcion + '</td><td> ' + item.tipo + '</td> ';
+                    $.each(item.lista_cantidades, function (key, i) {
+                        html += '<td>' + i.total + '</td>';
+                        piezas += i.total;
+                    });
+                    html += '<td>' + piezas + '</td>';
+                    html += '<td>' + (piezas / 6) + '</td>';
+                    html += '</tr>';
+                });
+                $(".body_tabla_inicio_fantasy_merch").html(html);
+                $("#load_fantasy_inventory").css('display', 'none');
+            }
+        });
+    }
+    $(document).on("click", "#boton_clientes_fantasy", function () {
+        $("#load_fantasy_inventory").css('display','inline');
+        cargar_clientes();
+        $("#load_fantasy_inventory").css('display', 'none');
+    });
+    function cargar_clientes() {
+        $("#load_fantasy_inventory").css('display', 'inline');
+        $.ajax({
+            url: '/Fantasy/buscar_clientes_fantasy',
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (result) {
+                var html = '';
+                $.each(result, function (key, item) {
+                    html += '<tr><td>' + item.id_cliente + '</td><td>' + item.nombre + '</td>';
+                    if (item.estado == 0) {
+                        html += '<td><input type="checkbox" id="switch_' + item.id_cliente + '" checked />' +
+                            '<label class="clientescbx" id="ccbx_' + item.id_cliente + '" for="switch_' + item.id_cliente + '"  ></label></td></tr>';
+                    } else {
+                        html += '<td><input type="checkbox" id="switch_' + item.id_cliente + '" />' +
+                            '<label class="clientescbx" id="ccbx_' + item.id_cliente + '" for="switch_' + item.id_cliente + '" style="background:#ea4c4c;" ></label></td></tr>';                    
+                    }
+                });
+                $(".body_tabla_clientes").html(html);
+                $("#load_fantasy_inventory").css('display', 'none');
+            }
+        });
+    }
+    function guardar_nuevo_cliente(event) {
+        if ($('#caja_nombre_cliente').val()!='') {
+            $('#caja_nombre_cliente').css('border', '1px solid #cccccc');
+            $("#load_fantasy_inventory").css('display', 'inline');
+            $.ajax({
+                url: '/Fantasy/agregar_cliente',
+                data: "{'cliente':'" + $("#caja_nombre_cliente").val() + "'}",
+                contentType: 'application/json',
+                dataType: 'json',
+                type: 'post',
+                success: function (result) {
+                    $('#caja_nombre_cliente').val(''); 
+                    cargar_clientes();
+                    alertify.success('Success!');
+                    alertify.set('notifier', 'position', 'top-right');
+                }
+            });
+            $("#load_fantasy_inventory").css('display', 'none');
+        } else {
+            event.preventDefault();
+            $('#caja_nombre_cliente').css('border', '2px solid #e03f3f');
+            alertify.alert('Error!', 'Check empty fields, please');
+            return false;
+        }
+    }
+    $(document).on("dblclick", "#tabla_clientes_fantasy tr", function () {
+        var row = this.rowIndex;
+        if (row != 0) {
+            id_cliente = parseFloat($('#tabla_clientes_fantasy tr:eq(' + row + ') td:eq(0)').html());
+            $("#caja_nombre_cliente_edit").val($('#tabla_clientes_fantasy tr:eq(' + row + ') td:eq(1)').html());
+            $("#editar_cliente").css('display','inline');
+        }
+    });
+    $(document).on("click", "#boton_cancelar_edicion_cliente", function () {
+        $("#caja_nombre_cliente_edit").val('');
+        id_cliente = 0;
+        $("#editar_cliente").css('display', 'none');
+    });
+    function guardar_edicion_cliente(event) {
+        if ($('#caja_nombre_cliente_edit').val() != '') {
+            $('#caja_nombre_cliente_edit').css('border', '1px solid #cccccc');
+            $("#load_fantasy_inventory").css('display', 'inline');
+            $.ajax({
+                url: '/Fantasy/editar_nombre_cliente',
+                data: "{'id':'"+id_cliente+"','cliente':'" + $("#caja_nombre_cliente_edit").val() + "'}",
+                contentType: 'application/json',
+                dataType: 'json',
+                type: 'post',
+                success: function (result) {
+                    $('#caja_nombre_cliente_edit').val('');
+                    $("#editar_cliente").css('display', 'none');
+                    cargar_clientes();
+                    alertify.success('Success!');
+                    alertify.set('notifier', 'position', 'top-right');
+                }
+            });
+            $("#load_fantasy_inventory").css('display', 'none');
+        } else {
+            event.preventDefault();
+            $('#caja_nombre_cliente_edit').css('border', '2px solid #e03f3f');
+            alertify.alert('Error!', 'Check empty fields, please');
+            return false;
+        }
+    }
+    $(document).on("click", ".clientescbx", function () {
+        var idcbx = this.id;
+        var id_customer = idcbx.split('_');
+        ids = id_customer[1];
+        if ($("#switch_" + id_customer[1]).is(":checked")) {
+            $("#switch_" + id_customer[1]).prop('checked', false);            
+            estados = 1;
+            $("label[for = switch_" + id_customer[1] + "]").css('background', '#ea4c4c');
+            cambiar_estados_clientes();           
+        } else {
+            $("#switch_" + id_customer[1]).prop('checked', true);          
+            estados = 0;
+            $("label[for = switch_" + id_customer[1] + "]").css('background', '#54dc7f');
+            cambiar_estados_clientes();            
+        }
+        return false;        
+    });
+    function cambiar_estados_clientes() {
+        $.ajax({
+            url: '/Fantasy/editar_estados',
+            data: "{'ids':'"+ids+"','estados':'" + estados + "'}",
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (result) { }
+        });
+    }
+ //*************CLIENTES*********************************************************************************
+//*************ESTILOS*************************************************************************************
+    $(document).ready(function () { $('.js-example-basic-single').select2();     });
+    $(document).on("input", ".estilos", function () { $('.estilos').autocomplete({ source: '@Url.Action("Autocomplete_estilos")' }); });
+    $(document).on("input", ".colores", function () { $('.colores').autocomplete({ source: '@Url.Action("Autocomplete_colores_codigos")' }); });
+    var clientes;
+    $(document).on("click", "#boton_estilos_fantasy", function () {
+        //$("#load_fantasy_inventory").css('display', 'inline');
+        get_clientes();
+        cargar_estilos();
+        //$("#load_fantasy_inventory").css('display', 'none');
+    });
+    function llenar_lista_clientes() {
+        var html = '<label class=" col-form-label">Style</label> <select class="form-control pk" id="caja_cliente_estilo" >';
+        var html2 = '<label class=" col-form-label">Style</label> <select class="form-control pk" id="caja_cliente_estilo_editar" >';
+        $.each(clientes, function (key, item) {
+            html += '<option  value="' + item.id_cliente + '">' + item.nombre + '</option>';
+            html2 += '<option  value="' + item.id_cliente + '">' + item.nombre + '</option>';
+        });
+        html += '</select>';
+        html2 += '</select>';
+        $("#new_estilo_customer").html(html);
+        $("#estilo_cliente_editar").html(html2);
+    }
+    function get_clientes() {
+        $("#load_fantasy_inventory").css('display', 'inline');
+        $.ajax({
+            url: '/Fantasy/buscar_clientes_fantasy',
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (result) {
+                clientes = result;
+                var html = '<label class=" col-form-label">Customer</label> <select class="form-control pk" id="caja_cliente_estilo" >';
+                var html2 = '<label class=" col-form-label">Customer</label> <select class="form-control pk" id="caja_cliente_estilo_editar" >';
+                $.each(result, function (key, item) {
+                    html += '<option  value="' + item.id_cliente + '">' + item.nombre + '</option>';
+                    html2 += '<option  value="' + item.id_cliente + '">' + item.nombre + '</option>';
+                });
+                html += '</select>';
+                html2 += '</select>';
+                $("#new_estilo_customer").html(html);
+                $("#estilo_cliente_editar").html(html2);
+                //$("#load_fantasy_inventory").css('display', 'none');
+            }
+        });
+    }
+    function cargar_estilos() {
+        $.ajax({
+            url: '/Fantasy/buscar_estilos_fantasy',
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (result) {
+                var html = ''; //<tr><th>#</th><th>Style</th>DESCRIPCION<th>Customer</th><th>ENABLE/DISABLE</th></tr>
+                $.each(result, function (key, item) {
+                    html += '<tr><td>' + item.id_estilo_fantasy + '</td><td>' + item.estilo + '</td><td>' + item.descripcion + '</td><td>' + item.cliente + '</td>';
+                    html += '<td>' + item.color + '</td>';
+                    if (item.estado == 0) {
+                        html += '<td><input type="checkbox" id="e_switch_' + item.id_estilo_fantasy + '" checked />' +
+                            '<label class="estiloscbx" id="ecbx_' + item.id_estilo_fantasy + '" for="e_switch_' + item.id_estilo_fantasy + '"  ></label></td></tr>';
+                    } else {
+                        html += '<td><input type="checkbox" id="e_switch_' + item.id_estilo_fantasy + '" />' +
+                            '<label class="estiloscbx" id="ecbx_' + item.id_estilo_fantasy + '" for="e_switch_' + item.id_estilo_fantasy + '" style="background:#ea4c4c;" ></label></td></tr>';
+                    }
+                });
+                $(".body_tabla_estilos").html(html);
+                $("#load_fantasy_inventory").css('display', 'none');
+            }
+        });
+    }
+    function guardar_nuevo_estilo(event) {
+        if ($('#caja_estilo').val() != '' && $("#caja_color").val()!='') {
+            $('#caja_estilo').css('border', '1px solid #cccccc');
+            $('#caja_color').css('border', '1px solid #cccccc');
+            $("#load_fantasy_inventory").css('display', 'inline');
+            $.ajax({
+                url: '/Fantasy/agregar_estilo',
+                data: "{'estilo':'" + $("#caja_estilo").val() + "','cliente':'" + $("#caja_cliente_estilo").val() + "','color':'" + $("#caja_color").val()+"'}",
+                contentType: 'application/json',
+                dataType: 'json',
+                type: 'post',
+                success: function (result) {
+                    $('#caja_estilo').val('');
+                    cargar_estilos();
+                    alertify.success('Success!');
+                    alertify.set('notifier', 'position', 'top-right');
+                }
+            });
+            $("#load_fantasy_inventory").css('display', 'none');
+        } else {
+            event.preventDefault();
+            if ($('#caja_estilo').val() == '') { $('#caja_estilo').css('border', '2px solid #e03f3f'); } else { $('#caja_estilo').css('border', '1px solid #cccccc'); }
+            if ($('#caja_color').val() == '') { $('#caja_color').css('border', '2px solid #e03f3f'); } else { $('#caja_color').css('border', '1px solid #cccccc'); }
+            
+            alertify.alert('Error!', 'Check empty fields, please');
+            return false;
+        }
+    }
+    $(document).on("dblclick", "#tabla_estilos_fantasy tr", function () {
+        var row = this.rowIndex;
+        if (row != 0) {
+            id_estilo = parseFloat($('#tabla_estilos_fantasy tr:eq(' + row + ') td:eq(0)').html());
+            $("#caja_nombre_estilo_edit").val($('#tabla_estilos_fantasy tr:eq(' + row + ') td:eq(1)').html());
+            $("#caja_color_edit").val($('#tabla_estilos_fantasy tr:eq(' + row + ') td:eq(4)').html());
+            $("caja_cliente_estilo_editar option").filter(function () {
+                //may want to use $.trim in here
+                return $(this).text() == $('#tabla_estilos_fantasy tr:eq(' + row + ') td:eq(3)').html()
+            }).prop('selected', true);
+            $("#editar_estilo").css('display', 'inline');
+        }        
+    });
+    $(document).on("click", "#boton_cancelar_edicion_estilo", function () {
+        $("#caja_nombre_estilo_edit").val('');
+        id_estilo = 0;
+        $("#editar_estilo").css('display', 'none');
+    });
+    function guardar_edicion_estilo(event) {
+        if ($('#caja_nombre_estilo_edit').val() != '' && $("#caja_color_edit").val()!='') {
+            $('#caja_nombre_estilo_edit').css('border', '1px solid #cccccc');
+            $('#caja_color_edit').css('border', '1px solid #cccccc');
+            $("#load_fantasy_inventory").css('display', 'inline');
+            $.ajax({
+                url: '/Fantasy/editar_estilo',
+                data: "{'id':'" + id_estilo + "','estilo':'" + $("#caja_nombre_estilo_edit").val() + "','cliente':'" + $("#caja_cliente_estilo_editar").val() + "','color':'" + $("#caja_color_edit").val() +"'}",
+                contentType: 'application/json',
+                dataType: 'json',
+                type: 'post',
+                success: function (result) {
+                    $('#caja_nombre_estilo_edit').val('');
+                    $("#editar_estilo").css('display', 'none');
+                    cargar_estilos();
+                    alertify.success('Success!');
+                    alertify.set('notifier', 'position', 'top-right');
+                }
+            });
+            $("#load_fantasy_inventory").css('display', 'none');
+        } else {
+            event.preventDefault();
+            if ($('#caja_nombre_estilo_edit').val()=='')
+                $('#caja_nombre_cliente_edit').css('border', '2px solid #e03f3f');
+            if ($('#caja_color_edit').val() == '')
+                $('#caja_color_edit').css('border', '2px solid #e03f3f');
+            alertify.alert('Error!', 'Check empty fields, please');
+            return false;
+        }
+    }
+    $(document).on("click", ".estiloscbx", function () {
+        $("#load_fantasy_inventory").css('display', 'inline');
+        ids = ''; estados = '';
+        var idcbx = this.id;
+        var id_customer = idcbx.split('_');
+        ids = id_customer[1];
+        if ($("#e_switch_" + id_customer[1]).is(":checked")) {
+            $("#e_switch_" + id_customer[1]).prop('checked', false);
+            estados = 1;
+            $("label[for = e_switch_" + id_customer[1] + "]").css('background', '#ea4c4c');
+            cambiar_estados_estilos();
+        } else {
+            $("#e_switch_" + id_customer[1]).prop('checked', true);
+            estados = 0;
+            $("label[for = e_switch_" + id_customer[1] + "]").css('background', '#54dc7f');
+            cambiar_estados_estilos();
+        }
+        $("#load_fantasy_inventory").css('display', 'none');
+        return false;             
+    });
+    function cambiar_estados_estilos() {
+        $.ajax({
+            url: '/Fantasy/editar_estados_estilos',
+            data: "{'ids':'" + ids + "','estados':'" + estados + "'}",
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (result) { }
+        });
+    }
+//*************ESTILOS*********************************************************************************
+//*************ORDER***********************************************************************************
+    $(document).on("click", "#boton_order_fantasy", function () {
+        $("#load_fantasy_inventory").css('display', 'inline');
+        get_clientes_ordenes();
+        cargar_estilos_ordenes();
+        $("#load_fantasy_inventory").css('display', 'none');
+    });
+ 
+    
+    function get_clientes_ordenes() {
+        $("#load_fantasy_inventory").css('display', 'inline');
+        $.ajax({
+            url: '/Fantasy/buscar_clientes_fantasy',
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (result) {
+                clientes = result;
+                var html = '<label class=" col-form-label">Customer</label> <select class="form-control " id="caja_cliente_orden" >';
+                html += '<option  value="0">Select</option>';
+                $.each(result, function (key, item) {
+                    html += '<option  value="' + item.id_cliente + '">' + item.nombre + '</option>';
+                });
+                html += '</select>';
+                $("#customer_div").html(html);
+                $("#load_fantasy_inventory").css('display', 'none');
+            }
+        });
+    }
+    $(document).on("change", "#caja_cliente_orden", function () {
+        cargar_estilos_ordenes();
+    });
+    function cargar_estilos_ordenes() {
+        $("#load_fantasy_inventory").css('display', 'inline');
+        $.ajax({
+            url: '/Fantasy/buscar_estilos_fantasy',
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (result) {
+                var html = ''; 
+                html = '<label class=" col-form-label">Style</label>';                   
+                html += ' <select class="form-control " id="caja_estilo_orden" >';
+                $.each(result, function (key, item) {
+                    if (item.id_cliente == $("#caja_cliente_orden").val()) {
+                        html += '<option  value="' + item.id_estilo_fantasy + '">' + (item.estilo).trim() + " " + (item.descripcion).trim() + '</option>';
+                    }
+                });                                              
+                html += '</select>'; 
+                $("#style_div").html(html);
+                $("#load_fantasy_inventory").css('display', 'none');
+            }
+        });
+    }
+    $(document).on("input", ".pedidos", function () { $('.pedidos').autocomplete({ source: '@Url.Action("Autocomplete_po")' }); });
+    var estilo, instruccion, po, sm, md, lg, xl, xx;
+    function guardar_order(event) {
+        estilo = ''; instruccion = ''; po = ''; sm = ''; md = ''; lg = ''; xl = ''; xx = '';
+        if (rows_estilos < 1) { error++;}
+        var error = 0;
+        $(".order").each(function () {
+            if ($(this).val() == '') {
+                $(this).css('border', '2px solid #e03f3f');
+                error++;
+            } else {
+                $(this).css('border', '1px solid #cccccc');
+            }
+        });
+        if ($("#caja_cliente_orden").val() == "0") { error++; }
+        $('#tabla_tallas_fantasy tbody tr').each(function () {
+            if ($(this).find('td:eq(4) input').val() == "0" && $(this).find('td:eq(5) input').val() == "0" && $(this).find('td:eq(6) input').val() == "0" && $(this).find('td:eq(7) input').val() == "0" && $(this).find('td:eq(8) input').val() == "0")
+            { error++; }            
+        });
+        if (error == 0) {
+            $("#load_fantasy_inventory").css('display', 'inline');
+            $('#tabla_tallas_fantasy tbody tr').each(function () {
+                estilo += "*" + $(this).find('td:eq(0)').html();
+                instruccion += "*" + $(this).find("select option:selected").text();
+                po += "*" + $(this).find('td:eq(3) input').val();
+                if ($(this).find('td:eq(4) input').val() == '') { sm += "*0"; } else { sm += "*" + $(this).find('td:eq(4) input').val();}
+                if ($(this).find('td:eq(5) input').val() == '') { md += "*0"; } else { md += "*" + $(this).find('td:eq(5) input').val();}
+                if ($(this).find('td:eq(6) input').val() == '') { lg += "*0"; } else { lg += "*" + $(this).find('td:eq(6) input').val();}
+                if ($(this).find('td:eq(7) input').val() == '') { lx += "*0"; } else { xl += "*" + $(this).find('td:eq(7) input').val();}
+                if ($(this).find('td:eq(8) input').val() == '') { xx += "*0"; } else { xx += "*" + $(this).find('td:eq(8) input').val();}
+            });
+            enviar_datos_order();
+            $("#load_fantasy_inventory").css('display', 'none');
+        } else {
+            $("#load_fantasy_inventory").css('display', 'none');
+            event.preventDefault();
+            alertify.alert('Error!', 'Check empty fields, please');
+            return false;
+        }
+    }
+    
+    function enviar_datos_order() {
+        b = 0;
+        $.ajax({
+            url: '/Fantasy/nueva_orden',
+            data: "{'cliente':'" + $("#caja_cliente_orden").val() + "','estilo':'" + estilo + "','instruccion':'" + instruccion + "','talla_sm':'" + sm+ "','talla_md':'" + md+ "','talla_lg':'" +lg+ "','talla_xl':'" + xl+ "','talla_xx':'" + xx + "','ship_date':'" + $("#caja_ship_date").val() + "','pedido':'" + po+"'}",
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (result) {
+                $(".order").each(function () {
+                    $(this).val("0");
+                });
+                $(".body_tabla_tallas_fantasy").html("");
+                $("#modal_order").modal("hide");
+                batch = result;                
+                             
+                alertify.success('Succes! ');
+                alertify.set('notifier', 'position', 'top-right');
+            }
+        });
+       
+            var boton = document.getElementById('imprimir_batch');
+            setTimeout(function () { boton.click(); }, 5000);
+           
+    }
+    $(document).on("click", ".cerrar_order", function () {
+        $(".body_tabla_tallas_fantasy").html("");
+        $("#caja_ship_date").val('');
+    });
+    function agregar() {//<tr><<th>PO</th><th>SM</th><th>MD</th><th>LG</th><th>XL</th><th>2X</th><th>-</th></tr>
+        var html = '<tr>';
+        html += '<td>' + $('#caja_estilo_orden').val() + '</td>';
+        var estilo = ($('#caja_estilo_orden').text()).split(' ');
+        html += '<td>' + estilo[0] + '</td>';
+        html+='<td> <select class="form-control " id="caja_tipo_orden"><option>PULL</option><option>INVENTORY</option></select> </td > ';
+     
+        html += '<td> <input  type="text" class=" form-control pedidos order validacion" ondrop="return false;" onpaste="return false;" maxlength="30" id="caja_pedido_orden"></td>';
+        html += '<td><input style="width:7em;" type="text" class=" form-control numeric order" ondrop="return false;" onpaste="return false;" value="0" maxlength="10" id="caja_sm"></td>';
+        html += '<td><input style="width:7em;" type="text" class=" form-control numeric order" ondrop="return false;" onpaste="return false;" value="0" maxlength="10" id="caja_sm"></td>';
+        html += '<td><input style="width:7em;" type="text" class=" form-control numeric order" ondrop="return false;" onpaste="return false;" value="0" maxlength="10" id="caja_sm"></td>';
+        html += '<td><input style="width:7em;" type="text" class=" form-control numeric order" ondrop="return false;" onpaste="return false;" value="0" maxlength="10" id="caja_sm"></td>';
+        html += '<td><input style="width:7em;" type="text" class=" form-control numeric order" ondrop="return false;" onpaste="return false;" value="0" maxlength="10" id="caja_sm"></td>';
+        html += '<td><button type="button" class="btn btn-light deleteRowEstilos"><b>-</b></button></td></tr>';
+        rows_estilos++;
+        $('#div_tabla_tallas_fantasy').css('visibility', 'visible');
+        $('.body_tabla_tallas_fantasy').append(html);
+    }
+    $(document).on("click", ".deleteRowEstilos", function () {
+        $(this).closest("tr").remove();
+        rows_estilos--;
+        if (rows_estilos <= 0) {
+            $('#div_tabla_tallas_fantasy').css('visibility', 'hidden');
+        } else {
+            $('#div_tabla_tallas_fantasy').css('visibility', 'visible');
+        }
+    });
+//*************ORDER***********************************************************************************
+//*************TABLA*INICIO***********************************************************************************
+
+
+//*********************************************************************************************
+    //div_reporte_estilos
+    $(document).on("click", "#boton_reportes_fantasy", function () {
+        cargar_estilos_reporte();
+    });
+
+    function cargar_estilos_reporte() {
+        $("#load_fantasy_inventory").css('display', 'inline');
+        $.ajax({
+            url: '/Fantasy/buscar_estilos_fantasy',
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (result) {
+                var html = '';
+                html = '<label class=" col-form-label">Style</label>';
+                html += ' <select class="form-control " id="caja_estilo_reporte" > <option value="0" >Select</option>';
+
+                $.each(result, function (key, item) {
+                    html += '<option  value="' + item.id_estilo_fantasy + '">' + (item.estilo).trim() + " " + (item.descripcion).trim() + '</option>';
+                });
+                html += '</select>';
+                $("#div_reporte_estilos").html(html);
+                $("#load_fantasy_inventory").css('display', 'none');
+            }
+        });
+    }
+    function reporte_estilo() {
+        $("#load_fantasy_inventory").css('display', 'inline');
+        $.ajax({
+            url: '/Fantasy/buscar_movimientos_estilo',
+            data: "{'estilo':'" + $("#caja_estilo_reporte").val()+"'}",
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (result) {
+                var html = '';
+                var tallas = ['SM', 'MD', 'LG', 'XL', '2X'];
+                $.each(result, function (key, item) {
+                    //<th>DATE</th><th>INSTRUCTION</th><th>PO</th><th>SM</th><th>MD</th><th>LG</th><th>XL</th><th>2X</th>
+                    html += '<tr>';
+                    html += '<td>' + item.fecha + '</td><td>' + item.tipo + '</td><td>' + item.pedido +'</td>';                    
+                    //for (var i = 0; i < 6; i++) {
+                    $.each(item.lista_cantidades, function (key, i) {
+                            //if (i.talla == tallas[i]) {
+                               // totales_tallas[i] = totales_tallas[i] + i.total;
+                                html += '<td>' + i.total + '</td>';
+                           //}
+                        });
+                    //}
+                    html += '</tr>';
+                });              
+                $(".body_tabla_reporte_fantasy").html(html);               
+                $("#div_tabla_reporte_fantasy").css('visibility', 'visible');   
+                $("#load_fantasy_inventory").css('display', 'none');
+            }
+        });
+    }
+
+//***********************************************************************************************************************************************
+    $(document).on("click", "a", function () {
+        //setTimeout(function () { $("#loading").css('display', 'none'); }, 1000);
+        $("#loading").css('display', 'none');
+    });
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
+<a id="imprimir_batch" href="@Url.Action("batch_excel", "Fantasy")" style="visibility:hidden;">Descargar</a>
+<style>
+    .boton_menu {
+        border: none;
+        color: white;
+        background: #69984c;
+        width: 100%;
+        text-align: left;
+        font-size: 1.2em;
+        padding: 0.5em
+    }
+
+        .boton_menu:hover {
+            border: none;
+            background: #f3f3f3;
+            color: #69984c;
+            width: 100%;
+            text-align: left;
+            font-size: 1.2em;
+        }
+    td { text-align: center; padding:4px; }
+    .clientescbx, .estiloscbx {
+        width: 1.5em;
+        height: 1.5em;
+        background: #54dc7f;
+        margin: 0;
+        padding: 0;
+        border-radius: 10px;
+        border: .5px solid #8bb0ea;
+    }
+    input[type=checkbox] {
+        height: 0;
+        width: 0;
+        visibility: hidden;
+    }
+  
+    .ui-autocomplete { z-index: 2147483647; }
+    .modal-header-primary {
+        color: #fff;
+        padding: 9px 15px;
+        border-bottom: 1px solid #eee;
+        background-color: #3479bf;
+        -webkit-border-top-left-radius: 5px;
+        -webkit-border-top-right-radius: 5px;
+        -moz-border-radius-topleft: 5px;
+        -moz-border-radius-topright: 5px;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+    }
+
+    .dropbtn {
+        background-color: #3479bf;
+        color: white;
+        padding: 16px;
+        font-size: 18px;
+        border: none;
+    }
+
+    .dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: white;
+        color: black;
+        min-width: 160px;
+        box-shadow: 1px 5px 25px 1px rgba(0,0,0,0.2);
+        z-index: 1;
+    }
+
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+    .menu {
+        background: #3479bf;
+        border-radius: 5px;
+        border: solid 1px #3479bf;
+        margin-bottom: .5em;
+        margin: 1em;
+    }
+
+    .dropdown-content a:hover {
+        /*background-color: #f1f1f1;
+        color: black;*/
+        background-color: #61b363;
+        color: white;
+    }
+
+    .dropdown:hover .dropdown-content {
+        display: block;
+    }
+    .x {
+        transition: transform .25s ease-in-out;
+        color: white !important;
+    }
+
+        .x:hover {
+            transform: rotate(180deg);
+            color: white !important;
+        }
+
+        .x:before {
+            transform: rotate(45deg);
+            transform-origin: center;
+        }
+
+        .x:after {
+            transform: rotate(-45deg);
+            transform-origin: center;
+        }
+    tr { cursor:pointer; }
+
+    
+
+</style>
+<div id="load_fantasy_inventory" class="load">
+    <div id="spinner_fantasy" class="imagen_loading" style=""></div>
+</div>
+<div class="container-fluid" style="padding-left:7em; padding-right:3em;">
+    <h3 style="color:#3479bf;">FANTASY</h3>
+    <div class="row">
+        <div class="menu">
+
+            <div class="dropdown">
+                <button class="dropbtn" type="button" id="boton_clientes_fantasy" href="#modal_clientes" data-toggle="modal">
+                    Customers
+                </button>
+            </div>
+
+            <div class="dropdown">
+                <button class="dropbtn" type="button" id="boton_estilos_fantasy" href="#modal_estilos" data-toggle="modal">
+                    Styles
+                </button>
+            </div>
+
+            <div class="dropdown">
+                <button class="dropbtn" type="button" id="boton_order_fantasy" href="#modal_order" data-toggle="modal">
+                    Order
+                </button>
+            </div>
+            <div class="dropdown">
+                <button class="dropbtn" type="button" id="boton_reportes_fantasy" href="#modal_reporte" data-toggle="modal">
+                    Reports
+                </button>
+            </div>
+
+        </div>
+    </div>
+    <!--------------------------------------------------------------------------------------------------------------------------->
+    <div id="div_graficas" class="row panel panel-default" style="border: 1px solid #337ab7; width: 100%; height:200px !important;font-size:.9em; margin:0px 0px 1em 0px; overflow:auto; ">
+        <div class="panel-heading" style="margin-bottom:-1px;">BRAVADO</div>
+        <table id="tabla_inicio_fantasy_bravado" class="table table-striped results_e">
+            <thead class="cabecera_tabla_inicio_fantasy_bravado" style="background:#3479bf; color:white;">
+                <tr><th>Date</th><th>Ship Date</th><th>PO</th><th>Style</th><th>Instruction</th><th>SM</th><th>MD</th><th>LG</th><th>XL</th><th>2X</th><th>PCS</th><th>BXS</th></tr>
+            </thead>
+            <tbody class="body_tabla_inicio_fantasy_bravado"></tbody>
+        </table>
+    </div>
+    <div id="div_graficas" class="row panel panel-default" style="border: 1px solid #337ab7; width: 100%; height:200px !important;font-size:.9em;  margin:0px 0px 1em 0px; overflow:auto; ">
+      <div class="panel-heading"  style="margin-bottom:-1px;">FEA</div>
+        <table id="tabla_inicio_fantasy_fea" class="table table-striped results_e">
+            <thead class="cabecera_tabla_inicio_fantasy_fea" style="background:#3479bf; color:white;">
+                <tr><th>Date</th><th>Ship Date</th><th>PO</th><th>Style</th><th>Instruction</th><th>SM</th><th>MD</th><th>LG</th><th>XL</th><th>2X</th><th>PCS</th><th>BXS</th></tr>
+            </thead>
+            <tbody class="body_tabla_inicio_fantasy_fea"></tbody>
+        </table>
+    </div>
+    <div id="div_graficas" class="row panel panel-default" style="border: 1px solid #337ab7; width: 100%; height:200px !important; font-size:.9em; margin:0px 0px 1em 0px; overflow:auto; ">
+       <div class="panel-heading" style="margin-bottom:-1px;">MERCH</div>
+        <table id="tabla_inicio_fantasy_merch" class="table table-striped results_e">
+            <thead class="cabecera_tabla_inicio_fantasy_merch" style="background:#3479bf; color:white;">
+                <tr><th>Date</th><th>Ship Date</th><th>PO</th><th>Style</th><th>Instruction</th><th>SM</th><th>MD</th><th>LG</th><th>XL</th><th>2X</th><th>PCS</th><th>BXS</th></tr>
+            </thead>
+            <tbody class="body_tabla_inicio_fantasy_merch"></tbody>
+        </table>
+    </div>
+
+
+
+</div>
+
+
+
+
+<!------------------------MODALES------------------------------------------------------------------------------------------------>
+<div class="modal fade" id="modal_estilos" data-target="#modal_estilos">
+    <div class="modal-dialog modal-lg" style="width:80% !important; height:80% !important; overflow:auto;">
+        <div class="modal-content" style="width:100% !important; height:100% !important; overflow:auto;  ">
+            <div class="modal-header orange  modal-header-primary">
+                <button type="button" class="close x " data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title"><strong></strong>Fantasy Styles</h4>
+            </div>
+            <div class="modal-body " id="contenedor_modal_estilos">
+
+                <div class="row" id="formulario_nuevo_estilo" style="padding: 0em 3em 0em 7em; display:inline;">
+                    <div class="form-group col-sm-3" style="padding-left:2em;">
+                        <label class=" col-form-label">Style</label>
+                        <input type="text" class=" form-control validacion estilos" ondrop="return false;" onpaste="return false;" maxlength="30" id="caja_estilo">
+                    </div>
+                    <div class="form-group col-sm-3" style="padding-left:2em;">
+                        <label class=" col-form-label">Color</label>
+                        <input type="text" class=" form-control validacion colores" ondrop="return false;" onpaste="return false;" maxlength="30" id="caja_color">
+                    </div>
+                    <div id="new_estilo_customer" class="form-group col-sm-3" style="padding-left:2em;">
+                    </div>
+                    <div class="form-group col-sm-2  ">                        
+                        <button type="button" style="margin-top: 0.1em; " class="btn btn-sm btn-danger" onclick="guardar_nuevo_estilo(event)" data-toggle="modal">Add style</button>
+                    </div>                   
+                </div>
+
+                <div id="div_tabla_estilos" class=" " style="padding: 0em 2em;  visibility:visible;   width: 100%;   height:250px; ">
+                    <div style="overflow:auto; height:250px; border: 1px solid #337ab7; border-radius: 5px;">
+                        <table id="tabla_estilos_fantasy" class="table table-striped results_e">
+                            <thead class="cabecera_tabla" style="background:#3479bf; color:white;">
+                                <tr><th>#</th><th>Style</th><th>Description</th><th>Customer</th><th>Color</th><th>ENABLE/DISABLE</th></tr>
+                            </thead>
+                            <tbody class="body_tabla_estilos"></tbody>
+                        </table>
+                    </div><br />
+                </div>
+
+                <div id="editar_estilo" class="row" style="padding:0em 2em; margin-top:2em; display:none;">
+                    <h4 style="margin-left:2em; margin-bottom:1em; ">Edit style <button type="button" id="boton_cancelar_edicion_estilo" style="margin-top: 0.1em; margin: .5em 2em;" class="btn btn-sm btn-danger ">Cancel</button></h4>
+                    <div class="form-group col-sm-2 " style="padding-left:2em;">
+                        <label class=" col-form-label">Style</label>
+                        <input type="text" class=" form-control validacion estilos" ondrop="return false;" onpaste="return false;" maxlength="30" id="caja_nombre_estilo_edit">
+                    </div>
+                    <div class="form-group col-sm-3" style="padding-left:2em;">
+                        <label class=" col-form-label">Color</label>
+                        <input type="text" class=" form-control validacion colores" ondrop="return false;" onpaste="return false;" maxlength="30" id="caja_color_edit">
+                    </div>
+                    <div id="estilo_cliente_editar" class="form-group col-sm-2 " style="padding-left:2em;">
+                    </div>
+                    <div class="form-group col-sm-2  ">
+                        <br />
+                        <button type="button" style="margin-top: 0.1em; " class="btn btn-sm btn-success " onclick="guardar_edicion_estilo(event)" data-toggle="modal">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal_clientes" data-target="#modal_clientes">
+    <div class="modal-dialog modal-lg" style="width:80% !important; height:80% !important; overflow:auto;">
+        <div class="modal-content" style="width:100% !important; height:100% !important; overflow:auto;  ">
+            <div class="modal-header orange  modal-header-primary">
+                <button type="button" class="close x " data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title"><strong></strong>Fantasy Customers</h4>
+            </div>
+            <div class="modal-body " id="contenedor_modal_estilos">
+                <div class="row" id="formulario_nuevo_cliente" style="padding: 0em 3em 0em 7em; display:inline;">
+                    <div class="form-group col-sm-3" style="padding-left:2em;">
+                        <label class=" col-form-label">Name</label>
+                        <input type="text" class=" form-control validacion" ondrop="return false;" onpaste="return false;" maxlength="30" id="caja_nombre_cliente">
+                    </div>
+                    <div class="form-group col-sm-2  ">
+                        <br />
+                        <button type="button" style="margin-top: 0.1em; " class="btn btn-sm btn-danger" onclick="guardar_nuevo_cliente(event)" data-toggle="modal">Add customer</button>
+                    </div>
+                    <div class="form-group col-sm-7  ">
+                   </div>
+                </div>
+
+                <div id="div_tabla_clientes" class=" " style="padding: 0em 2em;  visibility:visible;   width: 100%;   height:250px; ">
+                    <div style="overflow:auto; height:250px; border: 1px solid #337ab7; border-radius: 5px;">
+                        <table id="tabla_clientes_fantasy" class="table table-striped results_e">
+                            <thead class="cabecera_tabla" style="background:#3479bf; color:white;">
+                                <tr><th>#</th><th>Customer</th><th>ENABLE/DISABLE</th></tr>
+                            </thead>
+                            <tbody class="body_tabla_clientes"></tbody>
+                        </table>
+                    </div>
+                    <br />
+                </div>
+
+                <div id="editar_cliente" class="row" style="padding:0em 2em; margin-top:2em; display:none;">
+                    <h4 style="margin-left:2em; margin-bottom:1em; ">Edit customer <button type="button" id="boton_cancelar_edicion_cliente" style="margin-top: 0.1em; margin: .5em 2em;" class="btn btn-sm btn-danger ">Cancel</button></h4>
+                    <div class="form-group col-sm-2 " style="padding-left:2em;">
+                        <label class=" col-form-label">Name</label>
+                        <input type="text" class=" form-control validacion " ondrop="return false;" onpaste="return false;" maxlength="30" id="caja_nombre_cliente_edit">
+                    </div>
+                    <div class="form-group col-sm-2  ">
+                        <br />
+                        <button type="button" style="margin-top: 0.1em; " class="btn btn-sm btn-success " onclick="guardar_edicion_cliente(event)" data-toggle="modal">Save changes</button>
+                    </div>
+                </div>
+                </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal_order" data-target="#modal_order">
+    <div class="modal-dialog modal-lg" style="width:80% !important; height:80% !important; overflow:auto;">
+        <div class="modal-content" style="width:100% !important; height:100% !important; overflow:auto;  ">
+            <div class="modal-header orange  modal-header-primary">
+                <button type="button" class="close x cerrar_order" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title"><strong></strong>Fantasy orders</h4>
+            </div>
+
+            <div class="modal-body " id="">
+                <div class="row" id="formulario_nuevo_cliente" style="padding: 0em 3em 0em 7em; display:inline;">
+                    <div class="form-group col-sm-2" id="customer_div" style="padding-left:2em;"></div>
+                    <div class="form-group col-sm-3" id="style_div" style="padding-left:2em;">
+                        <label class=" col-form-label">Style</label>
+                        <input type="text" readonly class=" form-control validacion estilos" ondrop="return false;" onpaste="return false;" maxlength="30" id="">
+                    </div>
+                    <div class="form-group col-sm-2 ">
+                        <label for="caja_ship_date" class=" col-form-label ">Ship date</label>
+                        <input type="text" class="form-control order " onkeydown="upperCaseF(this)" ondrop="return false;" onpaste="return false;" maxlength="23" id="caja_ship_date">
+                    </div>                   
+                    <div class="form-group col-sm-3  ">
+                        <br />
+                        <button type="button" style="margin-left:2em; " class="btn btn btn-danger" onclick="agregar()" data-toggle="modal">Add</button>
+                    </div>
+                </div>
+               <br /><br />
+                     <div id="div_tabla_tallas_fantasy" class=" " style="padding: 3em 2em 0em 2em;  visibility:hidden;   width: 100%;   height:400px; overflow:auto;">
+                         <table id="tabla_tallas_fantasy" class="table table-striped results_e" style="">
+                             <thead class="cabecera_tallas_fantasy" style="background:#3479bf; color:white;">
+                                 <tr><th>#</th><th>STYLE</th><th>INSTRUCTION</th><th>PO</th><th>SM</th><th>MD</th><th>LG</th><th>XL</th><th>2X</th><th>-</th></tr>
+                             </thead>
+                             <tbody class="body_tabla_tallas_fantasy"></tbody>
+                         </table>
+                         <button type="button" style="margin-left:2em; " class="btn btn btn-danger" onclick="guardar_order(event)" data-toggle="modal">Save</button>
+                     </div>
+               
+
+
+
+
+
+
+
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="modal_reporte" data-target="#modal_reporte">
+    <div class="modal-dialog modal-lg" style="width:80% !important; height:80% !important; overflow:auto;">
+        <div class="modal-content" style="width:100% !important; height:100% !important; overflow:auto;  ">
+            <div class="modal-header orange  modal-header-primary">
+                <button type="button" class="close x cerrar_order" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title"><strong></strong>Report by style</h4>
+            </div>
+
+            <div class="modal-body " id="">
+                <div class="row" id="formulario_nuevo_cliente" style="padding: 0em 3em 0em 7em; display:inline;">
+                    <div class="form-group col-sm-4" id="div_reporte_estilos" style="padding-left:2em;">
+
+                    </div>
+                    <div class="form-group col-sm-3  ">
+                        <br />
+                        <button type="button" style="margin-left:2em; " class="btn btn btn-danger" onclick="reporte_estilo()" data-toggle="modal">Search</button>
+                    </div>
+                </div>               
+                <br /><br />
+                <div id="div_tabla_reporte_fantasy" class=" " style="padding: 3em 2em 0em 2em;  visibility:hidden;   width: 100%;   height:400px; overflow:auto;">
+                    <table id="tabla_reporte_fantasy" class="table table-striped results_e" style="">
+                        <thead class="cabecera_reporte_fantasy" style="background:#3479bf; color:white;">
+                            <tr><th>DATE</th><th>INSTRUCTION</th><th>PO</th><th>SM</th><th>MD</th><th>LG</th><th>XL</th><th>2X</th></tr>
+                        </thead>
+                        <tbody class="body_tabla_reporte_fantasy"></tbody>
+                    </table>
+                </div>
+
+
+
+
+
+
+
+
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+

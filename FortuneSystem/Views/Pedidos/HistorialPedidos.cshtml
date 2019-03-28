@@ -1,0 +1,85 @@
+﻿@model IEnumerable<FortuneSystem.Models.Pedidos.OrdenesCompra>
+
+@{
+    ViewBag.Title = "PO REVIEW";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+</div>
+<div class="container-fluid" style="padding-left:20em; padding-right:10em;">
+    <div class="panel panel-primary" id="consultaPO">
+        <div class="panel-heading">
+            <h2>PO REVISION HISTORY</h2>
+        </div>
+        <div id="div_tabla_estilos" style="width: 100%; height:300px; overflow:auto; ">
+            <table id="tabless" class="table table-sm table-striped table-hover ">
+                <thead>
+                    <tr>
+                        <th>
+                            @Html.DisplayNameFor(model => model.IdPedido)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.PO)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.VPO)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.CatCliente.Nombre)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.CatClienteFinal.NombreCliente)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.FechaOrden)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Revision.FechaRevision)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.TotalUnidades)
+                        </th>
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody class="tbody">
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.IdPedido)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.PO)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.VPO)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.CatCliente.Nombre)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.CatClienteFinal.NombreCliente)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.FechaOrden)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Revision.FechaRevision)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.TotalUnidades)
+                            </td>
+                            <td>
+                                @Html.ActionLink(" ", "DetallesRev", new { id = item.IdPedido }, new { @class = "btn btn-default glyphicon glyphicon-search", @style = "color:black", @Title = "Style Details " })
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <a href='@Url.Action("Index", "Pedidos")'>
+        <img src='@Url.Content("~/Content/img/backToPage.png")' id="flecha" title="Go Back" />
+    </a>
+</div>

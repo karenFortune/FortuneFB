@@ -1,0 +1,43 @@
+﻿<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <title>UABC</title>
+</head>
+<body>
+    <!-- header -->
+    <div class="header">
+        <div id="uabc_header" class="row">
+            <div class="col-sm-6">            
+                <div class="cabecera">
+                    <h1 class="escuela">                      
+                    </h1>
+                    <p class="sistema_nombre"></p>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="user_info">
+                    <ul class="nav navbar-nav navbar-right">
+                        <ul class="nav navbar-nav navbar-right">
+                            <li class="dropdown">
+                                <a href="#" class="rol dropdown-toggle"
+                                   data-toggle="dropdown" role="button" aria-haspopup="true"
+                                   aria-expanded="false">
+                                    <i class="fa fa-user-circle-o fa-3x fa_menu"></i><span class="nav-text">@Session["nombre"]</span>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <div class="info">
+
+                                        </div>
+                                    </li>
+                                    <li><a href="@Url.Action("Login","Login")">Logout</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

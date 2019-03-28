@@ -1,0 +1,431 @@
+﻿@model FortuneSystem.Models.Pedidos.OrdenesCompra
+
+@{
+    ViewBag.Title = "Style PO";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    tr.highlighted td {
+        background: #b3e0ff;
+    }
+
+    .edit_driver {
+    }
+
+        .edit_driver:hover {
+            color: white !important;
+            background: #3479bf !important;
+            border-radius: 15px;
+        }
+
+    #nuevo-estilo {
+        margin-left: 30px;
+        margin-top: 1px;
+        width: 180px;
+        height: 40px;
+        border: none;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    body .arte {
+        width: 120% !important;
+        margin-left: -20% !important;
+             
+    }
+
+    .x {
+        transition: transform .25s ease-in-out;
+        color: black !important;
+    }
+
+        .x:hover {
+            transform: rotate(180deg);
+            color: black !important;
+        }
+
+        .x:before {
+            transform: rotate(45deg);
+            transform-origin: center;
+        }
+
+        .x:after {
+            transform: rotate(-45deg);
+            transform-origin: center;
+        }
+
+  
+</style>
+<script>
+
+    $(document).ready(function () {
+        var ID = $("#IdPedido").val();
+        buscar_estilos(ID);
+
+
+    });
+
+    function probar(id) {
+        $('#tabless tr').on('click', function (e) {
+            $('#tabless tr').removeClass('highlighted');
+            $(this).addClass('highlighted');
+        });       
+    }
+    $(document).on("dblclick", "#tabless tr", function () {
+        debugger
+        var row = this.rowIndex;
+        var numEstilo = $('#tabless tr:eq(' + row + ') td:eq(0)').html();
+        //var estilo = $('#tabless tr:eq(' + row + ') td:eq(2)').html();
+        obtener_tallas_item(numEstilo);        
+    });
+    var idStyle;
+    var EstiloItem;
+    function buscar_estilos(ID) {
+        $.ajax({
+            url: "/Pedidos/Lista_Estilos_PO/" + ID,
+            type: "POST",
+            contentType: "application/json;charset=UTF-8",
+            dataType: "json",
+            success: function (jsonData) {
+                var html = '';
+                var lista_estilo = jsonData.Data.listaItem;
+                var totalUnitsReg = 0;
+                $.each(lista_estilo, function (key, item) {
+                    html += '<tr  onclick="probar(' + item.IdItems + ')">';
+                    html += '<td>' + item.IdItems + '</td>';
+                    html += '<td>' + item.EstiloItem + '</td>';
+                    html += '<td>' + item.ItemDescripcion.Descripcion + '</td>';
+                    html += '<td>' + item.CatColores.CodigoColor + '</td>';
+                    html += '<td>' + item.CatColores.DescripcionColor + '</td>';
+                    html += '<td>' + item.Cantidad + '</td>';
+                    html += '<td>' + item.NombreUsuario + '</td>';
+                    html += '<td>' + item.Price + '</td>';
+                    html += '<td>' + item.Total + '</td>';
+                    totalUnitsReg += item.Cantidad;
+                    idStyle = item.IdEstilo;
+                    EstiloItem = item.EstiloItem;
+                   // html += '<td><a href="#" onclick="obtener_tallas_item(' + item.IdItems + ',\'' + item.ItemDescripcion.Descripcion + '\');" class = "btn edit_driver edicion_driver l1s"  Title = "Sizes"> <span class="glyphicon glyphicon-search" aria-hidden="true" style="padding: 0px !important;"></span></a>';
+                    html += '<td><a href="#" data-value="' + item.IdItems + '" class = "btn edit_driver edicion_driver btnEdit"  Title = "Edit Style"> <span class="glyphicon glyphicon-edit" aria-hidden="true" style="padding: 0px !important;"></span></a>';
+                    html += '<a href="#" data-value="' + item.IdItems + '" class = "btn edit_driver edicion_driver btnArte"  Title = "Art PNL"> <span class="fa fa-paint-brush fa-lg" aria-hidden="true" style="padding: 0px !important;"></span></a></td>';
+                    //html += '<a class="btn edit_driver edicion_driver " Title="Report" onclick="imprimir_reporte_po(' + item.IdItems+')"> <span class="fa fa-file-pdf-o fa-lg" aria-hidden="true" style="padding: 0px !important;"></span></a></td>';
+                    html += '</tr>';
+                });
+                $("#RegTotalUnits").text(totalUnitsReg);
+                if (Object.keys(lista_estilo).length === 0) {
+                    html += '<tr class="odd"><td valign="middle" align="center" colspan="10" class="dataTables_empty">No styles were found for the PO.</td></tr>';
+
+                }
+                $('.tbody').html(html);
+                $("#div_estilos_orden").css("visibility", "visible");
+            },
+            error: function (errormessage) { alert(errormessage.responseText); }
+        });
+    }
+    //$("#RegTotalUnits").append("some Text");
+    function imprimir_reporte_po(id) {
+        $.ajax({
+            url: "/Pedidos/Imprimir_Reporte_PO/",
+            data: "{'id':'" + id + "'}",
+            dataType: 'json',
+            contentType: 'application/json',
+            type: 'post',
+            success: function () {
+                imprimir_reporte();
+            }
+        });
+    }
+    function imprimir_reporte(id) {
+        var h = screen.height - 100;
+        var w = screen.width - 30;
+        window.open('/PDF/Imprimir_Reporte_PO', '_blank', 'toolbar=0,location=0,menubar=0,width=' + w + ',height=' + h + ', fullscreen=yes');
+        $("#loading").css('display', 'none');
+    }
+
+    function obtener_tallas_item(IdTalla) {
+        var tempScrollTop = $(window).scrollTop();
+        probar();
+        //var nombreEstilo = $.trim(DescEstilo);
+        $.ajax({
+            url: "/Pedidos/Listado_Tallas_Estilos/" + IdTalla,
+            type: "POST",
+            contentType: "application/json;charset=UTF-8",
+            dataType: "json",
+            success: function (jsonData) {
+                var html = '';
+                var estilos = jsonData.Data.estilos;
+                var EstiloDescription;
+                var lista_estilo_Desc = jsonData.Data.listaTalla;
+                $.each(lista_estilo_Desc, function (key, item) {
+
+                    EstiloDescription = item.DescripcionEstilo;
+
+                });
+                debugger
+                if (estilos != '') {
+                    $("#div_estilo").html("<h2>Item: " + estilos + "-" + $.trim(EstiloDescription)+"</h2>");
+                    $("#div_estilo").show();
+                } else {
+                    $("#div_estilo").hide();
+                }
+
+                var lista_estilo = jsonData.Data.listaTalla;
+                html += '<tr> <th> Size </th>'
+                $.each(lista_estilo, function (key, item) {
+
+                    html += '<th>' + item.Talla + '</th>';
+
+                });
+                html += '<th> Total </th>'
+                html += '</tr><tr><td>Quantity</td>';
+                var cantidades = 0;
+                $.each(lista_estilo, function (key, item) {
+
+                    html += '<td>' + item.Cantidad + '</td>';
+                    cantidades += item.Cantidad;
+                });
+                html += '<td>' + cantidades + '</td>';
+                html += '</tr><tr><td>Extra</td>';
+                var extrasCantidad = 0;
+                $.each(lista_estilo, function (key, item) {
+
+                    html += '<td>' + item.Extras + '</td>';
+                    extrasCantidad += item.Extras;
+                });
+                html += '<td>' + extrasCantidad + '</td>';
+                html += '</tr><tr><td>Examples</td>';
+                var ejemplosCantidad = 0;
+                $.each(lista_estilo, function (key, item) {
+
+                    html += '<td>' + item.Ejemplos + '</td>';
+                    ejemplosCantidad += item.Ejemplos;
+                });
+                html += '<td>' + ejemplosCantidad + '</td>';
+                html += '</tr><tr><td></td>';
+                var totalGeneral = cantidades + extrasCantidad + ejemplosCantidad;
+                $.each(lista_estilo, function (key, item) {
+
+                    html += '<td></td>';
+                  
+                });
+                html += '<td>' + parseInt(totalGeneral) + '</td>';
+                html += '</tr>';
+                if (Object.keys(lista_estilo).length === 0) {
+                    html += '<tr class="odd"><td valign="middle" align="center" colspan="10" class="dataTables_empty">No sizes were found for the style.</td></tr>';
+
+                }
+                $('.tbodys').html(html);
+                $("#div_estilo").css("visibility", "visible");
+                $("#consultaTalla").css("visibility", "visible");
+                $(window).scrollTop(tempScrollTop);
+            },
+            error: function (errormessage) { alert(errormessage.responseText); }
+        });
+    }
+
+</script>
+</div>
+<div class="modal fade" id="reporteModal" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="consulColorModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="exampleModalLabel">REPORT PURCHASE ORDER</h2>
+            </div>
+            <div class="modal-body">
+                <div id="ContenedorModal"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="editarEstiloModal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="editarEstiloModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="exampleModalLabel">STYLE</h2>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div id="ContenedorEditarModal"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary " data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="agregarArteEstiloModal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="agregarArteEstiloModal"  style="height: 120% !important">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content arte">
+            <div class="modal-header">
+                <h2 class="modal-title" id="exampleModalLabel">ART PNL</h2>
+                <button type="button" class="close x" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">                
+                <div id="ContenedorAgregarPNLModal"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btnCancel" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="nuevoEstiloModal" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="nuevoEstiloModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="exampleModalLabel">REGISTER STYLES</h2>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">                  
+                    <div id="infPedido"> <label style="font-size: x-large; font-weight: 500">PO
+                        @Html.LabelFor(model => model.IdPedido, new { @class = "control-label" })
+                        <label style="font-size: x-large; font-weight: 500">@Html.DisplayFor(model => model.IdPedido, new { @class = "control-label col-md-6" })</label>
+                    </label></div>
+                    <div id="Contenedor"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btnCancel" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid" style="padding-left:20em; padding-right:10em;">
+        <div>
+
+            <div class="panel panel-primary" id="consultaPO">
+                <div class="panel-heading">
+                    <h2>Orden de Referencia: @Html.DisplayFor(model => model.PO, new { @class = "control-label col-md-6" })  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      Orden de Compra: @Html.DisplayFor(model => model.VPO, new { @class = "control-label col-md-6" })</h2>
+                </div>
+                @Html.HiddenFor(model => model.IdPedido)
+
+            </div>
+            <div class="container-fluid">
+                <div class="form-row">
+                    <div class="form-group col-sm-4 estilo">
+                        <label style="font-size: x-large; font-weight: 500">
+                            @Html.LabelFor(model => model.CatCliente.Nombre, new { @class = "control-label" }):
+                            <label style="font-size: x-large; font-weight: 500">@Html.DisplayFor(model => model.CatCliente.Nombre, new { @class = "control-label col-md-6" })</label>
+                        </label>
+                    </div>
+                    <div class="form-group col-sm-7 estilo">
+                        <label style="font-size: x-large; font-weight: 500">
+                            @Html.LabelFor(model => model.CatClienteFinal.NombreCliente, new { @class = "control-label" }):
+                            <label style="font-size: x-large; font-weight: 300">@Html.DisplayFor(model => model.CatClienteFinal.NombreCliente, new { @class = "control-label col-md-6" })</label>
+                        </label>
+                    </div>
+                </div>
+                <br />
+                    <p>
+                        <a href="#" class="btn btn-primary  btnNuevo" title="ADD NEW STYLE" id="nuevo-estilo"> <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> ADD NEW STYLE</a>
+                    </p>
+            </div>
+            <div class="panel panel-primary" id="consultaPO">
+                <div class="panel-heading">
+                    <h4>STYELS</h4>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-sm-4 estilo">
+                        <label style="font-size: x-large; font-weight: 500">
+                            @Html.LabelFor(model => model.TotalUnidades, new { @class = "control-label" }):
+                            <label style="font-size: x-large; font-weight: 500">@Html.DisplayFor(model => model.TotalUnidades, new { @class = "control-label col-md-6" })</label>
+                        </label>
+                    </div>
+                    <div class="form-group col-sm-7 estilo">
+                        <label style="font-size: x-large; font-weight: 500">
+                            @Html.LabelFor(model => model.TotalUnidadesReg, new { @class = "control-label" }):
+                            <label style="font-size: x-large; font-weight: 300" id="RegTotalUnits">@Html.DisplayFor(model => model.TotalUnidadesReg, new { @class = "control-label col-md-6" })</label>
+                        </label>
+                    </div>
+                </div>
+                <div id="div_tabla_estilos" style="width: 100%; height:300px; overflow:auto; ">
+                    <table id="tabless" class="table table-sm table-striped table-hover ">
+                        <thead>
+                            <tr>
+                                <th style="border-top-left-radius:0px !important;">#</th>
+                                <th>ITEM</th>
+                                <th>ITEM DESCRIPTION</th>
+                                <th>COLOR CODE</th>
+                                <th>COLOR DESCRIPTION</th>
+                                <th>QTY</th>
+                                <th>USER</th>
+                                <th>PRICE</th>
+                                <th>TOTAL</th>
+                                <th>ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody class="tbody"></tbody>
+                    </table>
+                </div>
+
+            </div>
+
+            <br />
+            <br />
+            <div class="panel panel-primary" id="consultaTalla" style="visibility:hidden;">
+                <div class="panel-heading">
+                    <h4>SIZES</h4>
+                </div>
+                <div id="div_tabla_tallas" style="width: 100%; height:250px; ">
+
+                    <div id="div_estilo" style=" overflow:auto; visibility:hidden; background-color:lightblue; text-align:center "></div>
+                    <table class="table table-sm table-striped table-hover ">
+                        <thead class="encabezado"></thead>
+                        <tbody class="tbodys"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <br />
+        <br />
+        <br />
+
+        <a href='@Url.Action("Index", "Pedidos")'>
+            <img src='@Url.Content("~/Content/img/backToPage.png")' id="flecha" title="Go Back" />
+        </a>
+    </div>
+    <script>
+        $('#tabless tr').click(function (e) {
+            $('#tabless tr').removeClass('highlighted');
+            $(this).addClass('highlighted');
+        });
+
+        $(document).on('click', '.btnReport', function () {
+            $("#loading").css('display', 'none');
+            var id = $(this).data("value");
+            $('#reporteModal').modal('show');
+            //$("#ContenedorModal").load("/Colores/Detalles/" + id, function () {
+            //});
+        });
+
+        $(document).on('click', '.btnEdit', function () {
+            var id = $(this).data("value");
+            $("#ContenedorEditarModal").load("/Pedidos/EditarEstiloNuevo/" + id, function () {
+                $("#IdItems").val(id);
+                $("#editarEstiloModal").modal("show");
+            });
+        });
+
+        $(document).on('click', '.btnNuevo', function () {
+            $("#loading").css('display', 'none');         
+            
+            $("#Contenedor").load("/POSummary/RegistrarNuevoEstiloPo", function () {
+                $("#nuevoEstiloModal").modal("show"); 
+            });
+        });
+
+        $(document).on('click', '.btnArte', function () {
+            debugger
+            var id = $(this).data("value");
+            var link = '@Url.Action("FileUploadPNL", "Arte", new { id = "valor" , idEst = "valor2", descItem = "valor3" })';
+            link = link.replace("valor", id);
+            link = link.replace("valor2", idStyle);
+            link = link.replace("valor3", EstiloItem);
+            $("#loading").css('display', 'none');           
+            $("#ContenedorAgregarPNLModal").load(link, function () {
+                $("#agregarArteEstiloModal").modal("show");
+            });
+        });
+    </script>

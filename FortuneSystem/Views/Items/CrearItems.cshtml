@@ -1,0 +1,173 @@
+﻿@model FortuneSystem.Models.POSummary.POSummary
+
+@{
+    ViewBag.Title = "CrearItems";
+
+}
+
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#ItemDescripcion_ItemEstilo").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/POSummary/Autocomplete_Item_Estilo",
+                        type: "POST",
+                        dataType: "json",
+                        data: { keyword: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return {
+                                    label: item.ItemEstilo,
+                                    value: item.ItemId
+                                };
+                            }))
+                        },
+                        error: function () {
+
+                        }
+                    })
+                },
+                messages: {
+                    noResults: "", results: ""
+                }
+            });
+
+            $("#CatColores_CodigoColor").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/POSummary/Autocomplete_Color",
+                        type: "POST",
+                        dataType: "json",
+                        data: { keyword: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return {
+                                    label: item.CodigoColor,
+                                    value: item.IdColor
+                                };
+                            }))
+                        },
+                        error: function () {
+
+                        }
+                    })
+                },
+                messages: {
+                    noResults: "", results: ""
+                }
+            });
+
+        })
+
+        function InputToUpper(obj) {
+            if (obj.value != "") {
+                obj.value = obj.value.toUpperCase();
+            }
+        }
+    </script>
+
+    <h2>Reception of items</h2>
+
+    
+        @using (Html.BeginForm(new { @class = "form-inline" }))
+        {
+            @Html.AntiForgeryToken()
+            
+
+    <div class="form-horizontal">
+
+
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="container-fluid">
+            <div class="form-row ">
+                <div class="form-group col-md-4">
+                    @Html.LabelFor(model => model.ItemDescripcion.ItemEstilo, htmlAttributes: new { @class = "control-label" })
+                    @Html.EditorFor(model => model.ItemDescripcion.ItemEstilo, new { htmlAttributes = new { @class = "form-control", @onkeyup = "InputToUpper(this);" } })
+                    @Html.ValidationMessageFor(model => model.ItemDescripcion.ItemEstilo, "", new { @class = "text-danger" })
+                </div>
+                <div class="form-group col-md-4">
+                    @Html.LabelFor(model => model.ItemDescripcion.Descripcion, htmlAttributes: new { @class = "control-label" })
+                    @Html.EditorFor(model => model.ItemDescripcion.Descripcion, new { htmlAttributes = new { @class = "form-control", @onkeyup = "InputToUpper(this);" } })
+                    @Html.ValidationMessageFor(model => model.ItemDescripcion.Descripcion, "", new { @class = "text-danger" })
+                </div>
+                <div class="form-group col-md-4">
+                    <br />
+                    <a href="@Url.Action("CrearItems")">
+                        <button type="button" class="btn btn-success" id="nuevo-usuario" data-toggle="modal">
+                            <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> ADD STYLE
+                        </button>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="form-row">
+                <br />
+                <div class="form-group col-md-4">
+                    @Html.LabelFor(model => model.CatColores.CodigoColor, htmlAttributes: new { @class = "control-label" })
+                    @Html.EditorFor(model => model.CatColores.CodigoColor, new { htmlAttributes = new { @class = "form-control", @onkeyup = "InputToUpper(this);" } })
+                    @Html.ValidationMessageFor(model => model.CatColores.CodigoColor, "", new { @class = "text-danger" })
+
+                </div>
+                <div class="form-group col-md-4">
+                    @Html.LabelFor(model => model.CatColores.DescripcionColor, htmlAttributes: new { @class = "control-label" })
+                    @Html.EditorFor(model => model.CatColores.DescripcionColor, new { htmlAttributes = new { @class = "form-control", @onkeyup = "InputToUpper(this);" } })
+                    @Html.ValidationMessageFor(model => model.CatColores.DescripcionColor, "", new { @class = "text-danger" })
+                </div>
+                <div class="form-group col-md-4">
+                    <br />
+                    <a href="@Url.Action("CrearItems")">
+                        <button type="button" class="btn btn-success" id="nuevo-usuario" data-toggle="modal">
+                            <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> ADD COLOR
+                        </button>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="container-fluid">
+            <div class="form-row">
+
+                <div class="form-group col-sm-4">
+                    @Html.LabelFor(model => model.Cantidad, htmlAttributes: new { @class = "control-label" })
+                    @Html.EditorFor(model => model.Cantidad, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.Cantidad, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="form-group col-sm-4">
+                    @Html.LabelFor(model => model.Precio, htmlAttributes: new { @class = "control-label" })
+                    @Html.EditorFor(model => model.Precio, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.Precio, "", new { @class = "text-danger" })
+
+                </div>
+
+                <div class="form-group col-sm-4">
+                    @Html.LabelFor(model => model.IdGenero, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.ValidationMessageFor(model => model.IdGenero, "", new { @class = "text-danger" })
+                        @Html.DropDownList("listGenero", (IEnumerable<System.Web.Mvc.SelectListItem>)ViewData["listGenero"], new { @class = "form-control", @id = "selectGenero", @name = "state" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <br />
+                    <a href="@Url.Action("CrearItems")">
+                        <button type="button" class="btn btn-success" id="nuevo-usuario" data-toggle="modal">
+                            <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> ADD ITEM
+                        </button>
+                    </a>
+                </div>
+            </div>
+          </div>
+
+        </div>
+        }
+
+        @section Scripts {
+            @Scripts.Render("~/bundles/jqueryval")
+        }

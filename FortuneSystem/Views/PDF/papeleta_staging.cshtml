@@ -1,0 +1,119 @@
+﻿@model IEnumerable<FortuneSystem.Models.Staging.stag_conteo>
+    @{ Layout = null; }
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta name="viewport" content="width=device-width" />
+        <script src="~/Scripts/jquery-3.3.1.js"></script>
+        <script src="~/Scripts/bootstrap.min.js"></script>
+        <script src="~/Scripts/bootstrap.js"></script>
+        <link href="~/Content/bootstrap-theme.css" rel="stylesheet" />
+        <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+        <title></title>
+        <style>
+            body {
+                font-size:20px;
+                font-weight:bolder;
+            }
+
+            .tabla td {
+                border: 1px solid black;                
+            }
+            .page-breaker {
+                display: block;
+                clear: both;
+                page-break-after: always;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container-fluid">
+            <div class="row">
+                @foreach (var item in Model)
+                {
+                    <table class="tabla" style="width:100%; font-size:19px;">
+                        <tr>
+                            <td style="padding-right:1em; text-align:right;">NÚMERO DE PO </td>
+                            <td style="padding-left:1em;width:75%;">@item.po</td>
+                        </tr>
+                        <tr>
+                            <td style="padding-right:1em; text-align:right;">NOMBRE DEL DISEÑO </td>
+                            <td style="padding-left:1em;width:75%;">@item.estilo  - @item.estilo_nombre</td>
+                        </tr>
+                    </table>
+                    <br />
+                    <table class="tabla" style="width:100%; text-align:center;">
+                        <tr style="font-size:25px;"><td>STAGING</td><td>@item.turno</td></tr>
+                        <tr>
+                            <td>COLOR DE PLAYERA</td>
+                            <td>@item.color</td>
+
+                        </tr>
+                        <tr>
+                            <td>TALLA</td>
+                            <td>@item.talla</td>
+
+                        </tr>
+                        <tr>
+                            <td>PORCENTAJE</td>
+                            <td>@item.porcentaje</td>
+
+                        </tr>
+                        <tr>
+                            <td>PAIS DE ORIGEN</td>
+                            <td>@item.pais</td>
+
+                        </tr>
+                        <tr>
+                            <td>CANTIDAD DE PIEZAS</td>
+                            <td>@item.cantidad</td>
+
+                        </tr>
+                        <tr>
+                            <td>REALIZADO POR</td>
+                            <td>@item.usuario_conteo</td>
+
+                        </tr>
+                        <tr>
+                            <td>FECHA</td>
+                            <td>@item.fecha</td>
+
+                        </tr>
+
+                    </table>
+
+                    <br />
+                    <table class="tabla" style="width:100%; text-align:center;">
+                        <tr style="font-size:25px;"><td>PRINT SHOP</td><td>PRIMER TURNO</td><td>SEGUNDO TURNO</td></tr>
+                        <tr><td>CANTIDAD DE PIEZAS</td><td></td><td></td></tr>
+                        <tr><td>REALIZADO POR</td><td></td><td></td></tr>
+                        <tr><td>FECHA</td><td></td><td></td></tr>
+                        <tr><td>DAÑADAS</td><td></td><td></td></tr>
+                    </table>
+                    <br />
+                    <table class="tabla" style="width:100%; text-align:center;">
+                        <tr style="font-size:25px;"><td>PNL</td><td>PRIMER TURNO</td><td>SEGUNDO TURNO</td></tr>
+                        <tr><td>CANTIDAD DE PIEZAS</td><td></td><td></td></tr>
+                        <tr><td>REALIZADO POR</td><td></td><td></td></tr>
+                        <tr><td>FECHA</td><td></td><td></td></tr>
+                        <tr><td>DAÑADAS</td><td></td><td></td></tr>
+                    </table>
+                    <br />
+                    <table class="tabla" style="width:100%; text-align:center;">
+                        <tr style="font-size:25px;"><td>PACKING</td><td>PRIMER TURNO</td><td>SEGUNDO TURNO</td></tr>
+                        <tr><td>CANTIDAD DE PIEZAS</td><td></td><td></td></tr>
+                        <tr><td>REALIZADO POR</td><td></td><td></td></tr>
+                        <tr><td>FECHA</td><td></td><td></td></tr>
+                        <tr><td>DAÑADAS</td><td></td><td></td></tr>
+                    </table>
+                    <br />
+                    <p>OBSERVACIONES: @item.observaciones</p>
+                    <p>CAPTURÓ: @item.usuario</p>
+                    <p>DOCUMENTO CONTROLADO ÚNICAMENTE SE PUEDE MODIFICAR POR EL SUPERVISOR DE STAGING</p>
+                    <div class="page-breaker"></div>
+                }
+
+            </div>
+        </div>
+    </body>
+</html>

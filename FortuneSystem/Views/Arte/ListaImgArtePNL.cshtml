@@ -1,0 +1,108 @@
+﻿@model IEnumerable<FortuneSystem.IMAGEN_ARTE_PNL>
+
+@{
+    ViewBag.Title = "Index";
+
+}
+<script>
+    $(function () {
+        $('img').on('click', function () {
+            $('.enlargeImageModalSource').attr('src', $(this).attr('src'));
+            $('#enlargeImageModal').modal('show');
+        });
+    });
+
+</script>
+
+<style>
+
+    .center {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .edit_driver {
+    }
+
+        .edit_driver:hover {
+            color: white !important;
+            background: #3479bf !important;
+            border-radius: 15px;
+        }
+</style>
+<div class="modal fade" id="enlargeImageModal" tabindex="-1" role="dialog" aria-labelledby="enlargeImageModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="exampleModalLabel">ART</h2>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+                <img class="enlargeImageModalSource center" style="width: 50%;">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<h2></h2>
+<table id="tablaArte" class="table table-striped">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.PO)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Estilo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Tienda)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.StatusPNL)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.imgPNL)
+            </th>
+
+            <th>ACTIONS</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PO)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Estilo)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Tienda)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EstadosPNL)
+                </td>
+                <td>
+                    <img width="70" height="70" src="@Url.Action("ConvertirImagenPNL", "Arte", new {pnlCodigo= item.IdImgArtePNL})" />
+                </td>
+                <td>
+                    @* @Html.ActionLink(" ", "Create", new { id = item.IdSummary, idArte = item.IdImgArtePNL }, new { @class = "btn btn-default glyphicon glyphicon-check", @style = "color:black", @Title = "Art" })*@
+                    <a href="@Url.Action("EditarArtePNL", "Arte", new { id = item.IdSummary, idArte = item.IdImgArtePNL })" class="btn edit_driver edicion_driver" Title="Edit Art PNL"> <span class="glyphicon glyphicon-check" aria-hidden="true" style="padding: 0px !important;"></span></a>
+                </td>
+
+            </tr>
+        }
+    </tbody>
+</table>
+<script>
+    $('#tablaArte').dataTable({
+        responsive: true,
+        "ordering": false,
+        "lengthMenu": [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]]
+
+    });
+</script>

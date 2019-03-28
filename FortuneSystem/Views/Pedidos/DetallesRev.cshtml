@@ -1,0 +1,214 @@
+﻿@model FortuneSystem.Models.Pedidos.OrdenesCompra
+
+@{
+    ViewBag.Title = "Style PO";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    tr.highlighted td {
+        background: #b3e0ff;
+    }
+</style>
+<script>
+
+    $(document).ready(function () {
+        var ID = $("#IdPedido").val();
+        buscar_estilos(ID);
+
+
+    });
+
+    function probar() {
+        $('#tabless tr').on('click', function (e) {
+            $('#tabless tr').removeClass('highlighted');
+            $(this).addClass('highlighted');
+        });
+    }
+
+    function buscar_estilos(ID) {
+        $.ajax({
+            url: "/Pedidos/Lista_Estilos_PO/" + ID,
+            type: "POST",
+            contentType: "application/json;charset=UTF-8",
+            dataType: "json",
+            success: function (jsonData) {
+                var html = '';
+                var lista_estilo = jsonData.Data.listaItem;
+
+                $.each(lista_estilo, function (key, item) {
+                    html += '<tr  onclick="probar()">';
+                    html += '<td>' + item.EstiloItem + '</td>';
+                    html += '<td>' + item.ItemDescripcion.Descripcion + '</td>';
+                    html += '<td>' + item.CatColores.CodigoColor + '</td>';
+                    html += '<td>' + item.CatColores.DescripcionColor + '</td>';
+                    html += '<td>' + item.Cantidad + '</td>';
+                    html += '<td>' + item.Price + '</td>';
+                    html += '<td>' + item.Total + '</td>';
+                    html += '<td><a href="#" onclick="obtener_tallas_item(' + item.IdItems + ');" class = "btn btn-default glyphicon glyphicon-search l1s" style = "color:black; padding:0px 5px 0px 5px;" Title = "Sizes"></a></td>';
+                    html += '</tr>';
+                });
+                if (Object.keys(lista_estilo).length === 0) {
+                    html += '<tr class="odd"><td valign="middle" align="center" colspan="10" class="dataTables_empty">No styles were found for the PO.</td></tr>';
+
+                }
+                $('.tbody').html(html);
+                $("#div_estilos_orden").css("visibility", "visible");
+            },
+            error: function (errormessage) { alert(errormessage.responseText); }
+        });
+    }
+
+
+
+    function obtener_tallas_item(IdTalla, estilo) {
+        var tempScrollTop = $(window).scrollTop();
+        probar();
+        var itemEstilo = estilo;
+        $.ajax({
+            url: "/Pedidos/Lista_Tallas_Estilo/" + IdTalla,
+            type: "POST",
+            contentType: "application/json;charset=UTF-8",
+            dataType: "json",
+            success: function (jsonData) {
+                var html = '';
+                var estilos = jsonData.Data.estilos;
+                debugger
+                if (estilos != '') {
+                    $("#div_estilo").html("<h2>Item: " + estilos + "</h2>");
+                    $("#div_estilo").show();
+                } else {
+                    $("#div_estilo").hide();
+                }
+
+                var lista_estilo = jsonData.Data.listaTalla;
+                html += '<tr> <th> Size </th>'
+                $.each(lista_estilo, function (key, item) {
+
+                    html += '<th>' + item.Talla + '</th>';
+
+                });
+                html += '<th> Total </th>'
+                html += '</tr><tr><td>Quantity</td>';
+                var cantidades = 0;
+                $.each(lista_estilo, function (key, item) {
+
+                    html += '<td>' + item.Cantidad + '</td>';
+                    cantidades += item.Cantidad;
+                });
+                html += '<td>' + cantidades + '</td>';
+                html += '</tr><tr><td>Extra</td>';
+                var extrasCantidad = 0;
+                $.each(lista_estilo, function (key, item) {
+
+                    html += '<td>' + item.Extras + '</td>';
+                    extrasCantidad += item.Extras;
+                });
+                html += '<td>' + extrasCantidad + '</td>';
+                html += '</tr><tr><td>Examples</td>';
+                var ejemplosCantidad = 0;
+                $.each(lista_estilo, function (key, item) {
+
+                    html += '<td>' + item.Ejemplos + '</td>';
+                    ejemplosCantidad += item.Ejemplos;
+                });
+                html += '<td>' + ejemplosCantidad + '</td>';
+                html += '</tr>';
+                if (Object.keys(lista_estilo).length === 0) {
+                    html += '<tr class="odd"><td valign="middle" align="center" colspan="10" class="dataTables_empty">No sizes were found for the style.</td></tr>';
+
+                }
+                $('.tbodys').html(html);
+                $("#div_estilo").css("visibility", "visible");
+                $("#consultaTalla").css("visibility", "visible");
+                $(window).scrollTop(tempScrollTop);
+            },
+            error: function (errormessage) { alert(errormessage.responseText); }
+        });
+    }
+
+</script>
+</div>
+<div class="container-fluid" style="padding-left:20em; padding-right:10em;">
+    <div>
+        <div class="panel panel-primary" id="consultaPO">
+            <div class="panel-heading">
+                <h2>Orden de Referencia: @Html.DisplayFor(model => model.PO, new { @class = "control-label col-md-6" })  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      Orden de Compra: @Html.DisplayFor(model => model.VPO, new { @class = "control-label col-md-6" })</h2>
+            </div>
+            @Html.HiddenFor(model => model.IdPedido)
+
+        </div>
+        <div class="container-fluid">
+            <div class="form-row">
+                <div class="form-group col-sm-4 estilo">
+                    <label style="font-size: x-large; font-weight: 500">
+                        @Html.LabelFor(model => model.CatCliente.Nombre, new { @class = "control-label" }):
+                        <label style="font-size: x-large; font-weight: 500">@Html.DisplayFor(model => model.CatCliente.Nombre, new { @class = "control-label col-md-6" })</label>
+                    </label>
+                </div>
+                <div class="form-group col-sm-7 estilo">
+                    <label style="font-size: x-large; font-weight: 500">
+                        @Html.LabelFor(model => model.CatClienteFinal.NombreCliente, new { @class = "control-label" }):
+                        <label style="font-size: x-large; font-weight: 300">@Html.DisplayFor(model => model.CatClienteFinal.NombreCliente, new { @class = "control-label col-md-6" })</label>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-primary" id="consultaPO">
+            <div class="panel-heading">
+                <h4>STYLES</h4>
+            </div>
+            <div id="div_tabla_estilos" style="width: 100%; height:300px; overflow:auto; ">
+                <table id="tabless" class="table table-sm table-striped table-hover ">
+                    <thead>
+                        <tr>
+
+                            <th>ITEM</th>
+                            <th>ITEM DESCRIPTION</th>
+                            <th>COLOR CODE</th>
+                            <th>COLOR DESCRIPTION</th>
+                            <th>QTY</th>
+                            <th>PRICE</th>
+                            <th>TOTAL</th>
+                            <th>ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody class="tbody"></tbody>
+                </table>
+            </div>
+
+        </div>
+
+        <br />
+        <br />
+        <div class="panel panel-primary" id="consultaTalla" style="visibility:hidden;">
+            <div class="panel-heading">
+                <h4>SIZES</h4>
+            </div>
+            <div id="div_tabla_tallas" style="width: 100%; height:210px; overflow:auto;  ">
+                <div id="div_estilo" style=" overflow:auto; visibility:hidden; ">
+                </div>
+                <table class="table table-sm table-striped table-hover ">
+                    <thead class="encabezado"></thead>
+                    <tbody class="tbodys"></tbody>
+                </table>
+            </div>
+
+        </div>
+
+
+
+    </div>
+    <br />
+    <br />
+    <br />
+
+    <a href='@Url.Action("Index", "Pedidos")'>
+        <img src='@Url.Content("~/Content/img/backToPage.png")' id="flecha" title="Go Back" />
+    </a>
+</div>
+    <script>
+        $('#tabless tr').click(function (e) {
+            $('#tabless tr').removeClass('highlighted');
+            $(this).addClass('highlighted');
+        });
+    </script>

@@ -1,0 +1,360 @@
+﻿@model IEnumerable<FortuneSystem.Models.Almacen.salidas>
+<link href="~/Content/base_m.css" rel="stylesheet" type="text/css" />
+<script>
+    $(document).ready(function () {
+        $(".search_lt").keyup(function () {
+            var searchTerm = $(".search_lt").val();
+            var listItem = $('.results_lt tbody').children('tr');
+            var searchSplit = searchTerm.replace(/ /g, "'):containsi('")
+            $.extend($.expr[':'], {
+                'containsi': function (elem, i, match, array) {
+                    return (elem.textContent || elem.innerText || '').toLowerCase().indexOf((match[3] || "").toLowerCase()) >= 0;
+                }
+            });
+            $(".results_lt tbody tr").not(":containsi('" + searchSplit + "')").each(function (e) {
+                $(this).attr('visible', 'false');
+            });
+            $(".results_lt tbody tr:containsi('" + searchSplit + "')").each(function (e) {
+                $(this).attr('visible', 'true');
+            });
+            var jobCount = $('.results_lt tbody tr[visible="true"]').length;
+            $('.counter_lt').text(jobCount + ' item');
+            if (jobCount == '0') { $('.no-result_lt').show(); }
+            else { $('.no-result').hide(); }
+        });
+    });
+    $(document).on("click", "a", function () {
+        //setTimeout(function () { $("#loading").css('display', 'none'); }, 1000);
+        $("#loading").css('display', 'none');
+    });
+    function aprobar_transferencia(ID) {
+        $("#loading_lt").css('display', 'inline');
+        $.ajax({
+            url: '/Almacen/aprobar_transferencia/' + ID,
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (jsonData) {
+                $('#tabla_listado_transferencias tbody tr').each(function () {
+                    var ant = $(this).find("td").eq(1).html();
+                    var tabla = parseFloat($(this).find('td:eq(0) ').html());
+                    var id = parseFloat(ID);
+                    if (tabla == id) {
+                        $(this).find('td:eq(9) ').html("Approved").addClass("table-striped");
+                        $(this).find('td:eq(10) ').html("").addClass("table-striped").css('display', 'none');
+                        $(this).find('td:eq(11) ').html("").addClass("table-striped").css('display', 'none');
+                        alertify.success('Succes!');
+                        alertify.set('notifier', 'position', 'top-right');
+                    }
+                });
+            }
+        });
+        $("#loading_lt").css('display', 'none');
+    }
+    function desaprobar_transferencia(ID) {
+        $("#loading_lt").css('display', 'inline');
+        $.ajax({
+            url: '/Almacen/desaprobar_transferencias/' + ID,
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (jsonData) {
+                $('#tabla_listado_transferencias tbody tr').each(function () {
+                    var ant = $(this).find("td").eq(1).html();
+                    var tabla = parseFloat($(this).find('td:eq(0)').html());
+                    var id = parseFloat(ID);
+                    if (tabla == id) {
+                        $(this).find('td:eq(9) ').html("Denied").addClass("table-striped");
+                        $(this).find('td:eq(10) ').html("").addClass("table-striped").css('display', 'none');
+                        $(this).find('td:eq(11) ').html("").addClass("table-striped").css('display', 'none');
+                        alertify.success('Succes!');
+                        alertify.set('notifier', 'position', 'top-right');
+                    }
+                });
+            }
+        });
+        $("#loading_lt").css('display', 'none');
+    }
+    function ver_transferencia(ID) {
+        $("#loading_lt").css('display', 'inline');
+        $.ajax({
+            url: '/Almacen/buscar_transferencia/' + ID,
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (jsonData) {
+                var html = '';
+                $.each(jsonData, function (key, item) {
+                    html += '<div class="panel-heading">Shipping  ' + item.sello + '</div><div id="formulario_campos_01" class="row" style="padding:1em;">' +
+                        '<div class="form-group">' +
+                        '<div class="form-group col-sm-4">' +
+                        '<label for="caja_date_trans" class=" col-form-label validacion must_trans">Date requested: &nbsp; </label>' +
+                        '<label for="caja_date_trans" class=" col-form-label validacion must_trans">' + item.fecha_solicitud + '</label> ' +
+                        '</div>' +
+                        '<div class="form-group col-sm-4">' +
+                        '<label for="caja_by_trans" class=" col-form-label validacion must_trans">Requested by: &nbsp; </label>' +
+                        '<label for="caja_date_trans" class=" col-form-label validacion must_trans">' + item.responsable + ' </label>' +
+                        '</div>' +
+                        '<div class="form-group col-sm-4">' +
+                        '<label for="caja_driver_trans" class=" col-form-label must_trans">Driver: &nbsp; </label>' +
+                        '<label for="caja_date_trans" class=" col-form-label validacion must_trans">' + item.driver + '</label>' +
+                        '</div>' +
+                        '</div>' +
+                        '<div class="form-group">' +
+                        '<div class="form-group col-sm-4">' +
+                        '<label for="caja_sello_trans" class=" col-form-label must_trans"># Seal: &nbsp; </label>' +
+                        '<label for="caja_date_trans" class=" col-form-label validacion must_trans">' + item.sello + '</label>' +
+                        '</div>' +
+                        '<div class="form-group col-sm-4">' +
+                        '<label for="caja_pallet_trans" class=" col-form-label must_trans">Pallet number: &nbsp; </label>' +
+                        '<label for="caja_date_trans" class=" col-form-label validacion must_trans">' + item.pallet + '</label>' +
+                        '</div>' +
+                        '<div class="form-group col-sm-4">' +
+                        '<label for="caja_envio_trans" class=" col-form-label must_trans">Shipping: &nbsp; </label>' +
+                        '<label for="caja_date_trans" class=" col-form-label validacion must_trans">' + item.id_envio + '</label>' +
+                        '</div>' +
+                        '</div>' +
+                        '<div class="form-group">' +
+                        '<div class="form-group col-sm-4" > ' +
+                        '<label for="caja_envio_trans" class=" col-form-label must_trans">Whse from: &nbsp; </label>' +
+                        '<label for="caja_date_trans" class=" col-form-label validacion must_trans">' + item.origen + '</label>' +
+                        '</div>' +
+                        '<div class="form-group col-sm-4" > ' +
+                        '<label for="caja_envio_trans" class=" col-form-label must_trans">Whse to:  &nbsp;</label>' +
+                        '<label for="caja_date_trans" class=" col-form-label validacion must_trans">' + item.destino + '</label>' +
+                        '</div>' + '                   </div>' + '              </div>';
+                    html += '<table class=" table table-striped"><thead style="background:#3479bf; color:white;"><tr><td>PO</td><td>Description</td><td>Style</td><td>Quantity</td></tr></thead>';
+                    $.each(item.lista_salidas_item, function (key, i) {
+                        html += '<tr><td>' + i.po + '</td><td>' + i.descripcion + '</td><td>' + i.estilo + '</td><td>' + i.cantidad + '</td></tr>';
+                    });
+                    html += '</table>';
+                });
+                $("#revision_transferencia").css('display', 'inline');
+                $("#revision_transferencia").html(html);
+                $("#loading_lt").css('display', 'none');
+            }
+        });
+
+    }
+    function cambiar_sello(ID) {
+        $.ajax({
+            url: "/Almacen/cambiar_sello_transferencia/" + ID,
+            type: "POST",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                /* $("#caja_cambiar_sello_trans").val(result.sello);
+                 $("#caja_cambiar_id_sello_trans").val(result.id_sello);*/
+                alertify.success('Succes!');
+                alertify.set('notifier', 'position', 'top-right');
+            },
+            error: function (errormessage) {
+                alert(errormessage.responseText);
+            }
+        });
+    }
+
+    function imprimir_transfer_ticket(ID) {
+
+        $.ajax({
+            url: "/Almacen/datos_imprimir_transfer",
+            data: "{'ID':'" + ID + "'}",
+            dataType: 'json',
+            contentType: 'application/json',
+            type: 'post',
+            success: function (result) {
+                abrir_imprimir_transfer_ticket();
+            }
+        });
+    }
+
+    function abrir_imprimir_transfer_ticket() {
+        /* var h = screen.height - 100;
+         var w = screen.width - 30;
+         window.open('/PDF/transfer_ticket', '_blank', 'toolbar=0,location=0,menubar=0,width=' + w + ',height=' + h + ', fullscreen=yes');*/
+        var boton = document.getElementById('link_abrir_imprimir_transfer_ticket');
+        boton.click();
+    }
+
+    //CAMBIAR LOS ROW DE COLOR
+    $(document).on("click", "#tabla_listado_transferencias tr", function () {
+        if (this.style.background == "" || this.style.background == "white") {
+            $(this).css('background', '#46a772');
+            $(this).css('color', 'white');
+
+        } else {
+            $(this).css('background', 'white');
+            $(this).css('color', 'black');
+        }
+    });
+
+    //SELECCIONA DESPUÉS DEL DOBLE CLICK
+    $(document).on("dblclick", "#tabla_listado_transferencias tr", function () {
+        debugger
+        var row = this.rowIndex;
+        //alert($('#tabla_listado_transferencias tr:eq(' + row + ') td:eq(0)').html());
+        //alert($('#items_recibos tr:eq('+row+') td:eq(0)').html()); //empieza las columas desde 0
+        //alert($('#items_recibos tr:eq(' + row + ') td:nth-child(2)').html());     //empieza las columnas desde 1
+        ver_transferencia($('#tabla_listado_transferencias tr:eq(' + row + ') td:eq(0)').html());
+    });
+
+    function abrir_edicion_salida(id) {
+        $.ajax({
+            url: "/Almacen/guardar_id_salida",
+            data: "{'id':'" + id + "'}",
+            dataType: 'json',
+            contentType: 'application/json',
+            type: 'post',
+            success: function (result) {  }
+        });
+        var boton = document.getElementById('link_abrir_editar_salida');
+        boton.click();
+    }
+</script>
+<a id="link_abrir_imprimir_transfer_ticket" href="@Url.Action("transfer_ticket", "PDF")" style="visibility:hidden;">Daily</a>
+<a id="link_abrir_editar_salida" href="@Url.Action("abrir_edicion", "Almacen")" style="visibility:hidden;">Daily</a>
+<style>
+    .botonazo {
+        color: #3479bf !important;
+        padding: 0px 5px 0px 5px !important;
+    }
+    .results_lt tr[visible='false'],
+    .no-result_lt {
+        display: none;
+    }
+
+    .results_lt tr[visible='true'] {
+        display: table-row;
+    }
+
+    .counter_lt {
+        padding: 8px;
+        color: #ccc;
+    }
+
+    .load_trans {
+        position: fixed;
+        z-index: 2001 !important;
+        height: 100%;
+        display: none;
+        border: 0;
+        padding: .5em 1em;
+        overflow: auto;
+        top: 11%;
+        left: 3%;
+        background: white;
+        width: 94%;
+        border: none;
+        opacity: 0.8;
+        height: 85% !important;
+    }
+
+    .imagen_loading2 {
+        position: absolute;
+        z-index: 2000 !important;
+        top: 25%;
+        left: 35%;
+        width: 300px;
+        height: 300px;
+        background: url('../../Content/img/gif/loader3.gif');
+    }
+</style>
+<div id="loading_lt" class="load_trans">
+    <div id="spinner" class="imagen_loading2" style=""></div>
+</div>
+<div class="form-group pull-left">
+    <label class=" col-form-label">Type to search</label>
+    <input type="text" class="search_lt form-control validacion" placeholder="Search something">
+</div>
+<span class="counter_lt pull-left"></span><br />
+
+<table id="tabla_listado_transferencias" class="table table-striped results_lt">
+    <thead style="background:#3479bf; color:white;">
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.id_salida)</th>
+            <th>@Html.DisplayNameFor(model => model.id_envio)</th>
+            <th>@Html.DisplayNameFor(model => model.fecha)</th>
+            <th>@Html.DisplayNameFor(model => model.responsable)</th>
+            <th>@Html.DisplayNameFor(model => model.sello)</th>
+            <th>@Html.DisplayNameFor(model => model.total)</th>
+            <th>@Html.DisplayNameFor(model => model.usuario)</th>
+            <th>@Html.DisplayNameFor(model => model.origen)</th>
+            <th>@Html.DisplayNameFor(model => model.destino)</th>
+            <th>@Html.DisplayNameFor(model => model.estado_aprobacion)</th>
+            <th></th><th></th><th></th><th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+        <tr>
+            <td>@Html.DisplayFor(modelItem => item.id_salida)</td>
+            <td>@Html.DisplayFor(modelItem => item.id_envio)</td>
+            <td>@Html.DisplayFor(modelItem => item.fecha)</td>
+            <td>@Html.DisplayFor(modelItem => item.responsable)</td>
+            <td>@Html.DisplayFor(modelItem => item.sello)</td>
+            <td>@Html.DisplayFor(modelItem => item.total)</td>
+            <td>@Html.DisplayFor(modelItem => item.usuario)</td>
+            <td>@Html.DisplayFor(modelItem => item.origen)</td>
+            <td>@Html.DisplayFor(modelItem => item.destino)</td>
+            @{
+                if (item.estado_aprobacion == 0)
+                {
+                    <td>Waiting</td>
+                }
+                if (item.estado_aprobacion == 1)
+                {
+                    if (item.estado_entrega == 0)
+                    {
+                        <td>Approved</td>
+                    }
+                    if (item.estado_entrega == 1)
+                    {
+                        <td>Delivered</td>
+                    }
+                }
+                if (item.estado_aprobacion == 2)
+                {
+                    <td>Denied</td>
+                }
+
+                if (item.estado_aprobacion == 0)
+                {
+                    <td><button type="button" onclick="aprobar_transferencia( @item.id_salida )" title="Approve transfer" class="btn btn-default glyphicon glyphicon-ok aprobar" style="    color: #3479bf; padding:0px 5px 0px 5px;"></button></td>
+                    <td>
+                        <button type="button" onclick="desaprobar_transferencia( @item.id_salida)" title="Deny transfer" class="btn btn-default glyphicon glyphicon-remove reprobar" style="    color: #3479bf; padding:0px 5px 0px 5px;"></button>
+                    </td>
+                    <td>
+                        <button type="button" onclick="cambiar_sello( @item.id_salida)" title="Change seal" class="btn btn-default glyphicon glyphicon-tag" style="    color: #3479bf; padding:0px 5px 0px 5px;"></button>
+                    </td>
+                }
+                if (item.estado_aprobacion == 1){
+                    <td></td>
+                    <td><button type="button" onclick="imprimir_transfer_ticket(@item.id_salida)" title="Print" class="btn btn-default glyphicon glyphicon-print" style="    color: #3479bf; padding:0px 5px 0px 5px;"></button></td>
+                    <td>
+                        @if (item.estado_entrega == 1)
+                        {
+                        }
+                        else
+                        {<button type="button" onclick="cambiar_sello( @item.id_salida)" title="Change seal" class="btn btn-default glyphicon glyphicon-tag" style="  color: #3479bf; padding:0px 5px 0px 5px;"></button>}
+                    </td>
+                }
+                if (item.estado_aprobacion == 2){
+                    <td></td><td></td><td></td>
+                }
+                if (item.estado_aprobacion != 2 && item.estado_entrega != 1){
+                    <td>
+                        <button type="button" title="Edit" onclick="abrir_edicion_salida( @item.id_salida)" class="btn btn-default glyphicon glyphicon-pencil" style=" color:#3479bf; padding:0px 5px 0px 5px;"></button>
+                    </td>
+                }
+
+
+            }
+
+        </tr>
+        }
+    </tbody>
+</table>
+
+<div id="revision_transferencia" class="panel panel-default" style="display:none;">
+</div>

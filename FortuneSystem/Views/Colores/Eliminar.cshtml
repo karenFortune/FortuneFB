@@ -1,0 +1,44 @@
+﻿@model FortuneSystem.Models.Catalogos.CatColores
+
+@{
+    ViewBag.Title = "Delete Color";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div>
+
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.IdColor)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.IdColor)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CodigoColor)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CodigoColor)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DescripcionColor)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DescripcionColor)
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm()) {
+        @Html.AntiForgeryToken()
+
+    <div class="form-actions no-color">
+        <input type="submit" value="Delete" class="btn btn-danger" /> 
+    </div>
+    }
+</div>

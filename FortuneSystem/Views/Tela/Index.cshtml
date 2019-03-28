@@ -1,0 +1,243 @@
+﻿@model IEnumerable<FortuneSystem.Models.Catalogos.CatTela>
+
+@{
+    ViewBag.Title = "Fabric";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    tr.highlighted td {
+        background: #b3e0ff;
+    }
+
+    table thead {
+        color: #fff;
+        background-color: #006bb3;
+    }
+
+    th {
+        color: #fff;
+        background-color: #006bb3;
+    }
+
+    #nuevo-usuario {
+        margin-left: 50px;
+        margin-top: 1px;
+        width: 200px;
+        height: 40px;
+        border: none;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    .edit_driver {
+    }
+
+        .edit_driver:hover {
+            color: white !important;
+            background: #3479bf !important;
+            border-radius: 15px;
+        }
+</style>
+@{
+    if (TempData["telaOK"] != null)
+    {
+        <script type="text/javascript">
+            alertify.set('notifier', 'position', 'top-right');
+            alertify.notify(@Html.Raw(Json.Encode(TempData["telaOK"])), 'success', 5, null);
+
+        </script>
+    }
+    if (TempData["telaError"] != null)
+    {
+        <script type="text/javascript">
+            alertify.set('notifier', 'position', 'top-right');
+            alertify.notify(@Html.Raw(Json.Encode(TempData["telaError"])), 'error', 5, null);
+
+        </script>
+    }
+    if (TempData["telaEditar"] != null)
+    {
+        <script type="text/javascript">
+            alertify.set('notifier', 'position', 'top-right');
+            alertify.notify(@Html.Raw(Json.Encode(TempData["telaEditar"])), 'success', 5, null);
+
+        </script>
+    }
+    if (TempData["telaEditarError"] != null)
+    {
+        <script type="text/javascript">
+            alertify.set('notifier', 'position', 'top-right');
+            alertify.notify(@Html.Raw(Json.Encode(TempData["rolesEditarError"])), 'error', 5, null);
+
+        </script>
+    }
+    if (TempData["telaEliminar"] != null)
+    {
+        <script type="text/javascript">
+            alertify.set('notifier', 'position', 'top-right');
+            alertify.notify(@Html.Raw(Json.Encode(TempData["telaEliminar"])), 'success', 5, null);
+
+        </script>
+    }
+
+}
+</div>
+<div class="modal fade" id="consulModal" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="consulModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="exampleModalLabel">DETAILS FABRIC</h2>
+            </div>
+            <div class="modal-body">
+                <div id="ContenedorModal"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="editarModal" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="editarModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="exampleModalLabel">EDIT FABRIC</h2>
+            </div>
+            <div class="modal-body">
+                <div id="ContenedorEditModal"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="crearModal" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="crearModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="exampleModalLabel">ADD FABRIC</h2>
+            </div>
+            <div class="modal-body">
+                <div id="ContenedorCrearModal"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="deleteModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="exampleModalLabel">Are you sure to eliminate the fabric?</h2>
+            </div>
+            <div class="modal-body">
+                <div id="ContenedorDeleteModal"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container-fluid" style="padding-left:20em; padding-right:10em;">
+    <div class="panel panel-primary" id="consultaPO">
+        <div class="panel-heading">
+            <h3>Administration of Fabric</h3>
+        </div>
+        <br />
+        <p>
+
+                <button type="button" class="btn btn-primary" id="nuevo-usuario" data-toggle="modal">
+                    <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> ADD NEW FABRIC
+                </button>
+
+        </p>
+        <br />
+        <table class="table table-striped" id="tablaTela">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Id_Tela)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Tela)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.CodigoTela)
+                    </th>
+                    <th>ACTIONS</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Id_Tela)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Tela)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CodigoTela)
+                        </td>
+                        <td>
+                            <a href="#" class="btn edit_driver edicion_driver btnEdit" data-value="@item.Id_Tela " title="Edit Fabric"><span class="glyphicon glyphicon-edit " aria-hidden="true" style="padding: 0px !important;"></span></a>
+                            <a href="#" class="btn edit_driver edicion_driver btnSearch" data-value="@item.Id_Tela " title="Details Fabric"><span class="glyphicon glyphicon-search " aria-hidden="true" style="padding: 0px !important;"></span></a> 
+                            <a href="#" class="btn edit_driver edicion_driver btnDelete" data-value="@item.Id_Tela " title="Delete Fabric"><span class="glyphicon glyphicon-trash " aria-hidden="true" style="padding: 0px !important;"></span></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    $('#tablaTela tr').click(function (e) {
+        $('#tablaTela tr').removeClass('highlighted');
+        $(this).addClass('highlighted');
+    });
+
+    $(document).ready(function () {
+        $('#tablaTela').dataTable({
+            responsive: true
+        });
+    });
+
+    $(document).on('click', '.btnSearch', function () {
+        $("#loading").css('display', 'none');
+        var id = $(this).data("value");
+        $('#consulModal').modal('show');
+        $("#ContenedorModal").load("/Tela/Detalles/" + id, function () {
+        });
+    });
+
+    $(document).on('click', '.btnEdit', function () {
+        $("#loading").css('display', 'none');
+        var id = $(this).data("value");
+        $('#editarModal').modal('show');
+        $("#ContenedorEditModal").load("/Tela/Editar/" + id, function () {
+        });
+    });
+
+    $(document).on('click', '.btnDelete', function () {
+        $("#loading").css('display', 'none');
+        var id = $(this).data("value");
+        $('#deleteModal').modal('show');
+        $("#ContenedorDeleteModal").load("/Tela/Eliminar/" + id, function () {
+        });
+    });
+
+    $(document).on('click', '#nuevo-usuario', function () {
+        $("#loading").css('display', 'none');
+        var id = $(this).data("value");
+        $('#crearModal').modal('show');
+        $("#ContenedorCrearModal").load("/Tela/CrearTela/" + id, function () {
+        });
+    });
+
+</script>

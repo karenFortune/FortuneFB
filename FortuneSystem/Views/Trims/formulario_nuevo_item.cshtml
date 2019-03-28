@@ -1,0 +1,360 @@
+﻿<link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+<link href="~/Content/base_m.css" rel="stylesheet" />
+<script>
+    $(document).ready(function () {
+        obtener_categorias();
+    });  
+    function obtener_categorias() {
+        $.ajax({
+            url: "/Almacen/obtener_categorias_inventario",
+            type: "POST",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                var html = ' <label for="caja_tipo_recibo">Type </label><select type="text" class="form-control" id="caja_tipo_recibo"> <option value="0">Select</option>';                    
+                $.each(result, function (key, item) {
+                    html += '<option value="' + item.id_categoria_inventario+'">' + item.categoria_inventario + '</option>';
+                });
+                html += '</select>';
+                $(".categorias").html(html);
+            },
+            error: function (errormessage) {
+                alert(errormessage.responseText);
+            }
+        });
+    }
+    $(document).on("click", "a", function () {
+        //setTimeout(function () { $("#loading").css('display', 'none'); }, 1000);
+        $("#loading").css('display', 'none');
+    });
+    $(document).on("input", "#caja_po", function () { $('#caja_po').autocomplete({ source: '@Url.Action("Autocomplete_po")'         }); });
+    $(document).on("input", "#caja_pais", function () { $('#caja_pais').autocomplete({ source: '@Url.Action("Autocomplete_paises")' }); });
+    $(document).on("input", "#caja_fabricante", function () { $('#caja_fabricante').autocomplete({ source: '@Url.Action("Autocomplete_fabricantes")' }); });
+    $(document).on("input", "#caja_color", function () { $('#caja_color').autocomplete({ source: '@Url.Action("Autocomplete_colores_codigos")' }); });
+    $(document).on("input", "#caja_body_type", function () { $('#caja_body_type').autocomplete({ source: '@Url.Action("Autocomplete_body_type")' }); });
+    $(document).on("input", "#caja_size", function () { $('#caja_size').autocomplete({ source: '@Url.Action("Autocomplete_tallas")' }); });
+    $(document).on("input", "#caja_genero", function () { $('#caja_genero').autocomplete({ source: '@Url.Action("Autocomplete_generos")' }); });
+    $(document).on("input", "#caja_fabric_type", function () { $('#caja_fabric_type').autocomplete({ source: '@Url.Action("Autocomplete_telas")' }); });
+    $(document).on("input", "#caja_fabric_percent", function () { $('#caja_fabric_percent').autocomplete({ source: '@Url.Action("Autocomplete_percents")' }); });
+    $(document).on("input", "#caja_customer_name", function () { $('#caja_customer_name').autocomplete({ source: '@Url.Action("Autocomplete_customer_name")' }); });
+
+    $(document).on("input", "#caja_unidad", function () { $('#caja_unidad').autocomplete({ source: '@Url.Action("Autocomplete_unidades")' }); });
+    $(document).on("input", "#caja_locacion", function () { $('#caja_locacion').autocomplete({ source: '@Url.Action("Autocomplete_locacion")' }); });
+    $(document).on("input", "#caja_family_trim", function () { $('#caja_family_trim').autocomplete({ source: '@Url.Action("Autocomplete_family")' }); });
+    $(document).on("input", "#caja_location", function () { $('#caja_location').autocomplete({ source: '@Url.Action("Autocomplete_ubicacion")' }); });
+    $(document).on("input", "#caja_purchased_for", function () { $('#caja_purchased_for').autocomplete({ source: '@Url.Action("Autocomplete_cliente_final")' }); });
+    $(document).on("input", "#caja_descripcion", function () { $('#caja_descripcion').autocomplete({ source: '@Url.Action("Autocomplete_trims")' }); });
+
+    $(document).on("input", "#caja_yarn", function () { $('#caja_yarn').autocomplete({ source: '@Url.Action("Autocomplete_yarns")' }); });
+
+    $(document).on("input", "#caja_unit_trim", function () { $('#caja_unit_trim').autocomplete({ source: '@Url.Action("Autocomplete_units")' }); });
+
+    $(document).on("input", ".numeric", function () {
+        this.value = this.value.replace(/\D/g, '');
+    });
+    $(document).on("input", ".validacion", function () {
+        var c = this.selectionStart,
+            r = /[^a-zA-Z0-9áéíóúÁÉÍÓÚ .()!@@/#%-]/,
+            v = $(this).val();
+        if (r.test(v)) {
+            $(this).val(v.replace(r, ''));
+            c--;
+        }
+        this.setSelectionRange(c, c);
+    });
+    $(function () {
+        $.datepicker.regional['es'] = {
+            closeText: 'Cerrar',
+            prevText: '<Ant',
+            nextText: 'Sig>',
+            currentText: 'Hoy',
+            monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+            monthNamesShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+                'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+            dayNames: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+            dayNamesShort: ['Dom', 'Lun', 'Mar', 'Mié', 'Juv', 'Vie', 'Sáb'],
+            dayNamesMin: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'],
+            weekHeader: 'Sm',
+            dateFormat: 'yy-mm-dd',
+            firstDay: 1,
+            isRTL: false,
+            showMonthAfterYear: false,
+            yearSuffix: ''
+        };
+        $.datepicker.setDefaults($.datepicker.regional['es']);
+        $('#caja_date_comment').datepicker();
+    });//DATEPICKER
+    var error;
+
+    function upperCaseF(a) {
+        setTimeout(function () {
+            a.value = a.value.toUpperCase();
+        }, 1);
+    }
+    $(document).on("input", "#caja_tipo_recibo", function () {
+        $("#caja_tipo_recibo").change(function () {
+            if ($("#caja_tipo_recibo").val() != "0") {
+               //blanks_form  trims_form
+                $("#blanks_form").css('display', 'none');
+                $("#trims_form").css('display', 'none');
+            } 
+            if ($("#caja_tipo_recibo").val() == "1") {
+                $("#blanks_form").css('display', 'inline');
+                $("#trims_form").css('display', 'none');
+            } else {
+               $("#trims_form").css('display', 'none');
+            }
+
+            if ($("#caja_tipo_recibo").val() == "2" ) {
+                $("#blanks_form").css('display', 'none');
+                $("#trims_form").css('display', 'inline');
+            } else {
+                $("#trims_form").css('display', 'none');
+            }
+        });
+    });
+    function limpiar_formularios() {
+        $(".must_blank").each(function () {
+            $(this).val("");
+        }); $(".must_trim").each(function () {
+            $(this).val("");
+        });
+        $('#caja_tipo_recibo').val("Select");
+        $("#blanks_form").css('display', 'none');
+        $("#trims_form").css('display', 'none');
+
+    }
+    function recibir(event) {
+        debugger
+        var error = 0;
+        if ($('#caja_tipo_recibo').val() == 1) {
+            $(".must_blank").each(function () {
+                var id = $(this).attr('id');
+                if ($(this).val() == '') {
+                    $("#" + id).css('border', '2px solid #e03f3f');
+                    error++;
+                } else {
+                    $("#" + id).css('border', '1px solid #cccccc');
+                }
+            });           
+        }
+        if ($('#caja_tipo_recibo').val() == 2) {
+            $(".must_trim").each(function () {
+                var id = $(this).attr('id');
+                if ($(this).val() == '') {
+                    $("#" + id).css('border', '2px solid #e03f3f');
+                    error++;
+                } else {
+                    $("#" + id).css('border', '1px solid #cccccc');
+                }
+            });
+        }
+
+        if (error == 0) {
+            alta_de_item();
+        } else {
+            event.preventDefault();
+            alertify.alert('Error!', 'Check empty fields, please');
+            return false;
+        }
+    }
+    function alta_de_item() {
+        var tempScrollTop = $(window).scrollTop();
+        $("#loading_nuevo_item").css('display', 'inline');
+        var item, manufacturer, color, size, body_type, gender, fabric_type, fabric_percent, yarn, division, type, descripcion,unit,minimo;
+        if ($("#caja_tipo_recibo").val() == 1) {
+           
+            if ($("#caja_tipo_recibo").val() == "") { type = "N/A"; } else { type = $("#caja_tipo_recibo").val(); }
+            if ($("#caja_item").val() == "") { item = "N/A"; } else { item = $("#caja_item").val(); }
+            if ($("#caja_fabricante").val() == "") { manufacturer = "N/A"; } else { manufacturer = $("#caja_fabricante").val(); }
+            if ($("#caja_size").val() == "") { size = "N/A"; } else { size = $("#caja_size").val(); }
+            if ($("#caja_color").val() == "") { color = "N/A"; } else { color = $("#caja_color").val(); }
+            if ($("#caja_body_type").val() == "") { body_type = "N/A"; } else { body_type = $("#caja_body_type").val(); }
+            if ($("#caja_genero").val() == "") { gender = "N/A"; } else { gender = $("#caja_genero").val() }
+            if ($("#caja_fabric_type").val() == "") { fabric_type = "N/A"; } else { fabric_type = $("#caja_fabric_type").val(); }
+            if ($("#caja_fabric_percent").val() == "") { fabric_percent = "N/A"; } else { fabric_percent = $("#caja_fabric_percent").val(); }
+            if ($("#caja_division").val() == "") { division = "N/A"; } else { division = $("#caja_division").val();}
+            if ($("#caja_yarn").val() == "") { yarn = "N/A"; } else { yarn = $("#caja_yarn").val(); }
+            unit = "N/A"; minimo = 0;
+            descripcion = manufacturer + " " + gender+" "+body_type+" "+color;
+        }
+        if ($("#caja_tipo_recibo").val() == 2) {
+            if ($("#caja_tipo_recibo").val() == "") { type = "N/A"; } else { type = $("#caja_tipo_recibo").val(); }
+            if ($("#caja_trim_item").val() == "") { item = "N/A"; } else { item = $("#caja_trim_item").val(); }
+            if ($("#caja_descripcion").val() == "") { descripcion = "N/A"; } else { descripcion = $("#caja_descripcion").val(); }  
+            if ($("#caja_family_trim").val() == "") { fabric_type = "N/A"; } else { fabric_type = $("#caja_family_trim").val(); }
+            size = "N/A"; manufacturer = "N/A"; color = "N/A"; body_type = "N/A"; gender = "N/A"; fabric_percent = "N/A"; division = "N/A"; yarn = "N/A"; 
+            descripcion = manufacturer + " " + gender + " " + body_type + " " + color;
+            if ($("#caja_unit_trim").val() == "") { unit = "N/A"; } else { unit = $("#caja_unit_trim").val(); }
+            if ($("#caja_minimo_trim").val() == "") { minimo = "N/A"; } else { minimo = $("#caja_minimo_trim").val(); }
+
+        }
+        var actionData = "{'actionData':'" + item + "*" + manufacturer + "*" + color + "*" + size + "*" + body_type + "*" + gender + "*" + fabric_type + "*" + fabric_percent + "*" + yarn + "*" + division + "*" + type + "*" + descripcion + "','unit':'" + unit +"','minimo':'"+minimo+"'}";
+
+        $.ajax({
+            url: '/Almacen/agregar_item_catalogo',
+            data: actionData,
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (jsonData) {
+                if (jsonData == "0") {
+                    $(window).scrollTop(tempScrollTop);
+                    $("#loading_nuevo_item").css('display', 'none');
+                    limpiar_formularios();
+                    $("#modal_formulario_nuevo_item").modal("hide");
+                    $("#caja_tipo_recibo").val('Select');
+                    alertify.success('Succes!');
+                    alertify.set('notifier', 'position', 'top-right');
+                } else {
+                    alertify.alert('Error!', 'This item already exists, please check the information');
+                }
+            }
+        });
+    }
+</script>
+<style>
+    .ui-autocomplete {
+        z-index: 2147483647 !important;
+    }
+    .col-sm {
+        margin-left:1em !important;
+    }
+
+    .columns {
+        column-width: 200px;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-auto-rows: 2em;
+        grid-gap: .5em;
+    }
+    .load_item {
+        position: fixed;
+        z-index: 2001 !important;
+        height: 100%;
+        display: none;
+        border: 0;
+        padding: .5em 1em;
+        overflow: auto;
+        top: 11%;
+        left: 3%;
+        background: white;
+        width: 94%;
+        border: none;
+        opacity: 0.8;
+        height: 75%;
+    }
+
+    .imagen_loading2 {
+        position: absolute;
+        z-index: 2000 !important;
+        top: 25%;
+        left: 35%;
+        width: 300px;
+        height: 300px;
+        background: url('../../Content/img/gif/loader3.gif');
+    }
+</style>
+<div id="loading_nuevo_item" class="load_item">
+    <div id="spinner" class="imagen_loading2" style=""></div>
+</div>
+<div class="container-fluid">
+    <div id="formulario_campos_01" class="row" style="margin-top:2em;">
+
+
+        <div class="form-group col-sm-3 categorias">
+
+        </div>
+    </div>
+    <div id="formulario_campos_01" class="row" style="margin-top:2em;">
+        <div class="form-group" id="blanks_form" style="display:none;">
+            <div class="form-group col-sm-4">
+                <label for="caja_item">Item </label>
+                <input type="text" ondrop="return false;" onpaste="return false;" class="form-control validacion must_blank " maxlength="30" onkeydown="upperCaseF(this)" id="caja_item">
+            </div>
+            <div class="form-group col-sm-4">
+                <label for="caja_fabricante">Manufacturer</label>
+                <input type="text" ondrop="return false;" onpaste="return false;" class="form-control validacion  must_blank " maxlength="100" onkeydown="upperCaseF(this)" id="caja_fabricante">
+            </div>
+            <div class="form-group col-sm-4">
+                <label for="caja_color">Color</label>
+                <input type="text" ondrop="return false;" onpaste="return false;" class="form-control validacion must_blank  " maxlength="50" onkeydown="upperCaseF(this)" id="caja_color">
+            </div>
+
+            <div class="form-group col-sm-4">
+                <label for="caja_size" class=" col-form-label">Size</label>
+                <input type="text" ondrop="return false;" onpaste="return false;" class="form-control validacion  must_blank " maxlength="150" onkeydown="upperCaseF(this)" id="caja_size">
+            </div>
+            <div class="form-group col-sm-4">
+                <label for="caja_body_type" class=" col-form-label">Body type </label>
+                <input type="text" ondrop="return false;" onpaste="return false;" class="form-control validacion  must_blank " maxlength="50" onkeydown="upperCaseF(this)" id="caja_body_type">
+            </div>
+            <div class="form-group col-sm-4">
+                <label for="caja_genero" class=" col-form-label">Gender</label>
+                <input type="text" ondrop="return false;" onpaste="return false;" class="form-control validacion must_blank  " maxlength="50" onkeydown="upperCaseF(this)" id="caja_genero">
+            </div>
+            <div class="form-group col-sm-4">
+                <label for="caja_fabric_type" class=" col-form-label">Fabric type</label>
+                <input type="text" ondrop="return false;" onpaste="return false;" class="form-control validacion  must_blank " maxlength="50" onkeydown="upperCaseF(this)" id="caja_fabric_type">
+            </div>
+
+
+            <div class="form-group col-sm-4">
+                <label for="caja_fabric_percent" class=" col-form-label">Fabric % </label>
+                <input type="text" ondrop="return false;" onpaste="return false;" class="form-control validacion  must_blank " maxlength="50" onkeydown="upperCaseF(this)" id="caja_fabric_percent">
+            </div>
+            <div class="form-group col-sm-4">
+                <label for="caja_yarn" class=" col-form-label">Yarn</label>
+                <input type="text" ondrop="return false;" onpaste="return false;" class="form-control validacion  must_blank " maxlength="50" onkeydown="upperCaseF(this)" id="caja_yarn">
+            </div>
+            <div class="form-group col-sm-4">
+                <label for="caja_division" class=" col-form-label">Division</label>
+                <input type="text" ondrop="return false;" onpaste="return false;" class="form-control validacion  must_blank " maxlength="50" onkeydown="upperCaseF(this)" id="caja_division">
+            </div>
+            <div class="form-group col-sm-4">
+                <br />
+                <button type="button" class="btn btn-primary mb-2" id="boton_guardar" onclick="recibir(event);">Save</button>
+            </div>
+        </div>
+
+        <div class="form-group" id="trims_form" style="display:none;">
+            <div class="form-group col-sm-4">
+                <label for="caja_trim_item" class=" col-form-label">Item</label>
+                <input type="text" ondrop="return false;" onpaste="return false;" class="form-control validacion  must_trim " maxlength="30" onkeydown="upperCaseF(this)" id="caja_trim_item">
+            </div>
+            <div class="form-group col-sm-4">
+                <label for="caja_descripcion" class=" col-form-label">Description</label>
+                <input type="text" ondrop="return false;" onpaste="return false;" class="form-control validacion  must_trim " maxlength="200" onkeydown="upperCaseF(this)" id="caja_descripcion">
+            </div>
+            <div class="form-group col-sm-4">
+                <label for="caja_family_trim" class=" col-form-label">Family trim</label>
+                <input type="text" ondrop="return false;" onpaste="return false;" class="form-control validacion  must_trim " maxlength="50" onkeydown="upperCaseF(this)" id="caja_family_trim">
+            </div>
+            <div class="form-group col-sm-4">
+                <label for="caja_unit_trim" class=" col-form-label">Unit</label>
+                <input type="text" ondrop="return false;" onpaste="return false;" class="form-control validacion  must_trim " maxlength="50" onkeydown="upperCaseF(this)" id="caja_unit_trim">
+            </div>
+            <div class="form-group col-sm-4">
+                <label for="caja_minimo_trim" class=" col-form-label">Minimum</label>
+                <input type="text" ondrop="return false;" onpaste="return false;" class="form-control numeric  must_trim " maxlength="50" onkeydown="upperCaseF(this)" id="caja_minimo_trim" value="0">
+            </div>
+            <div class="form-group col-sm-3">
+                <br />
+                <button type="button" class="btn btn-primary mb-2" id="boton_guardar_trim" onclick="recibir(event);">Save</button>
+            </div>
+        </div>
+
+
+
+    </div>
+ 
+</div>
+
+
+

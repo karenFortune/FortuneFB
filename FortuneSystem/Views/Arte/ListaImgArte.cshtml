@@ -1,0 +1,60 @@
+﻿@model IEnumerable<FortuneSystem.IMAGEN_ARTE>
+
+@{
+    ViewBag.Title = "Index";
+   
+}
+
+<h2></h2>
+    <table id="tablaArte" class="table table-striped">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Estilo)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.PO)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Tienda)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.StatusArte)
+                </th>
+
+                <th>ACTIONS</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Estilo)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.PO)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Tienda)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.EstadosArte)
+                    </td>      
+                    <td>
+                        @Html.ActionLink(" ", "Create", new { id = item.CATARTE.IdSummary, idArte = item.IdImgArte }, new { @class = "btn btn-default glyphicon glyphicon-check", @style = "color:black", @Title = "Art" })
+                    
+                    </td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+<script>
+    $('#tablaArte').dataTable({
+        responsive: true,
+        "ordering": false,
+        "lengthMenu": [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]]
+
+    });
+</script>

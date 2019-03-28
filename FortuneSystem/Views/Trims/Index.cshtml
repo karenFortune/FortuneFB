@@ -1,0 +1,1800 @@
+﻿@{
+    ViewBag.Title = "TRIMS";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+</div>
+<link href="~/Content/base_m.css" rel="stylesheet" />
+<script src="~/Content/Chart.js-master/Chart.bundle.js"></script>
+<script src="~/Content/Chart.js-master/Chart.bundle.min.js"></script>
+<script src="~/Content/Chart.js-master/Chart.min.js"></script>
+<script src="~/Content/Chart.js-master/moment.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+<link href="~/Content/base_m.css" rel="stylesheet" />
+<script>
+    var trims, cajas,auditoria;
+    $(document).on("input", ".numeric", function () {
+        this.value = this.value.replace(/\D/g, '');
+    });
+    $(document).on("input", ".validacion", function () {
+        var c = this.selectionStart,
+            r = /[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ .()!@@/#%-]/,
+            v = $(this).val();
+        if (r.test(v)) {
+            $(this).val(v.replace(r, ''));
+            c--;
+        }
+        this.setSelectionRange(c, c);
+    });
+    $(document).on("click", "a", function () { $("#loading").css('display', 'none'); });
+
+    $(document).on("input", ".po", function () { $('.po').autocomplete({ source: '@Url.Action("Autocomplete_po")' }); });
+
+    $(document).ready(function () {
+        trims = 0; cajas = 0;
+        llenar_tabla_ordenes_inicio();
+        llenar_items_trim();
+        llenar_tabla_trim_recibido_inicio();
+        $('.js-example-basic-single').select2();
+        $('.js-example-basic-single2').select2();
+        
+        $(document).on("input", "#caja_unit_trim_edit", function () { $('#caja_unit_trim_edit').autocomplete({ source: '@Url.Action("Autocomplete_units")' }); });
+        $(document).on("input", "#caja_family_trim_edit", function () { $('#caja_family_trim_edit').autocomplete({ source: '@Url.Action("Autocomplete_family")' }); });
+        llenar_tabla_trims_inicio();
+
+    });
+    $(function () {
+        $.datepicker.regional['es'] = {
+            closeText: 'Cerrar',
+            prevText: '<Ant',
+            nextText: 'Sig>',
+            currentText: 'Hoy',
+            monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+            monthNamesShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+                'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+            dayNames: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+            dayNamesShort: ['Dom', 'Lun', 'Mar', 'Mié', 'Juv', 'Vie', 'Sáb'],
+            dayNamesMin: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'],
+            weekHeader: 'Sm',
+            dateFormat: 'yy-mm-dd',
+            firstDay: 1,
+            isRTL: false,
+            showMonthAfterYear: false,
+            yearSuffix: ''
+        };
+        $.datepicker.setDefaults($.datepicker.regional['es']);
+        $('#caja_busqueda_fecha_trim_recibo').datepicker();
+        $('#caja_inicio_entrega').datepicker();
+        $('#caja_final_entrega').datepicker();
+        $('#caja_estado_inicio').datepicker();
+        $('#caja_estado_final').datepicker();
+    });//DATEPICKER  
+    /**********MP LISTADO**************************************************************************************************************************************************** */
+    $(document).on("click", "#ver_recibos_trim", function () {
+        $("#load_trim").css('display', 'inline');
+        cargar_recibos_trims('');
+    });
+    function buscar_recibos_fechas(event) {
+        if ($("#caja_inicio").val() != "" && $("#caja_final").val() !== "") {
+            cargar_recibos_trims($("#caja_inicio").val() + "*" + $("#caja_final").val());
+        } else {
+            event.preventDefault();
+            alertify.alert('Error!', 'Check empty fields, please');
+            return false;
+        }
+    }
+    function cargar_recibos_trims(busqueda) {
+        $.ajax({
+            url: "/Trims/buscar_informacion_recibos_trims",
+            data: "{'busqueda':'" + busqueda + "'}",
+            type: "POST",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                var html = '';//<tr><th>#</th><th>DATE</th><th>MP</th><th>ITEM</th><th>ORDER</th><th>PO</th><th>TOTAL</th></tr>
+                $.each(result, function (key, item) {
+                    html += '<tr>';
+                    html += '<td>' + item.id_salida + '</td>';
+                    html += '<td>' + item.fecha + '</td>';
+                    $.each(item.lista_salidas_item, function (key, i) {
+                        html += '<td>' + i.mp_number + '</td>';
+                        html += '<td>' + i.descripcion + '</td>';
+                        html += '<td>' + i.po + '</td>';
+                        html += '<td>' + i.po_number + '</td>';
+                        html += '<td>' + i.total + '</td>';
+                    });
+                    html += '</tr>';
+                });
+                $(".rows_tabla_recibos_trim").html(html);
+                $("#load_trim").css('display', 'none');
+            },
+            error: function (errormessage) { alert(errormessage.responseText); }
+        });
+    }
+    /**********MP LISTADO**************************************************************************************************************************************************** */
+    /*****REVISIONES********************************************************************************************************************************************************* */
+    $(document).on("click", "#ver_revisiones", function () {
+        $("#load_trim").css('display', 'inline');
+        llenar_po();
+    });
+    function llenar_po() {
+        $.ajax({
+            url: '/Trims/buscar_pedidos',
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (result) {
+                var html = ''; //'<label class="">PO&nbsp;</label> <select class="form-control js-example-basic-single" id="caja_pedido" >';
+                html += '<option  value="0">Select</option>';
+                $.each(result, function (key, item) {
+                    html += '<option  value="' + item.id_pedido + '">' + item.pedido + '</option>';
+                });
+                //html += '</select>';
+                $(".pedidos").append(html);
+                $("#load_trim").css('display', 'none');
+            }
+        });
+    }
+    /**********REVISIONES**************************************************************************************************************************************************** */
+    /*****REQUESTS*********************************************************************************************************************************************************** */
+    $(document).on("click", "#ver_request", function () {
+        $("#load_trim").css('display', 'inline');
+        llenar_po_request();
+    });
+    function llenar_po_request() {
+        $.ajax({
+            url: '/Trims/buscar_pedidos',
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (result) {
+                var html = ''; //'<label class="">PO&nbsp;</label> <select class="form-control js-example-basic-single" id="caja_pedido" >';
+                html += '<option  value="0">Select</option>';
+                $.each(result, function (key, item) {
+                    html += '<option  value="' + item.id_pedido + '">' + item.pedido + '</option>';
+                });
+                $(".pedidos_request").append(html);
+                $("#load_trim").css('display', 'none');
+            }
+        });
+    }
+    var estilos_trims_anteriores;
+    $(document).on("change", "#caja_pedido_request", function () {
+        $.ajax({
+            url: '/Trims/buscar_estilos',
+            contentType: 'application/json',
+            data: "{'pedido':'" + $("#caja_pedido_request").val()+"'}",
+            dataType: 'json',
+            type: 'post',
+            success: function (jsonData) {
+                var result = jsonData.Data.estilos;
+                estilos_trims_anteriores = jsonData.Data.trims_anteriores;
+                var html = '';
+                html += '<label for="caja_pedido_request">Style</label><select class="form-control  estilos_request " style="" id="caja_estilo_request" >';//'<label class="">PO&nbsp;</label> <select class="form-control js-example-basic-single" id="caja_pedido" >';
+                html += '<option  value="0">Select</option>';
+                $.each(result, function (key, item) {
+                    html += '<option  value="' + item.id_po_summary + '">' + item.estilo + ' ' + item.descripcion+ '</option>';
+                });
+                html += '</select>';
+                $("#div_estilos_request").css('display', 'inline');
+                $("#div_estilos_request").html(html);
+                $("#load_trim").css('display', 'none');    
+                agregar_trims_anteriores();
+            }
+        });
+    });
+    function agregar_trims_anteriores() {   
+        $("#load_trim").css('display', 'inline');
+        $.each(estilos_trims_anteriores, function (key, item) {
+            $.each(item.lista_requests, function (key, i) {
+                var html = '';
+                if (i.tipo_item != 'BOXES') {
+                    trims++;
+                    html = '<tr id="' + i.id_item + '"><td>' + i.estilo + ' - ' + i.talla + ' </td><td>' + i.item + '</td>';
+                    $("#div_tabla_trim_seleccionado").css('display', 'inline');
+                    html += '<td><input ondrop="return false;" onpaste="return false;" maxlength="6" class="numeric form-control check_trims" id="qty_' + trims + '" value="'+i.cantidad+'" onkeyup="change_total_trim(' + trims + ')"  /></td>';  //boxes
+                    html += '<td><input ondrop="return false;" onpaste="return false;" maxlength="6" class="numeric form-control check_trims " id="blank_' + trims + '" value="'+i.blanks+'" onkeyup="change_total_trim(' + trims + ')"  /></td>';  //boxes
+                    html += '<td><input ondrop="return false;" onpaste="return false;" maxlength="6" class="numeric form-control check_trims " id="total_' + trims + '" value="' + i.total + '" /></td>';  //boxes
+                    html += '<td><button type="button" class="btn btn-light deleteRowTrim"><b>-</b></button></td>';
+                    html += '<td style="visibility:hidden;">' + i.id_summary + '</td><td style="visibility:hidden;" id="item_' + trims + '" >' + i.id_item + '</td>' +
+                        '<td style="visibility:hidden;" id="totalTalla_' + trims + '" >' + i.total + '</td><td style="visibility:hidden;" id="' + trims + '" >' + i.id_talla + '</td>';
+                    html += '<td style="visibility:hidden;">' + i.id_request + '</td></tr>';
+                    $("#boton_guardar_request").css('display', 'inline');
+                    $(".body_tabla_trim_seleccionado").append(html);
+                } else {
+                    cajas++;
+                    html = '<tr id="' + trims + '"><td>' + i.estilo + ' - ' + i.talla+ ' </td><td>' + i.item + '</td>';
+                    $("#div_tabla_cajas_seleccionadas").css('display', 'inline');
+                    html += '<td><input ondrop="return false;" onpaste="return false;" maxlength="6" class="numeric form-control check_boxes " id="" value="' + i.total + '" /></td>';  //boxes
+                    html += '<td><button type="button" class="btn btn-light deleteRowCaja"><b>-</b></button></td>';
+                    html += '<td style="visibility:hidden;">' + i.id_summary + '</td><td style="visibility:hidden;">' + i.id_item + '</td>';
+                    html += '<td style="visibility:hidden;">' + i.id_request + '</td></tr>';
+                    $("#boton_guardar_request").css('display', 'inline');
+                    $(".body_tabla_cajas_seleccionadas").append(html);
+                }
+            });
+        });  
+       // if (cajas > 0 || trims > 0) { $("#boton_guardar_request").css('display', 'inline'); }
+        $("#load_trim").css('display', 'none');
+    }
+    $(document).on("change", "#caja_estilo_request", function () {       
+        llenar_tallas_estilo();
+        //llenar_items_trim();
+        $("#div_item_request").css('visibility', 'visible');
+        $("#boton_agregar_item_tabla").css('visibility', 'visible');
+    });
+    function llenar_tallas_estilo() {
+        $.ajax({
+            url: '/Trims/buscar_tallas_estilo',
+            contentType: 'application/json',
+            data: "{'estilo':'" + $("#caja_estilo_request").val() + "'}",
+            dataType: 'json',
+            type: 'post',
+            success: function (result) {
+                var html = '';
+                html += '<label for="caja_talla_request">Size</label><select class="form-control tallas_request" style="" id="caja_talla_request" >';//'<label class="">PO&nbsp;</label> <select class="form-control js-example-basic-single" id="caja_pedido" >';
+                html += '<option  value="0">All</option>';
+                $.each(result, function (key, item) {
+                    html += '<option  value="' + item.id_talla + '">' + item.talla + '</option>';
+                });
+                html += '</select>';
+                $("#div_tallas_request").css('display', 'inline');
+                $("#div_tallas_request").html(html);
+                $("#load_trim").css('display', 'none');
+            }
+        });
+    }
+    function llenar_items_trim() {
+        $.ajax({
+            url: '/Trims/buscar_inventario_items_trim',
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (result) {
+                var html = '';
+               // html += '<label for="caja_item_request">Item</label><select class="form-control js-example-basic-single2 items_request" style="" id="caja_item_request" >';
+                html += '<option  value="0">Select</option>';
+                $.each(result, function (key, item) {
+                    html += '<option  value="' + item.id_item + '">' + item.descripcion + '</option>';
+                });
+                //html += '</select>';                
+                $(".items_request").append(html);
+                $("#load_trim").css('display', 'none');
+            }
+        });
+    }
+
+    $(document).on("click", ".cerrar_material_request", function () {
+        cerrar_modal_trim_request();
+    });
+    function cerrar_modal_trim_request() {
+        trims = 0; cajas = 0;
+        $("#div_tabla_cajas_seleccionadas").css('display', 'none');
+        $("#div_tabla_trim_seleccionado").css('display', 'none');
+        $("#div_estilos_request").css('display', 'none');
+        $("#div_tallas_request").css('display', 'none');
+        $("#div_item_request").css('visibility', 'hidden');
+        $(".body_tabla_trim_seleccionado").html("");
+        $(".body_tabla_cajas_seleccionadas").html("");
+        $("#caja_pedido_request").val('0');
+        $("#myselect caja_pedido_request[value=0]").attr('selected', 'selected');
+    }
+    function agregar_item_tablas() {
+        var id_item = $("#caja_item_request").val(), item = $("#caja_item_request").find(":selected").text();
+        var id_estilo = $("#caja_estilo_request").val(), estilo = $("#caja_estilo_request").find(":selected").text();
+        var talla = $("#caja_talla_request").val(), talla_tabla = $("#caja_talla_request").find(":selected").text();
+        $.ajax({
+            url: '/Trims/buscar_total_estilo',
+            data: "{'summary':'" + $("#caja_estilo_request").val() + "','talla':'" + $("#caja_talla_request").val() + "','item':'" + $("#caja_item_request").val() + "'}",
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (jsonData) {
+                var categoria = jsonData.Data.categoria, total = jsonData.Data.total, cajas_total = jsonData.Data.cajas;                
+                var html = '';
+                if (categoria != 'BOXES') {
+                    trims++;   
+                    html = '<tr id="' + trims + '"><td>' + estilo + ' ' + talla_tabla +' </td><td>' + item +'</td>';
+                    $("#div_tabla_trim_seleccionado").css('display', 'inline');
+                    html += '<td><input ondrop="return false;" onpaste="return false;" maxlength="6" class="numeric form-control check_trims" id="qty_' + trims + '" value="1" onkeyup="change_total_trim(' + trims + ')"  /></td>';  //boxes
+                    html += '<td><input ondrop="return false;" onpaste="return false;" maxlength="6" class="numeric form-control check_trims " id="blank_' + trims + '" value="1" onkeyup="change_total_trim(' + trims + ')"  /></td>';  //boxes
+                    html += '<td><input ondrop="return false;" onpaste="return false;" maxlength="6" class="numeric form-control check_trims " id="total_' + trims +'" value="'+total+'" /></td>';  //boxes
+                    html += '<td><button type="button" class="btn btn-light deleteRowTrim"><b>-</b></button></td>';
+                    html += '<td style="visibility:hidden;">' + id_estilo + '</td><td style="visibility:hidden;" id="item_' + trims + '" >' + id_item + '</td>'+
+                        '<td style="visibility:hidden;" id="totalTalla_' + trims + '" >' + total + '</td><td style="visibility:hidden;" id="' + trims + '" >' + talla + '</td>';
+                    html += '<td style="visibility:hidden;">0</td></tr>';
+                    $(".body_tabla_trim_seleccionado").append(html);
+                } else {
+                    cajas++;
+                    html = '<tr id="' + trims + '"><td>' + estilo + ' ' + talla_tabla + ' </td><td>' + item + '</td>';
+                    $("#div_tabla_cajas_seleccionadas").css('display', 'inline');
+                    html += '<td><input ondrop="return false;" onpaste="return false;" maxlength="6" class="numeric form-control check_boxes " id="" value="' + cajas_total+'" /></td>';  //boxes
+                    html += '<td><button type="button" class="btn btn-light deleteRowCaja"><b>-</b></button></td>';
+                    html += '<td style="visibility:hidden;">' + id_estilo + '</td><td style="visibility:hidden;">' + id_item +'</td>';
+                    html += '<td style="visibility:hidden;">0</td></tr>';
+                    $(".body_tabla_cajas_seleccionadas").append(html);
+                }                 
+                $("#boton_guardar_request").css('display', 'inline');
+                $("#load_trim").css('display', 'none');
+            }
+        });       
+    }
+    function change_total_trim(row) {
+        var qty = 0, blanks = 0, total = 0;
+        qty = $('#qty_' + row).val();
+        blanks = $('#blank_' + row).val();
+        totalTalla = parseFloat($('#totalTalla_' + row).html());
+        total = qty * (totalTalla / blanks);
+        $('#total_' + row).val(total);
+    }
+    $(document).on("click", ".deleteRowTrim", function () {
+        $(this).closest("tr").remove();
+        trims--;
+        if (trims <= 0) {
+            $("#div_tabla_trim_seleccionado").css('display', 'none');           
+        } else {
+            $("#div_tabla_trim_seleccionado").css('display', 'inline');
+        }
+        if (trims == 0 && cajas == 0) {
+            $("#boton_guardar_request").css('display', 'none');
+        }
+    });
+    $(document).on("click", ".deleteRowCaja", function () {
+        $(this).closest("tr").remove();
+        cajas--;
+        if (cajas <= 0) {
+            $("#div_tabla_cajas_seleccionadas").css('display', 'none');
+        } else {
+            $("#div_tabla_cajas_seleccionadas").css('display', 'inline');
+        }
+        if (trims == 0 && cajas == 0) {
+            $("#boton_guardar_request").css('display', 'none');
+        }
+    });
+    var estilo, item, total, talla,cantidad,blank,request;
+    function guardar_request(event) {
+        if (trims >= 1 || cajas >= 1) {
+            $("#load_trim").css('display', 'inline');
+            var error = 0;
+            if (trims >= 1) {
+                $(".check_trims").each(function () {
+                    if ($(this).val() == '0' || $(this).val() == '' || $(this).val() == 0) {
+                        $(this).css('border', '2px solid #e03f3f');
+                        error++;
+                    } else {
+                        $(this).css('border', '1px solid #cccccc');
+                    }
+                });
+            }
+            if (cajas >= 1) {
+                $(".check_boxes").each(function () {
+                    if ($(this).val() == '0' || $(this).val() == '' || $(this).val() == 0) {
+                        $(this).css('border', '2px solid #e03f3f');
+                        error++;
+                    } else {
+                        $(this).css('border', '1px solid #cccccc');
+                    }
+                });
+            }
+            if (error == 0) {
+                estilo = ''; item = ''; total = ''; talla = ''; cantidad = ''; black = ''; request = '';
+                if (trims >= 1) {
+                    $('#tabla_trim_seleccionado tbody tr').each(function () {
+                        total += "*" + $(this).find('td:eq(4) input').val();
+                        cantidad += "*" + $(this).find('td:eq(2) input').val();
+                        blank += "*" + $(this).find('td:eq(3) input').val();
+                        estilo += "*" + $(this).find('td:eq(6) ').html();
+                        item += "*" + $(this).find('td:eq(7) ').html();
+                        talla += "*" + $(this).find('td:eq(9)').html();
+                        request += "*" + $(this).find('td:eq(10)').html();
+                    });
+                }
+                if (cajas >= 1) {
+                    $('#tabla_cajas_seleccionadas tbody tr').each(function () {
+                        total += "*" + $(this).find('td:eq(2) input').val();
+                        estilo += "*" + $(this).find('td:eq(4) ').html();
+                        item += "*" + $(this).find('td:eq(5) ').html();
+                        talla += "*0"; cantidad += "*0"; blank += "*0";
+                        request += "*" + $(this).find('td:eq(6)').html();
+                       
+                    });
+                }
+                enviar_request();
+            } else {
+                $("#load_trim").css('display', 'none');
+                event.preventDefault();
+                alertify.alert('Error!', 'Check empty fields, please');
+                return false;
+            }
+        }
+    }
+    function enviar_request() {
+        $.ajax({
+            url: '/Trims/enviar_datos_request',
+            data: "{'total':'" + total + "','estilo':'"+estilo+"','item':'"+item+"','talla':'"+talla+"','cantidad':'"+cantidad+"','blank':'"+blank+"','request':'"+request+"'}",
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (result) {
+                trims = 0; cajas = 0;
+                alertify.success('Succes!');
+                alertify.set('notifier', 'position', 'top-right');
+                $(".body_tabla_trim_seleccionado").html('');  
+                $(".body_tabla_cajas_seleccionadas").html('');  
+                $("#div_tabla_trim_seleccionado").css('display', 'none');           
+                $("#div_tabla_cajas_seleccionadas").css('display', 'none'); 
+                $("#boton_guardar_request").css('display', 'none');
+                $("#modal_request").modal("hide");
+                $("#load_trim").css('display', 'none');
+            }
+        });
+    }
+    /**********REQUESTS****************************************************************************************************************************************************** */
+    /******************AUDIT************************************************************************************************************************************************* */
+    $(document).on("click", "#ver_auditoria", function () {
+        $("#load_trim").css('display', 'inline');
+        llenar_trims_recibidos();
+    });
+    function llenar_trims_recibidos() {
+        auditoria = 0;
+        $.ajax({
+            url: '/Trims/buscar_lista_trims_recibidos',
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (result) {
+                var html = ''; //<th>Date</th><th>PO</th><th>Style</th><th>Trim</th><th>Total</th><th></th>
+                
+                    $.each(result, function (key, i) {
+                        html += '<tr>';                        
+                        html += '<td>' + i.pedido + '</td>';
+                        html += '<td>' + i.estilo + '</td>';
+                        html += '<td>' + i.descripcion + '</td>';
+                        html += '<td>' + i.total + '</td>';
+                        html += '<td style="visibility:hidden;">' + i.id_inventario + '</td>';
+                        html += '</tr>';
+                    });
+               
+                $(".body_tabla_items_recibidos").html(html);
+                $("#load_trim").css('display', 'none');
+            }
+        });
+    }
+    $(document).on("dblclick", "#tabla_items_recibidos tr", function () {
+        var row = this.rowIndex;
+        if (row != 0) {
+            auditoria++;
+            var num_item = $('#tabla_items_recibidos tr:eq(' + row + ') td:eq(4)').html();
+            var item = $('#tabla_items_recibidos tr:eq(' + row + ') td:eq(2)').html();
+            var total = $('#tabla_items_recibidos tr:eq(' + row + ') td:eq(3)').html();
+            var html = '<tr><td>' + num_item + '</td><td>' + item + '</td><td>' + total + '</td>';
+            html += '<td><input ondrop="return false;" onpaste="return false;" maxlength="6" class="numeric form-control check_audit " value="' + total + '" /></td>'; 
+            html += '<td><button type="button" class="btn btn-light deleteRowAudit"><b>-</b></button></td></tr>';
+            $(".body_tabla_items_recibidos_modificar").append(html);
+            $("#div_edicion_audit").css('visibility','visible');
+        }        
+    });
+    $(document).on("click", ".deleteRowAudit", function () {
+        $(this).closest("tr").remove();
+        auditoria--;
+        if (auditoria <= 0) {
+            $("#div_edicion_audit").css('visibility', 'hidden');
+        } else {
+            $("#div_edicion_audit").css('visibility', 'visible');
+        }        
+    });
+    var salidas, cant_original, cant_nueva;
+    function enviar_correcciones(event) {
+        var error = 0;
+        $(".check_audit").each(function () {
+            if ($(this).val() == '0' || $(this).val() == '' || $(this).val() == 0) {
+                $(this).css('border', '2px solid #e03f3f');
+                error++;
+            } else {
+                $(this).css('border', '1px solid #cccccc');
+            }
+        });
+        if (error == 0) {
+            salidas = ''; cant_original = ''; cant_nueva = '';
+            $('#tabla_items_recibidos_modificar tbody tr').each(function () {
+                cant_nueva += "*" + $(this).find('td:eq(3) input').val();
+                salidas += "*" + $(this).find('td:eq(0) ').html();
+                cant_original += "*" + $(this).find('td:eq(2) ').html();
+             });           
+            enviar_auditoria();
+        } else {
+            $("#load_trim").css('display', 'none');
+            event.preventDefault();
+            alertify.alert('Error!', 'Check empty fields, please');
+            return false;
+        }
+    }
+    function enviar_auditoria() {
+        $("#load_trim").css('display', 'inline');
+        $.ajax({
+            url: '/Trims/enviar_datos_auditoria',
+            data: "{'salidas':'" + salidas + "','originales':'" + cant_original + "','nuevas':'" + cant_nueva + "'}",
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (result) {
+                auditoria = 0;
+                alertify.success('Succes!');
+                alertify.set('notifier', 'position', 'top-right');
+                $(".body_tabla_items_recibidos_modificar").html('');
+                $("#modal_auditoria").modal("hide");
+                $("#modal_comparacion").modal("show");
+                $("#load_trim").css('display', 'none');
+                var html = '';
+                $.each(result, function (key, i) {
+                    if (i.item != null) {
+                        html += '<tr>';
+                        if (i.cantidad >= i.total) {
+                            html += '<tr style="color:#3c763d;">';
+                        } else {
+                            html += '<tr style="color:#941c1c;">';
+                        }
+                        html += '<td>' + i.pedido + '</td>';
+                        html += '<td>' + i.estilo + '</td>';
+                        html += '<td>' + i.item + '</td>';
+                        html += '<td>' + i.tipo_item + '</td>';
+                        html += '<td>' + i.total + '</td>';
+                        html += '<td>' + i.fecha + '</td>';
+                        html += '<td>' + i.cantidad + '</td>';
+                        if (i.cantidad >= i.total) {
+                            html += '<td>Completed</td>';
+                        } else {
+                            html += '<td>Incomplete</td>';
+                        }
+                        html += '<td style="visibility:hidden;">' + i.id_inventario + '</td>';
+                        html += '</tr>';
+                    }                   
+                });
+                $(".body_tabla_comparacion_auditado").html(html);
+                $("#load_trim").css('display', 'none');
+            }
+        });
+    }
+
+    /******************AUDIT***************************************************************************************************************************************************/
+    /*******************IMPRIMIR TRIM CARD************************************************************************************************************************************/
+    function revisar_po(event) {
+        if (event.keyCode == 13) {
+            $.ajax({
+                url: '/Trims/po_session',
+                data: "{'po':'" + $("#caja_po_trim_card").val() + "'}",
+                contentType: 'application/json',
+                dataType: 'json',
+                type: 'post',
+                success: function (result) {}
+            });  
+            imprimir_trim_card(); 
+        }
+    }
+    function imprimir_trim_card() {
+        var h = screen.height - 100;
+        var w = screen.width - 30;
+        window.open('/Trims/trim_card', '_blank', 'toolbar=0,location=0,menubar=0,width=' + w + ',height=' + h + ', fullscreen=yes');
+    }
+    /*******************IMPRIMIR TRIM CARD************************************************************************************************************************************/
+    /*******************EDITAR ITEM******************************************************************************************************************************************/
+    $(document).ready(function () {
+        $('.js-example-basic-single').select2();
+    });
+
+    $(document).on("click", ".btn_editar_item", function () {
+        $("#load_trim").css('display', 'inline');
+        llenar_items_edicion();
+    });
+    function llenar_items_edicion() {
+        $("#load_trim").css('display', 'inline');
+        $.ajax({
+            url: '/Trims/buscar_items_trims',
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (result) {
+                var html = '<option value="0">Select trim</option>';
+                $.each(result, function (key, item) {
+                    html += '<option value="' + item.id_item + '">' + item.descripcion + '</option>';
+                });
+                $(".descripciones_edit").append(html);
+                $("#load_trim").css('display', 'none');
+            }
+        });
+    }
+    $(document).ready(function () {
+        $('#caja_item_select').on('change', function () {
+            buscar_datos_edicion_trim();       
+        });
+    });
+    function buscar_datos_edicion_trim() {
+        $("#load_trim").css('display', 'inline');
+        $.ajax({
+            url: '/Trims/buscar_informacion_trim',
+            contentType: 'application/json',
+            data: "{'id':'" + $('#caja_item_select').val()+"'}",
+            dataType: 'json',
+            type: 'post',
+            success: function (jsonData) {
+                var trim = jsonData.Data.trim;               
+                var html = '';
+                $.each(trim, function (key, item) {
+                    $("#edicion_trim_catalogo").css('display','inline');
+                    $("#id_trim_edicion").val(item.id_item);
+                    $("#caja_trim_item_edit").val(item.item);
+                    $("#caja_minimo_trim_edit").val(item.minimo);
+                    $("#caja_descripcion_edit").val(item.descripcion);
+                    $("#caja_family_trim_edit").val(item.family);
+                    $("#caja_unit_trim_edit").val(item.unit);                                       
+                });                
+                $("#load_trim").css('display', 'none');
+            }
+        });
+    }
+    function guardar_edicion_trim() {
+        var error = 0;
+        $(".edit_trim").each(function () {
+            var id = $(this).attr('id');
+            if ($(this).val() == '') {
+                $("#" + id).css('border', '2px solid #e03f3f');
+                error++;
+            } else {
+                $("#" + id).css('border', '1px solid #cccccc');
+            }
+        });
+        if (error == 0) {
+            modificar_item();
+        } else {
+            event.preventDefault();
+            alertify.alert('Error!', 'Check empty fields, please');
+            return false;
+        }
+    }
+    function modificar_item() {
+        $("#load_trim").css('display', 'inline');
+        $.ajax({
+            url: '/Trims/editar_trim_catalogo',
+            data: "{'id':'" + $("#id_trim_edicion").val() + "','item':'" + $("#caja_trim_item_edit").val() + "','minimo':'" + $("#caja_minimo_trim_edit").val() + "','descripcion':'" + $("#caja_descripcion_edit").val() + "','family':'" + $("#caja_family_trim_edit").val() + "','unidad':'" + $("#caja_unit_trim_edit").val() +"'}",
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (result) {   
+                $('#caja_item_select').val(0);
+                $("#edicion_trim_catalogo").css('display', 'none');
+                $("#load_trim").css('display', 'none');
+                alertify.success('Succes!');
+                alertify.set('notifier', 'position', 'top-right');               
+            }
+        });
+    }
+
+    /*******************EDITAR ITEM************************************************************************************************************************************/
+    /*******************TABLA**INICIO**********************************************************************************************************************************/
+    function llenar_tabla_trims_inicio() {
+        $("#load_trim").css('display', 'inline');
+        $.ajax({
+            url: '/Trims/buscar_trims_tabla_inicio',
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (result) {
+                var html = '';
+                $.each(result, function (key, item) {
+                    html += '<tr>';
+                    html += '<td>' + item.item + '</td>';
+                    html += '<td>' + item.descripcion + '</td>';
+                    html += '<td>' + item.minimo + '</td>';
+                    html += '<td>' + item.total + '</td>';                    
+                    html += '</tr>';
+                });
+                $(".body_tabla_trims_inicio").append(html);
+            }
+        });
+    }
+    //OTRA TABLA AL INICIO    
+    function llenar_tabla_ordenes_inicio() {
+        $("#load_trim").css('display', 'inline');
+        $.ajax({
+            url: '/Trims/buscar_ordenes_tabla_inicio',
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (result) {
+                var html = '';                
+                $.each(result, function (key, item) {
+                    var total_orden = 0, total_recibido = 0, total_final = 0;
+                    $.each(item.lista_estilos, function (key, e) {
+                        $.each(e.lista_requests, function (key, r) {
+                            total_orden += r.total;
+                            total_recibido += (r.total - r.restante);
+                        });
+                    });
+                    total_final = (total_recibido * 100) / total_orden;
+                    if (total_recibido >= total_orden) {
+                        html += '<tr style="color:#3c763d;">';
+                    } else {
+                        html += '<tr style="color:#941c1c;">';
+                    }            
+                    html += '<td>' + item.id_pedido + '</td>';
+                    html += '<td>' + item.pedido + '</td>';
+                    html += '<td>' + total_orden + '</td>';
+                    html += '<td>' + total_recibido + '</td>';
+                    html += '<td>' + total_final + '% </td>';                    
+                    html += '</tr>';
+                });
+                $(".body_tabla_ordenes_inicio").html(html);
+            }
+        });
+    }
+    function llenar_tabla_trim_recibido_inicio() {
+        $("#load_trim").css('display', 'inline');
+        var busqueda, fecha;
+        if ($("#caja_busqueda_trim_recibido").val() == "") { busqueda = '0'; } else { busqueda = $("#caja_busqueda_trim_recibido").val();}
+        if ($("#caja_busqueda_fecha_trim_recibo").val() == "") { fecha = '0'; } else { fecha = $("#caja_busqueda_fecha_trim_recibo").val();}
+        $.ajax({
+            url: '/Trims/buscar_trims_recibidos_tabla_inicio',
+            contentType: 'application/json',
+            data: "{'busqueda':'" +busqueda + "','fecha':'" + fecha+"'}",
+            dataType: 'json',
+            type: 'post',
+            success: function (jsonData) {
+                var result = jsonData.Data.tabla;
+                var mps = jsonData.Data.mps;
+                var html = '';
+                $.each(result, function (key, item) {
+                    if (item.auditoria==1) {
+                        html += '<tr style="color:#3c763d;">';
+                    } else {
+                        html += '<tr style="color:#941c1c;">';
+                    }
+                    html += '<td>' + item.id_inventario + '</td>';
+                    html += '<td>' + item.po + '</td>';
+                    html += '<td>' + item.estilo + '</td>';
+                    html += '<td>' + item.descripcion + '</td>';
+                    html += '<td>' + item.fecha + '</td>';
+                    html += '<td>' + item.total + '</td>';
+                    if (item.auditoria == 1) {
+                        html += '<td><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></td>';
+                    } else {
+                        html += '<td><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></td>';
+                    }  
+                    html += '</tr>';
+                });
+                $(".body_tabla_trim_recibido").html(html);
+                html = 'MP Numbers today: ';
+                $.each(mps, function (key, item) {
+                    html += ' '+item.mp_number +' ';    
+                });
+                $("#mp_numbers_label").html(html);
+            }
+        });
+        $("#load_trim").css('display', 'none');
+    }
+    function busqueda_estado_pedido() {
+        var busqueda;
+        if ($("#caja_busqueda_estado_pedido").val() == "") { busqueda = "0"; } else { busqueda = $("#caja_busqueda_estado_pedido").val(); }
+        $.ajax({
+            url: '/Trims/buscar_especifico_ordenes_tabla_inicio',
+            contentType: 'application/json',
+            data: "{'busqueda':'" + busqueda+"'}",
+            dataType: 'json',
+            type: 'post',
+            success: function (result) {
+                var html = '';
+                $.each(result, function (key, item) {
+                    var total_orden = 0, total_recibido = 0, total_final = 0;
+                    $.each(item.lista_estilos, function (key, e) {
+                        $.each(e.lista_requests, function (key, r) {
+                            total_orden += r.total;
+                            total_recibido += (r.total - r.restante);
+                        });
+                    });
+                    total_final = (total_recibido * 100) / total_orden;
+                    if (total_recibido >= total_orden) {
+                        html += '<tr style="color:#3c763d;">';
+                    } else {
+                        html += '<tr style="color:#941c1c;">';
+                    }
+                    //html += '<td>' + item.id_pedido + '</td>';
+                    html += '<td>' + item.pedido + '</td>';
+                    html += '<td>' + total_orden + '</td>';
+                    html += '<td>' + total_recibido + '</td>';
+                    html += '<td>' + total_final + '% </td>';
+                    //html += '<td style="visibility:hidden; width:.5px;" >' + item.id_pedido + '</td>';
+                    html += '</tr>';
+                });
+                $(".body_tabla_ordenes_inicio").html(html);
+            }
+        });
+    }
+    $(document).on("dblclick", "#tabla_trim_recibido tr", function () {
+        //alert(this.rowIndex);        
+        var row = this.rowIndex;
+        if (row != 0) {
+            //agregar_row_otros($('#tabla_estilos_otros tr:eq(' + row + ') td:eq(0)').html() + "&" + $('#tabla_estilos_otros tr:eq(' + row + ') td:eq(1)').html() + "-" + $('#tabla_estilos_otros tr:eq(' + row + ') td:eq(2)').html());
+            $.ajax({
+                url: '/Trims/obtener_informacion_recibo',
+                contentType: 'application/json',
+                data: "{'inventario':'" + $('#tabla_trim_recibido tr:eq(' + row + ') td:eq(0)').html() + "','total':'" + $('#tabla_trim_recibido tr:eq(' + row + ') td:eq(5)').html()+"'}",
+                dataType: 'json',
+                type: 'post',
+                success: function (result) {
+                    var html = '';
+                    $.each(result, function (key, item) {
+                        var inventario;
+                        var html = '' +
+                            '<tr><td>' + result.id_recibo + '</td> ' +
+                            '<td>' + result.mp_number + '</td> ' +
+                            '<td>' + result.fecha + '</td> ' +
+                            '<td>' + result.items + '</td> ' +
+                            '<td>' + result.total + '</td> ' +
+                            '<td>' + result.usuario + '</td> ' +
+                            '<td>' + result.sucursal + '</td> ' +
+                            '<td>' + result.mill_po + '</td> ' +
+                            '<td>' + result.po_referencia + '</td> </tr>';
+                        $(".recibo_individual_trim").html(html);
+
+                        var recibos_items = result.lista_recibos_item;
+                        html = '';
+                        $.each(recibos_items, function (key, ri) {
+                            inventario = ri.item;
+                            html += '<tr><td>' + inventario.po + '</td> ' +
+                                '<td>' + inventario.categoria_inventario + '</td> ' +
+                                '<td>' + inventario.descripcion + '</td> ' +
+                                '<td>' + ri.total + '</td> </tr>';
+                        });
+                        $(".recibo_items_individual_trim").html(html);
+                        $("#modal_trim_receive_details").modal("show");
+                        //$("#detalles_recibo").css('display', 'inline');
+                    });
+                    //$(".body_tabla_trim_recibido").html(html);
+                }
+            });
+        }
+       
+    });
+    /*******************TABLA**INICIO**********************************************************************************************************************************/   
+    /*******************ENTREGA**DE**TRIMS*****************************************************************************************************************************/
+    //btn_entregar_material
+    $(document).on("click", ".btn_entregar_material", function () {
+        //$("#load_trim").css('display', 'inline');
+        llenar_po_entrega();
+    });
+    function llenar_po_entrega() {
+        $.ajax({
+            url: '/Trims/buscar_pedidos',
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (result) {
+                var html = ''; //'<label class="">PO&nbsp;</label> <select class="form-control js-example-basic-single" id="caja_pedido" >';
+                html += '<option  value="0">Select</option>';
+                $.each(result, function (key, item) {
+                    html += '<option  value="' + item.id_pedido + '">' + item.pedido + '</option>';
+                });
+                $(".pedidos_entrega").append(html);
+                $("#load_trim").css('display', 'none');
+            }
+        });
+    }
+    var estilos_entrega;
+    $(document).on("change", "#caja_pedido_entrega", function () {
+        $.ajax({
+            url: '/Trims/buscar_trims_pedido',
+            contentType: 'application/json',
+            data: "{'pedido':'" + $("#caja_pedido_entrega").val() + "'}",
+            dataType: 'json',
+            type: 'post',
+            success: function (jsonData) {
+                estilos_entrega = jsonData.Data.trims_anteriores;
+                var html = '';               
+                agregar_trims_entrega();
+            }
+        });
+    });
+    var trims_entrega_seleccionados;
+    function agregar_trims_entrega() {
+        $("#load_trim").css('display', 'inline');
+        var html = '';
+        $.each(estilos_entrega, function (key, item) {
+            $.each(item.lista_requests, function (key, i) {
+                if (i.entregado < i.total){
+                    html += '<tr>';
+                    html += '<td>' + i.id_request + '</td>';
+                    html += '<td>' + item.estilo + '</td>';
+                    html += '<td>' + i.item + '</td>';
+                    html += '<td>' + (i.total-i.entregado) + '</td>';
+                    html += '<td><input  style="width:8em;" type="text" class=" form-control numeric " ondrop="return false;" onpaste="return false;" value="' + (i.total-i.entregado) + '" maxlength="10" id="caja_sm"></td>';
+                    html += '<td style="visibility:hidden; width:1em;"><input type="checkbox"  class="custom-control-input" id="cbrequest_' + i.id_request + '"></td>';
+                    html += '</tr>';
+                }               
+            });
+        }); 
+        trims_entrega_seleccionados = 0;
+        $(".rows_tabla_trims_entrega").html(html);
+        $("#load_trim").css('display', 'none');
+    }
+    $(document).on("click", "#tabla_trims_entrega tr", function () {
+        var row = this.rowIndex;
+        var chekbox = $('#tabla_trims_entrega tr:eq(' + row + ')  td:nth-child(1)').html();
+        if (this.style.background == "" || this.style.background == "white") {
+            $("#cbrequest_" + chekbox).prop('checked', true);
+            $(this).css('background', '#46a772');
+            $(this).css('color', 'white');
+            trims_entrega_seleccionados++;
+        } else {
+            $("#cbrequest_" + chekbox).prop('checked', false);
+            $(this).css('background', 'white');
+            $(this).css('color', 'black');
+            trims_entrega_seleccionados--;
+        }
+    }); 
+    var cantidad_e, request_e, nombre_entrega_e, nombre_recibe_e,original_e;
+    function guardar_entrega(event) {
+        var error = 0, error_cantidades = 0;
+        cantidad_e = ''; request_e = ''; nombre_entrega_e = '', nombre_recibe_e = ''; original_e = '';
+        $(".entrega_item").each(function () {
+            var id = $(this).attr('id');
+            if ($(this).val() == '' ) {
+                $("#" + id).css('border', '2px solid #e03f3f');
+                error++;
+            } else {
+                $("#" + id).css('border', '1px solid #cccccc');
+            }
+        });
+        if (trims_entrega_seleccionados == 0) { error++; }  
+        $("#load_trim").css('display', 'inline');
+        $('#tabla_trims_entrega tbody tr').each(function () {
+            if ($(this).find('td:eq(5) input').is(":checked")) {
+                if (parseFloat($(this).find('td:eq(3) ').html()) < parseFloat($(this).find('td:eq(4) input').val())) { error_cantidades++; }
+                if (parseFloat($(this).find('td:eq(4) input').val())==0) { error_cantidades++; }
+                if ($(this).find('td:eq(4) input').val()=='') { error_cantidades++; }
+                request_e += "*" + $(this).find('td:eq(0) ').html();
+                original_e += "*" + $(this).find('td:eq(3) ').html();
+                cantidad_e += "*" + $(this).find('td:eq(4) input').val();                
+            }
+        });
+        nombre_entrega_e = $("#caja_nombre_entrega").val();
+        nombre_recibe_e = $("#caja_nombre_recibe").val();
+        if (error_cantidades != 0) { error++;}
+        if (trims_entrega_seleccionados == 0) { error++;}
+        if (error == 0) {
+            enviar_datos_entrega();
+            $("#load_trim").css('display', 'none');
+        } else {
+            $("#load_trim").css('display', 'none');
+            if (trims_entrega_seleccionados == 0) { alertify.alert('Error!', 'Select an item, please'); }
+            else {
+                if (error_cantidades != 0) {
+                    alertify.alert('Error!', 'Check your quantities, please');
+                } else {
+                    alertify.alert('Error!', 'Check empty fields, please');
+                }
+            } 
+            event.preventDefault();
+            return false;
+        }
+    }
+    function enviar_datos_entrega() {
+        $("#load_trim").css('display', 'inline');
+        $.ajax({
+            url: '/Trims/guardar_entrega',
+            data: "{'pedido':'" + $("#caja_pedido_entrega").val() + "','request':'" + request_e + "','cantidad':'" + cantidad_e + "','entrega':'" + nombre_entrega_e + "','recibe':'" + nombre_recibe_e + "','original':'" + original_e + "'}",
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (jsonData) {
+                $("#caja_nombre_entrega").val("");
+                $("#caja_nombre_recibe").val("");
+                $("#modal_formulario_entrega").modal("hide");
+                $("#load_trim").css('display', 'none');
+                $(".rows_tabla_trims_entrega").html("");
+                $("#caja_pedido_entrega").val("");
+            }
+        });
+    }
+    function buscar_entregas_fechas(event) {
+        if ($("#caja_inicio_entrega").val() != '' && $("#caja_final_entrega").val() != '') {
+            $.ajax({
+                url: '/Trims/buscar_entregas',
+                data: "{'inicio':'" + $("#caja_inicio_entrega").val() + "','final':'" + $("#caja_final_entrega").val() + "'}",
+                contentType: 'application/json',
+                dataType: 'json',
+                type: 'post',
+                success: function (result) {
+                    //<tr><th>Date</th><th>Deliver</th><th>Receive</th><th>Order</th><th>Item</th><th>Total</th></tr>
+                    var html = '';
+                    $.each(result, function (key, item) {
+                        var items = 0;
+                        html += '<tr>';
+                        $.each(item.lista_request, function (key, i) { items++; });
+                        html += '<td rowspan="' + items + '" style="vertical-align:middle;">' + item.fecha + '</td>';
+                        html += '<td rowspan="' + items + '" style="vertical-align:middle;">' + item.entrega + '</td>';
+                        html += '<td rowspan="' + items + '" style="vertical-align:middle;">' + item.recibe + '</td>';
+                        html += '<td rowspan="' + items + '" style="vertical-align:middle;">' + item.pedido + '</td>';
+                        $.each(item.lista_request, function (key, i) {  
+                            html += '<td>' + i.item + '</td>';
+                            html += '<td>' + i.total + '</td>';                         
+                            html += '</tr>';                 
+                        });
+                        
+                    }); 
+                    $(".rows_tabla_historial_entregas").html(html);
+                }
+            });
+           
+        } else {          
+            alertify.alert('Error!', 'Check empty fields, please');
+            event.preventDefault();
+            return false;
+        }
+    }
+    $(document).on("click", ".close", function () {
+        $('input').val('');
+    }); 
+    /*******************ENTREGA**DE**TRIMS*****************************************************************************************************************************/
+    /*******************C*O*L*O*R*E*S***********************************************************************************************************************************/
+    $(document).on("dblclick", "#tabla_ordenes_inicio tr", function () {           
+        var row = this.rowIndex;
+        if (row != 0) {
+            obtener_informacion_trims_orden($('#tabla_ordenes_inicio tr:eq(' + row + ') td:eq(0)').html());
+            $("#modal_trim_state").modal("show");
+        }
+    });
+    function obtener_informacion_trims_orden(pedido) {
+        $("#load_trim").css('display', 'inline');
+        $.ajax({
+            url: '/Trims/obtener_estado_total_pedido',
+            data: "{'pedido':'" +pedido + "'}",
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (p) {
+                var html = '';
+                $("#titulo_colores").html(p.pedido);
+                if (p.id_customer == 1) {
+                    $('#tabla_trim_state_po tr:eq(0) td:eq(1)').css("background-color", "#ffcbe5");
+                } 
+                $('#tabla_trim_state_po tr:eq(0) td:eq(1)').html(p.customer);
+                $('#tabla_trim_state_po tr:eq(0) td:eq(3)').html(p.ship_date);
+                $('#tabla_trim_state_po tr:eq(1) td:eq(1)').html(p.gender);
+                var empaque = '';
+                $.each(p.lista_empaque, function (key, e) {
+                    if (e.tipo_empaque == 1) {
+                        empaque += '<p>BP';
+                        $.each(e.lista_ratio, function (key, lr) { 
+                            empaque += ' '+lr.talla+':'+lr.ratio +' /';                            
+                        });                        
+                    } else {
+                        empaque += '<p>PPK';
+                        $.each(e.lista_ratio, function (key, lr) {
+                            empaque += ' ' + lr.ratio + '&nbsp;';
+                        }); 
+                    } 
+                    empaque += '</p>';
+                });
+                $.each(p.lista_assort, function (key, item) { //ASSORMENTS EN LISTA DE ESTILOS                    
+                    empaque += '<p>ASSORT '+item.cartones+' Cartons</p>';
+                });
+                $('#tabla_trim_state_po tr:eq(1) td:eq(3)').html(empaque);
+                //<tr><th>Family</th><th>Style</th><th>Size</th><th>Item</th><th>Total</th><th>Received</th><th>Audited</th><th>MP Number</th><th>Receive date</th>STATUS</tr>
+                $.each(p.lista_families, function (key, item) {  
+                    var items = 0;
+                    $.each(item.lista_requests, function (key, x) { items++; });
+                    //html += '<tr>';
+                    if (items == 0) {
+                        //html += '';
+                        html += '<tr><td style="vertical-align:middle;  " class="cabecera_tabla2" >' + item.family_trim + '</td>';
+                        html += '<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>';                        
+                       // html += '';
+                    } else {
+                        html += '<tr>';
+                        html += '<td rowspan="' + items + '" style="vertical-align:middle; " class="cabecera_tabla2">' + item.family_trim + '</td>'; 
+                        $.each(item.lista_requests, function (key, i) {
+                            var color = '';
+                            if (i.id_estado == 1) { color = '#ffff7a'; }
+                            else {
+                                if (i.id_estado == 2) { color = '#ff8585'; }
+                                else { color = '#aefcae'; }    
+                            }                                                   
+                            html += '<td style="background:' + color + '; border: none;" >' + i.estilo + '</td>';
+                            html += '<td style="background:' + color + '; border: none;" >' + i.talla + '</td>';
+                            html += '<td style="background:' + color + '; border: none;" >' + i.item + '</td>';
+                            html += '<td style="background:' + color + '; border: none;" >' + i.total + '</td>';
+                            html += '<td style="background:' + color + '; border: none;" >' + i.cantidad + '</td>';                            
+                            if (i.id_inventario == 0) {
+                                html += '<td style="background:' + color + '; border: none;" ></td><td style="background:' + color + '; border: none;" ></td>';
+                                //html += '';
+                            } else {
+                                html += '<td style="background:' + color + '; border: none;" >' + i.recibo_item.mp_number + '</td>';
+                                html += '<td style="background:' + color + '; border: none;" >' + i.recibo_item.fecha + '</td>';
+                            }
+                            html += '<td style="background:' + color + '; border: none;" >' + i.estado + '</td>';
+                            html += '</tr>';
+                        });
+                    }                     
+                });
+                $(".rows_tabla_trim_state_family").html(html);
+                $("#load_trim").css('display', 'none');
+            }
+        });
+    }
+    /*******************C*O*L*O*R*E*S***********************************************************************************************************************************/
+    /*******************E*X*C*E*L***************************************************************************************************************************************/
+    function excel_estados_pedidos_trim() {
+        if ($("#caja_estado_inicio").val() != '' && $("#caja_estado_final").val() != '') {
+            var dateReg = /([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))/;
+            if (dateReg.test($("#caja_estado_inicio").val()) && dateReg.test($("#caja_estado_final").val())  ) {
+                if (Date.parse($("#caja_estado_inicio").val()) <= Date.parse($("#caja_estado_final").val())) {
+                    $.ajax({
+                        url: '/Trims/sesiones_fechas',
+                        data: "{'inicio':'" + $("#caja_estado_inicio").val() + "','final':'" + $("#caja_estado_final").val() + "'}",
+                        contentType: 'application/json',
+                        dataType: 'json',
+                        type: 'post',
+                        success: function (jsonData) {                            
+                        }
+                    });
+                    $("#espera_t").css('display', 'inline');
+                    var boton = document.getElementById('link_excel_estados_trim_fechas');
+                    setTimeout(function () { $("#espera_t").css('display', 'none'); }, 2000);
+                    boton.click();
+                } 
+            }
+        }
+    }
+    /*******************E*X*C*E*L***************************************************************************************************************************************/
+</script>
+<a id="link_trim_card" href="@Url.Action("trim_card", "Trims")" style="visibility:hidden;">Daily</a>
+<a id="link_excel_estados_trim_fechas" href="@Url.Action("excel_trims_estados_fechas", "Trims")" style="visibility:hidden;">Daily</a>
+<style>
+
+    .cabecera_tabla2 {
+        /*background:#3479bf; #46a772*/
+        background: white;
+        color: #3479bf;
+        pointer-events: none;
+        cursor: not-allowed;
+    }
+    .cabecera_tabla {
+        /*background:#3479bf; #46a772*/
+        background: #3479bf;
+        color: white;
+        pointer-events: none;
+        cursor: not-allowed;
+    }
+
+    .select2-container--default .select2-selection--single {
+        display: block !important;
+        /*width: 100% !important;*/
+        height: 34px !important;
+        padding: 6px 12px !important;
+        font-size: 14px !important;
+        line-height: 1.42857143 !important;
+        color: #555 !important;
+        background-color: #fff !important;
+        background-image: none !important;
+        border: 1px solid #ccc !important;
+        border-radius: 4px !important;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075) !important;
+        box-shadow: inset 0 1px 1px rgba(0,0,0,.075) !important;
+        -webkit-transition: border-color ease-in-out .15s,-webkit-box-shadow ease-in-out .15s !important;
+        -o-transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s !important;
+        transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s !important;
+    }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #444;
+            line-height: 20px;
+        }
+    .modal-dialog {
+        width: 75% !important;
+        padding: 2em;
+        height: 90% !important;
+        min-height: 90% !important;
+    }
+
+    .modal-content {
+        height: 90% !important;
+    }
+
+    .modal-lg {
+        max-width: 80% !important;
+    }
+
+    a {
+        text-decoration: none !important;
+    }
+
+    .boton_barra_menu, .btn-info {
+        color: #fff;
+        background-color: #3479bf !important;
+        border-color: #3479bf !important;
+    }
+
+    .modal {
+        /*z-index: 4 !important;*/
+    }
+
+    .dataTables_filter {
+    }
+
+    .dropbtn {
+        background-color: #3479bf;
+        color: white;
+        padding: 16px;
+        /*padding: 0.40em;*/
+        font-size: 18px;
+        border: none;
+    }
+
+    .dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: white;
+        color: black;
+        min-width: 160px;
+        box-shadow: 1px 5px 25px 1px rgba(0,0,0,0.2);
+        z-index: 1;
+    }
+
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+    .menu {
+        background: #3479bf;
+        border-radius: 5px;
+        border: solid 1px #3479bf;
+        margin-bottom: .5em;
+        margin: 1em;
+    }
+
+    .dropdown-content a:hover {
+        /*background-color: #f1f1f1;
+        color: black;*/
+        background-color: #61b363;
+        color: white;
+    }
+
+    .dropdown:hover .dropdown-content {
+        display: block;
+    }
+
+
+    .modal-header-primary {
+        color: #fff;
+        padding: 9px 15px;
+        border-bottom: 1px solid #eee;
+        background-color: #3479bf;
+        -webkit-border-top-left-radius: 5px;
+        -webkit-border-top-right-radius: 5px;
+        -moz-border-radius-topleft: 5px;
+        -moz-border-radius-topright: 5px;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+    }
+
+    .x {
+        transition: transform .25s ease-in-out;
+        color: white !important;
+    }
+
+        .x:hover {
+            transform: rotate(180deg);
+            color: white !important;
+        }
+
+        .x:before {
+            transform: rotate(45deg);
+            transform-origin: center;
+        }
+
+        .x:after {
+            transform: rotate(-45deg);
+            transform-origin: center;
+        }
+    tr {
+    cursor:pointer;
+    }
+</style>
+<input type="hidden" id="total_blanks_hidden">
+<div id="load_trim" class="load">
+    <div id="spinner" class="imagen_loading" style=""></div>
+</div>
+<div id="espera_t" class="" style="display:none; z-index:999; position:absolute; top:0; left:0; width:100%; height:100%; background:white; opacity:0.6; ">
+    <div id="" class="" style="float:left; background-image:url('../../Content/img/gif/preloader.gif'); background-repeat: no-repeat; width:300px; height:160px; position:absolute; left:45%; top:25%; "></div>
+    <div id="" class="" style="float:left; font-size:2em; color:#3479bf; top:50%; position:absolute; left:36%; width:100%;">We are making the report, please wait a few seconds</div>
+</div>
+<div class="container-fluid" style="padding-left:7em; padding-right:3em;">
+    <h3>Trims</h3>
+    <div class="row">
+        <div class="menu">
+            <div class="dropdown">
+                <button class="dropbtn" type="button" href="#modal_formulario_nuevo_item" data-toggle="modal">
+                    New trim
+                </button>
+            </div>
+
+            <div class="dropdown">
+                <button class="dropbtn">Items</button>
+                <div class="dropdown-content">
+                    <a href="#modal_editar_item" data-toggle="modal" class="btn_editar_item">Modify</a>
+                </div>
+            </div>
+
+            <div class="dropdown">
+                <button class="dropbtn">Receives</button>
+                <div class="dropdown-content">
+                    <a href="#modal_recibir_transferencias" data-toggle="modal" class="btn_recibir_transferencia">Transfers</a>
+                    <a href="#modal_listado_recibos" data-toggle="modal" id="ver_recibos_trim">See receives</a>
+                </div>
+            </div>
+            <div class="dropdown">
+                <button class="dropbtn">Material</button>
+                <div class="dropdown-content">
+                    <a href="#modal_request" data-toggle="modal" id="ver_request">Requests</a>
+                    <a href="#modal_auditoria" data-toggle="modal" id="ver_auditoria">Audit</a>
+                    <a href="@Url.Action("excel_material_pedir", "Trims")">List</a>
+                </div>
+            </div>
+
+            <div class="dropdown">
+                <button class="dropbtn">Delivery</button>
+                <div class="dropdown-content">
+                    <a href="#modal_formulario_entrega" data-toggle="modal" class="btn_entregar_material">New delivery</a>
+                    <a href="#modal_listado_entregas" data-toggle="modal" class="btn_editar_item">Deliveries history</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="row" style="height:250px;">
+        <div style=" width: 45%; float:left; ">
+            <div class="form-group col-md-12 " style="margin-left:2em;">
+                <label class=" col-form-label" style="float:left;">Print Trim Card&nbsp;&nbsp;</label>
+                <input type="text" style="float:left;" placeholder="PO" class=" form-control validacion po" ondrop="return false;" onpaste="return false;" onkeypress="return revisar_po(event)" id="caja_po_trim_card">
+            </div>
+
+            <div class="panel" style=" height:200px; width:98%; margin-left:2em; overflow:auto; margin-right:1em;border: 1px solid #3479bf; ">
+                <div class="panel-heading"><label class=" col-form-label">Prim guide</label></div>
+                <table id="tabla_trims_inicio" class="table table-striped " style=" ">
+                    <thead class="cabecera_tabla_trims_inicio cabecera_tabla"><tr><th>AMT</th><th>Description</th><th>Minimum</th><th>Stock</th></thead>
+                    <tbody class="body_tabla_trims_inicio"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="panel" style="float:right; width: 50%; height:250px; overflow:auto; margin-right:2em;border: 1px solid #3479bf; ">
+            <div class="panel-heading"><label class=" col-form-label">To order</label></div>
+            <table id="tabla_trims_inicio" class="table table-striped " style=" ">
+                <thead class="cabecera_tabla_trims_inicio cabecera_tabla"><tr><th>AMT</th><th>Description</th><th>Minimum</th><th>Stock</th></thead>
+                <tbody class="body_tabla_trims_inicio"></tbody>
+            </table>
+        </div>
+    </div>
+       
+    <div class="row" style="height:300px; overflow:auto; width:100%; margin-left: 1em;">
+        <div class="panel" style="float:left; width: 45%; height:295px; overflow:auto; border: 1px solid #3479bf;">
+            <div class="panel-heading" style="height:3.2em;">
+                <label style="float:left;" class=" col-form-label">Trim status by order</label>
+                <input style="float:right;" type="text" ondrop="return false;" onpaste="return false;" class="form-control validacion " maxlength="30" onkeyup="busqueda_estado_pedido()" id="caja_busqueda_estado_pedido">
+            </div>
+            <div style="height: 40px; color:white; background:#3479bf;">
+                <label class=" col-form-label" style="padding-left:1em;">By dates</label>
+                <input type="text" autocomplete="false" style="float:right; width:20%; margin-right:1em;" placeholder="TO" class="form-control must_trans_edit  " ondrop="return false;" onpaste="return false;" onchange="excel_estados_pedidos_trim()" maxlength="10" id="caja_estado_final">
+                <input style="float:right; width:20%; margin-right:3em;" autocomplete="false" type="text" placeholder="FROM" ondrop="return false;" onpaste="return false;" class="form-control validacion " onchange="excel_estados_pedidos_trim()" maxlength="10" id="caja_estado_inicio">
+
+            </div>
+            <table id="tabla_ordenes_inicio" class="table table-striped " style=" ">
+                <thead class="cabecera_tabla_ordenes_inicio cabecera_tabla"><tr><th>#</th><th>Order</th><th>Total</th><th>Total received</th><th>Status</th></thead>
+                <tbody class="body_tabla_ordenes_inicio"></tbody>
+            </table>
+        </div>
+
+        <div class="panel" style="float:right; width: 52%;height:295px; overflow:auto; border: 1px solid #3479bf; margin-right: 1em;">
+            <div class="panel-heading">
+                <label class=" col-form-label">Trim</label>  
+                <input type="text" style="float:right; width:15%;" placeholder="DATE" class="form-control must_trans_edit  " ondrop="return false;" onpaste="return false;" onchange="llenar_tabla_trim_recibido_inicio()" id="caja_busqueda_fecha_trim_recibo">
+                <input style="float:right; width:20%; margin-right:1em;" type="text" placeholder="SEARCH" ondrop="return false;" onpaste="return false;" class="form-control validacion " maxlength="30" onkeyup="llenar_tabla_trim_recibido_inicio()" id="caja_busqueda_trim_recibido">
+            </div>   
+            <div style="padding:0px; margin:0px; color:white; background:#3479bf; text-align:center;">
+                <label id="mp_numbers_label" class=" col-form-label"></label>
+            </div>
+            <table id="tabla_trim_recibido" class="table table-striped " style=" ">
+                <thead class="cabecera_tabla_trim_recibido cabecera_tabla"><tr><th>#</th><th>Order</th><th>Style</th><th>Item</th><th>Date</th><th>Total</th><th>Audited</th></thead>
+                <tbody class="body_tabla_trim_recibido"></tbody>
+            </table>
+        </div>
+
+    </div>
+    
+</div>
+
+<div class="modal fade" id="modal_trim_state" data-target="#modal_trim_state">
+    <div class="modal-dialog" style="width:90% !important; padding:0px;">
+        <div class="modal-content" style="overflow:auto; width:100% !important; height:100% !important;">
+            <div class="modal-header orange  modal-header-primary">
+                <button type="button" class="close x " data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="titulo_colores"></h4>
+            </div>
+            <div class="modal-body " style="overflow:auto;">
+                <table id="tabla_trim_state_po" class="fold-table table table-striped table-hover ">
+                    <tr><td class="cabecera_tabla" style="border: none !important;">Customer</td><td style="border: none !important;"></td><td class="cabecera_tabla" style="border: none !important;">Ship date</td><td style="border: none !important;"></td></tr>
+                    <tr><td class="cabecera_tabla" style="border: none !important;">Gender</td><td style="border: none !important;"></td><td class="cabecera_tabla" style="border: none !important;">Packing</td><td style="border: none !important;"></td></tr>
+                </table>
+
+                <table id="tabla_trim_state_family" class="fold-table table table-striped table-hover ">
+                    <thead class="cabecera_tabla_trim_state_family" style="background:#3479bf; color:white;">
+                        <tr><th>Family</th><th>Style</th><th>Size</th><th>Item</th><th>Total</th><th>Received</th><th>MP Number</th><th>Receive date</th><th>Status</th></tr>
+                    </thead>
+                    <tbody class="rows_tabla_trim_state_family"></tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal_listado_entregas" data-target="#modal_listado_entregas">
+    <div class="modal-dialog" style="width:90% !important; padding:0px;">
+        <div class="modal-content" style="overflow:auto; width:100% !important; height:100% !important;">
+            <div class="modal-header orange  modal-header-primary">
+                <button type="button" class="close x" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title"><strong></strong>Receives and details</h4>
+            </div>
+
+            <div class="row" id="" style="padding:1em; ">
+                <div class="form-group col-sm-3 ">
+                    <label for="caja_inicio" class=" col-form-label ">From </label>
+                    <input type="text" class="form-control order " placeholder="SELECT DATE" onkeydown="upperCaseF(this)" ondrop="return false;" onpaste="return false;" maxlength="23" id="caja_inicio_entrega">
+                </div>
+                <div class="form-group col-sm-3 ">
+                    <label for="caja_final" class=" col-form-label ">To </label>
+                    <input type="text" class="form-control order " placeholder="SELECT DATE" onkeydown="upperCaseF(this)" ondrop="return false;" onpaste="return false;" maxlength="23" id="caja_final_entrega">
+                </div>
+                <div class="form-group col-sm-2  ">
+                    <br />
+                    <button type="button" style="margin-top: 0.5em; " class="btn btn-sm btn-success" onclick="buscar_entregas_fechas(event)" data-toggle="modal">Search</button>
+                </div>
+            </div>
+
+            <div class="modal-body " id="contenedor_modal_listado_recibos">
+                <table id="tabla_historial_entregas" class="fold-table table table-striped table-hover ">
+                    <thead class="cabecera_tabla_historial_entregas" style="background:#3479bf; color:white;">
+                        <tr><th>Date</th><th>Deliver</th><th>Receive</th><th>Order</th><th>Item</th><th>Total</th></tr>
+                    </thead>
+                    <tbody class="rows_tabla_historial_entregas"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal_formulario_entrega" data-target="#modal_formulario_entrega">
+    <div class="modal-dialog" style="width:90% !important; padding:0px;">
+        <div class="modal-content" style="overflow:auto; width:100% !important; height:100% !important;">
+            <div class="modal-header orange  modal-header-primary">
+                <button type="button" class="close x " data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title"><strong>New delivery</strong></h4>
+            </div>
+            <div class="modal-body " style="overflow:auto; ">
+                <div class="form-group">
+                    <div class="form-group col-md-3 ">
+                        <label for="caja_pedido_entrega">Order </label><br />
+                        <select class="form-control js-example-basic-single pedidos_entrega " style="width:100%;" id="caja_pedido_entrega"></select>
+                    </div>
+                    <div class="form-group col-sm-3 ">
+                        <label class=" col-form-label">Deliver: </label>
+                        <input type="text" class=" form-control validacion entrega_item" ondrop="return false;" onpaste="return false;" maxlength="150" id="caja_nombre_entrega">
+                    </div>
+                    <div class="form-group col-sm-3  ">
+                        <label class=" col-form-label">Receive: </label>
+                        <input type="text" class=" form-control validacion entrega_item" ondrop="return false;" onpaste="return false;" maxlength="10" id="caja_nombre_recibe">
+                    </div>
+                </div>
+                <table id="tabla_trims_entrega" class="fold-table table table-striped table-hover ">
+                    <thead class="cabecera_tabla_trims_entrega" style="background:#3479bf; color:white;">
+                        <tr>
+                            <th>#</th>
+                            <th>Style</th>
+                            <th>Item</th>
+                            <th>Total</th>
+                            <th>Quantity for delivery </th>
+                            <th style="visibility:hidden; width:1em;">CB</th>
+                        </tr>
+                    </thead>
+                    <tbody class="rows_tabla_trims_entrega"></tbody>
+                </table>
+                <button type="button" class="btn btn-success mb-2" id="boton_guardar_entrega" onclick="guardar_entrega(event)" style="margin-top:0.3em; float:right; margin-right:2em;">Save</button>
+
+            </div>
+            </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal_trim_receive_details" data-target="#modal_trim_receive_details">
+    <div class="modal-dialog" style="width:90% !important; padding:0px;">
+        <div class="modal-content" style="overflow:auto; width:100% !important; height:100% !important;">
+            <div class="modal-header orange  modal-header-primary">
+                <button type="button" class="close x " data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title"><strong>Receive information</strong></h4>
+            </div>
+            <div class="modal-body " style="overflow:auto; font-size: 1.5em;">
+
+                <table id="tabla_recibo_individual_trim" class="table table-striped results_recibos">
+                    <thead style="" class="cabecera_tabla">
+                        <tr><th>#</th><th>MP</th><th>Date</th><th>Items</th><th>Total</th><th>User</th><th>Office</th><th>Mill Po</th><th>PO Reference</th></tr>
+                    </thead>
+                    <tbody class="recibo_individual_trim"></tbody>
+                </table>
+                <table id="tabla_listado_items_recibo_trim" class="table table-striped results_recibos">
+                    <thead style="" class="cabecera_tabla">
+                        <tr><th>PO</th><th>Category</th><th>Description</th><th>Total</th></tr>
+                    </thead>
+                    <tbody class="recibo_items_individual_trim"></tbody>
+                </table>
+
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal_comparacion" data-target="#modal_comparacion">
+    <div class="modal-dialog" style="width:90% !important; padding:0px;">
+        <div class="modal-content" style="overflow:auto; width:100% !important; height:100% !important;">
+            <div class="modal-header orange  modal-header-primary">
+                <button type="button" class="close x " data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title"><strong>Comparison table</strong></h4>
+            </div>
+            <div class="modal-body " style="overflow:auto;">               
+                <div class="row" id="" style="">             
+                    <table id="tabla_comparacion_auditado" class="table table-striped ">
+                        <thead><tr><th>Order</th><th>Style</th><th>Item</th><th>Type</th><th>Total order</th><th>Receive date</th><th>Total receive</th><th>Status</th></tr></thead>
+                        <tbody class="body_tabla_comparacion_auditado"></tbody>
+                    </table>
+                </div>            
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal_editar_item" data-target="#modal_editar_item">
+    <div class="modal-dialog" style="width:90% !important; padding:0px;">
+        <div class="modal-content" style="overflow:auto; width:100% !important; height:100% !important;">
+            <div class="modal-header orange  modal-header-primary">
+                <button type="button" class="close x" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title"><strong>Modify</strong></h4>
+            </div>
+            <input type="hidden" id="id_trim_edicion">
+
+            <div class="row" style="margin:2em;">
+                <div class="form-group col-sm-10">
+                    <label for="caja_item_select" class=" col-form-label">Select </label>
+                    <select class="form-control js-example-basic-single descripciones_edit " style="width:25em;" id="caja_item_select"></select>
+                </div>
+            </div>
+
+            <div class="form-group" id="edicion_trim_catalogo" style="display:none;">
+                <div class="form-group col-sm-4">
+                    <label for="caja_trim_item" class=" col-form-label">Item</label>
+                    <input type="text" ondrop="return false;" onpaste="return false;" class="form-control validacion  edit_trim " maxlength="30" onkeydown="upperCaseF(this)" id="caja_trim_item_edit">
+                </div>
+                <div class="form-group col-sm-4">
+                    <label for="caja_descripcion" class=" col-form-label">Description</label>
+                    <input type="text" ondrop="return false;" onpaste="return false;" class="form-control validacion  edit_trim " maxlength="200" onkeydown="upperCaseF(this)" id="caja_descripcion_edit">
+                </div>
+                <div class="form-group col-sm-4">
+                    <label for="caja_family_trim" class=" col-form-label">Family trim</label>
+                    <input type="text" ondrop="return false;" onpaste="return false;" class="form-control validacion  edit_trim " maxlength="50" onkeydown="upperCaseF(this)" id="caja_family_trim_edit">
+                </div>
+                <div class="form-group col-sm-4">
+                    <label for="caja_unit_trim" class=" col-form-label">Unit</label>
+                    <input type="text" ondrop="return false;" onpaste="return false;" class="form-control validacion  edit_trim " maxlength="50" onkeydown="upperCaseF(this)" id="caja_unit_trim_edit">
+                </div>
+                <div class="form-group col-sm-4">
+                    <label for="caja_minimo_trim" class=" col-form-label">Minimum</label>
+                    <input type="text" ondrop="return false;" onpaste="return false;" class="form-control numeric  edit_trim " maxlength="50" onkeydown="upperCaseF(this)" id="caja_minimo_trim_edit" value="0">
+                </div>
+                <div class="form-group col-sm-3">
+                    <br />
+                    <button type="button" class="btn btn-primary mb-2" id="boton_guardar_trim" onclick="guardar_edicion_trim(event);">Save</button>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal_auditoria" data-target="#modal_auditoria">
+    <div class="modal-dialog" style="width:90% !important; padding:0px;">
+        <div class="modal-content" style="overflow:auto; width:100% !important; height:100% !important;">
+            <div class="modal-header orange  modal-header-primary">
+                <button type="button" class="close x" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title"><strong>Audit</strong></h4>
+            </div>
+
+            <div class="row" style="padding:2em; overflow:auto;">
+                <div class="col-md-6" id="div_recibo_audit" style="float:left;  height:700px;">
+                    <h3 style="color: #3479bf; font-weight: bold;">Warehouse</h3>
+                    <table id="tabla_items_recibidos" class="table table-striped ">
+                        <thead class="cabecera_tabla"><tr><th>PO</th><th>Style</th><th>Trim</th><th>Total</th><th style="visibility:hidden;"></th></tr></thead>
+                        <tbody class="body_tabla_items_recibidos"></tbody>
+                    </table>
+                </div>
+                <div class="col-md-6" id="div_edicion_audit" style="visibility:hidden;float:left; height:700px;">
+                    <h3 style="color: #3479bf; font-weight: bold;">Adjustment</h3>
+                    <table id="tabla_items_recibidos_modificar" class="table table-striped ">
+                        <thead class="cabecera_tabla"><tr><th></th><th>Item</th><th>Total</th><th>New total</th><th></th></tr></thead>
+                        <tbody class="body_tabla_items_recibidos_modificar"></tbody>
+                    </table>
+                    <button type="button" class="btn btn-success mb-2" id="boton_guardar_auditoria" onclick="enviar_correcciones(event)" style="margin-top:0.3em; float:right;">Save</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal_request" data-target="#modal_request">
+    <div class="modal-dialog" style="width:90% !important; padding:0px;">
+        <div class="modal-content" style="overflow:auto; width:100% !important; height:100% !important;">
+            <div class="modal-header orange  modal-header-primary">
+                <button type="button" class="close x cerrar_material_request" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title"><strong></strong>Material request</h4>
+            </div>
+            <div class="modal-body " style="overflow:auto;">
+                <div class="row" style="">
+                    <div class="form-group">
+                        <div class="form-group col-md-2 ">
+                            <label for="caja_pedido_request">Order </label>
+                            <select class="form-control js-example-basic-single pedidos_request " style="width:100%;  " id="caja_pedido_request"></select>
+                        </div>
+                        <div class="form-group col-md-3" id="div_estilos_request" style="display:none;"></div>
+                        <div class="form-group col-md-2" id="div_tallas_request" style="display:none;"></div>
+                        <div class="form-group col-md-3" id="div_item_request" style="visibility:hidden;">
+                            <label for="caja_item_request">Item </label>
+                            <select class="form-control js-example-basic-single items_request " style="width:100%; " id="caja_item_request"></select>
+                        </div>
+                        <div class="form-group col-1">
+                            <br />
+                            <button type="button" class="btn btn-success mb-2" id="boton_agregar_item_tabla" onclick="agregar_item_tablas()" style="visibility:hidden; margin-top:0.3em;">Add</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" id="div_tabla_trim_seleccionado" style="display:none;">
+                    <h4 style="border-bottom: solid 1px #3c763d;color: #3c763d; font-weight: bold;">Trims</h4>
+                    <table id="tabla_trim_seleccionado" class="table table-striped ">
+                        <thead><tr><th>Style</th><th>Trim</th><th>Quantity</th><th>Blank</th><th>Total</th><th></th><th style="visibility:hidden;width:.5em;"></th><th style="visibility:hidden;width:.5em;"></th><th style="visibility:hidden;width:.5em;"></th><th style="visibility:hidden;width:.5em;"></th><th style="visibility:hidden;width:.5em;"></th></tr></thead>
+                        <tbody class="body_tabla_trim_seleccionado"></tbody>
+                    </table>
+                </div>
+                <div class="row" id="div_tabla_cajas_seleccionadas" style="display:none;">
+                    <h4 style="border-bottom: solid 1px #3c763d; color: #3c763d; font-weight: bold;">Boxes</h4>
+                    <table id="tabla_cajas_seleccionadas" class="table table-striped ">
+                        <thead><tr><th>Style</th><th>Box</th><th>Quantity</th><th></th><th style="visibility:hidden; width:.5em;"></th><th style="visibility:hidden;width:.5em;"></th></tr></thead>
+                        <tbody class="body_tabla_cajas_seleccionadas"></tbody>
+                    </table>
+                </div>
+                <div class="row">
+                    <button type="button" class="btn btn-success mb-2" id="boton_guardar_request" onclick="guardar_request(event)" style="display:none; margin-top:0.3em; float:right; margin-right:2em;">Save</button>
+                </div>
+            </div>              
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal_listado_recibos" data-target="#modal_listado_recibos">
+    <div class="modal-dialog" style="width:90% !important; padding:0px;">
+        <div class="modal-content" style="overflow:auto; width:100% !important; height:100% !important;">
+            <div class="modal-header orange  modal-header-primary">
+                <button type="button" class="close x" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title"><strong></strong>Receives and details</h4>
+            </div>
+
+            <div class="row" id="" style="padding:1em; ">
+                <div class="form-group col-sm-3 ">
+                    <label for="caja_inicio" class=" col-form-label ">From this date</label>
+                    <input type="text" class="form-control order " onkeydown="upperCaseF(this)" ondrop="return false;" onpaste="return false;" maxlength="23" id="caja_inicio">
+                </div>
+                <div class="form-group col-sm-3 ">
+                    <label for="caja_final" class=" col-form-label ">To this date</label>
+                    <input type="text" class="form-control order " onkeydown="upperCaseF(this)" ondrop="return false;" onpaste="return false;" maxlength="23" id="caja_final">
+                </div>
+                <div class="form-group col-sm-2  ">
+                    <br />
+                    <button type="button" style="margin-top: 0.1em; " class="btn btn-sm btn-success" onclick="buscar_recibos_fechas(event)" data-toggle="modal">Search</button>
+                </div>
+            </div>
+
+            <div class="modal-body " id="contenedor_modal_listado_recibos">
+                <table id="tabla_recibos_trim" class="fold-table table table-striped table-hover ">
+                    <thead class="cabecera_tabla_recibos_trim" style="background:#3479bf; color:white;">
+                        <tr><th>#</th><th>DATE</th><th>MP</th><th>ITEM</th><th>ORDER</th><th>PO</th><th>TOTAL</th></tr>
+                    </thead>
+                    <tbody class="rows_tabla_recibos_trim"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal_formulario_nuevo_item" data-target="#modal_formulario_nuevo_item">
+    <div class="modal-dialog">
+        <div class="modal-content" style="overflow:auto;">
+            <div class="modal-header orange modal-header-primary">
+                <button type="button" class="close x" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+
+                </button>
+                <h4 class="modal-title"><strong></strong>New item</h4>
+
+            </div>
+            <div class="modal-body">
+                @{
+                    Html.RenderPartial("formulario_nuevo_item", "Almacen");
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal_recibir_transferencias" data-target="#modal_recibir_transferencias">
+    <div class="modal-dialog">
+        <div class="modal-content" style="overflow:auto; width:100% !important; height:100% !important;">
+            <div class="modal-header orange modal-header-primary">
+                <button type="button" class="close x" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title"><strong></strong>Receive transfer</h4>
+            </div>
+            <div class="modal-body">
+                <div id="contenedor_modal_recibir_transferencia"></div>
+                @{
+                    //Html.RenderAction("edicion_inventario","Almacen");
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $(".btn_recibir_transferencia").click(function () {
+        $("#contenedor_modal_recibir_transferencia").load("/Almacen/lista_recepcion_transferencias", function () {
+            $("#modal_recibir_transferencias").modal("show");
+        });
+    });
+</script>

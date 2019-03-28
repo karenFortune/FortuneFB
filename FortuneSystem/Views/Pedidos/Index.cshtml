@@ -1,0 +1,329 @@
+﻿@model IEnumerable<FortuneSystem.Models.Pedidos.OrdenesCompra>
+
+@{
+    ViewBag.Title = "RECEPTION PO";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    tr.highlighted td {
+        background: #b3e0ff;
+    }
+
+    #tablaPO thead {
+        color: #fff;
+        background-color: #006bb3;
+    }
+
+    #tablaPO th {
+        color: #fff;
+        background-color: #006bb3;
+    }
+
+    #nuevo-usuario {
+        margin-left: 30px;
+        margin-top: 1px;
+        width: 180px;
+        height: 40px;
+        border: none;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .btnPdf {
+        margin-left: 30px;
+        margin-top: 1px;
+        width: 70px;
+        height: 28px;
+        border: none;
+        font-size: 25px;
+        font-weight: 600;
+    }
+
+    /*#botones {
+        padding: 20px;
+        font-size: 14px;
+        font-weight: 600;
+        margin-left: 1250px;
+        margin-top: 1px;
+        display:inline-block;
+
+    }*/
+
+    .buttons-pdf {
+        background-color: red;
+        color: white;
+
+    }
+
+    .datatable, .no-footer {
+        width: auto !important;
+    }
+
+    input[type=text], #selectFechas {
+        width: 60%;
+        padding: 5px 20px;
+        margin: 8px 0;
+        display: inline-block;
+        border: 1px solid #ccc;
+        border-radius: 2px;
+        box-sizing: border-box;
+    }
+
+    .edit_driver {
+    }
+
+        .edit_driver:hover {
+            color: white !important;
+            background: #3479bf !important;
+            border-radius: 15px;
+        }
+
+
+    body .editar {
+        width: 120% !important;
+        margin-left: -20% !important;
+    }
+</style>
+@{
+    if (TempData["itemEditar"] != null)
+    {
+        <script type="text/javascript">
+            alertify.set('notifier', 'position', 'top-right');
+            alertify.notify(@Html.Raw(Json.Encode(TempData["itemEditar"])), 'success', 5, null);
+
+        </script>
+    }
+    if (TempData["itemEditarError"] != null)
+    {
+        <script type="text/javascript">
+            alertify.set('notifier', 'position', 'top-right');
+            alertify.notify(@Html.Raw(Json.Encode(TempData["itemEditarError"])), 'error', 5, null);
+
+        </script>
+    }
+
+    if (TempData["cancelarPO"] != null)
+    {
+        <script type="text/javascript">
+            alertify.set('notifier', 'position', 'top-right');
+            alertify.notify(@Html.Raw(Json.Encode(TempData["cancelarPO"])), 'success', 5, null);
+
+        </script>
+    }
+
+    <script type="text/javascript">
+        function confirmar() {
+            var confirm = alertify.confirm('Confirmacion', '¿Desea revisar el  Estilo?', null, null).set('labels', { ok: 'Aceptar', cancel: 'Cancelar' });
+
+            confirm.set({ transition: 'slide' });
+
+            confirm.set('onok', function () {
+                $("#crearTallas").hide();
+                $('#nuevoItem').prop("disabled", false);
+                limpiarFormItems();
+                alertify.success('Has confirmado');
+            });
+
+            confirm.set('oncancel', function () {
+                alertify.notify('Se finalizo el registro de la orden de compra.', 'success', 5, null);
+                setTimeout("redireccionarPagina()", 800);
+            });
+        }
+
+    </script>
+
+}
+
+</div>
+    <div class="modal fade" id="editarEstiloModal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="editarEstiloModal" style="width: 110% !important">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content editar">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="exampleModalLabel">EDIT PO</h2>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <div id="ContenedorEditarModal"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary " data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+<div class="container-fluid" style="margin-left:20em; margin-right:10em; ">
+    <div class="panel panel-primary" id="listaPO">
+        <div class="panel-heading">
+            <h2>Purchase Orders</h2>
+        </div>
+        <br />
+
+
+        @if ((int)Session["idCargo"] == 1 || (int)Session["idCargo"] == 6)
+        {
+            <p>
+                <a href="@Url.Action("CrearPO")">
+                    <button type="button" class="btn btn-primary" id="nuevo-usuario" data-toggle="modal">
+                        <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> ADD NEW PO
+                    </button>
+                </a>
+
+                <br />
+                <br />
+            </p>
+        }
+        <p id="date_filter">
+            <span id="date-label-from" class="date-label">
+                &nbsp;&nbsp; Range Date:<select id="selectFechas">
+                    <option value="0">Select an option</option>
+                    <option value="3">Cancel Date</option>
+                    <option value="4">Orden Date</option>
+                </select>&nbsp;&nbsp;From:
+            </span><input class="date_range_filter date" type="text" id="datepicker_from" />
+            <span id="date-label-to" class="date-label">&nbsp;&nbsp;To:<input class="date_range_filter date" type="text" id="datepicker_to" />
+
+        </p>
+
+        @*<p id="date_filter_fo">
+                 <span id="date-label-from_fo" class="date-label">From Range Date Orden: </span><input class="date_range_filter date" type="text" id="datepicker_from_fo" />
+                <span id="date-label-to_fo" class="date-label">To:<input class="date_range_filter date" type="text" id="datepicker_to_fo" />
+        </p>*@
+
+
+        <div id="botones"></div>
+        <br />
+        <br />
+        <div id="div_tabla_estilos" style="width: 100%; height:650px; overflow:auto; ">
+            <table align="center" class="table table-striped" id="tablaPO">
+                <thead>
+                    <tr>
+
+                        <th>
+                            @Html.DisplayNameFor(model => model.PO)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.VPO)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.CatClienteFinal.NombreCliente)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.FechaCancel)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.FechaOrden)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.TotalUnidades)
+                        </th>   
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr ondblclick="location.href = '@(Url.Action("Detalles", "Pedidos", new { id = item.IdPedido }))'">
+
+                            <td>
+                                @Html.DisplayFor(modelItem => item.PO)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.VPO)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.CatClienteFinal.NombreCliente)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.FechaCancel)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.FechaOrden)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.TotalUnidades)
+                            </td>
+                            <td>
+                                @*<a href="@Url.Action("Detalles", "Pedidos",  new { id = item.IdPedido }) " class="btn edit_driver edicion_driver" Title="Details Style"> <span class="glyphicon glyphicon-search " aria-hidden="true" style="padding: 0px !important;"></span></a>*@
+                                @if ((int)Session["idCargo"] == 15 || (int)Session["idCargo"] == 1 || (int)Session["idCargo"] == 6)
+                                {
+
+                                    <a href="#" data-value="@item.IdPedido" class="btn edit_driver edicion_driver btnEdit" Title="Edit PO"> <span class="glyphicon glyphicon-check " aria-hidden="true" style="padding: 0px !important;"></span></a>
+                                    <a href="@Url.Action("Revision", "Pedidos", new { id = item.IdPedido }) " class="btn edit_driver edicion_driver" Title="Check PO" onclick="event.preventDefault();ConfirmRev(this)"> <span class="glyphicon glyphicon-paste " aria-hidden="true" style="padding: 0px !important;"></span></a>
+                                    <a href="@Url.Action("CancelarPO", "Pedidos", new { id = item.IdPedido }) " class="btn edit_driver edicion_driver" Title="Cancel PO" onclick="event.preventDefault();ConfirmCancel(this)"> <span class="glyphicon glyphicon-ban-circle " aria-hidden="true" style="padding: 0px !important;"></span></a>
+
+                                    if (item.Historial == 1)
+                                    {
+                                        <a href="@Url.Action("HistorialPedidos", "Pedidos", new { id = item.IdPedido }) " class="btn edit_driver edicion_driver" Title="Record PO"> <span class="glyphicon glyphicon-share " aria-hidden="true" style="padding: 0px !important;"></span></a>
+                                    }
+
+                                    //@Html.ActionLink(" ", null, new { id = item.IdPedido }, new { @class = "btn edit_driver edicion_driver fa fa-file-pdf-o fa-lg", @Title = "Report", onclick = "imprimir_reporte_po('" + item.IdPedido + " ')" })
+                                }
+
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+    $('#tablaPO tr').click(function (e) {
+        $('#tablaPO tr').removeClass('highlighted');
+        $(this).addClass('highlighted');
+    });
+    function ConfirmRev(a) {
+        alertify.confirm("Are you sure you want to perform a review?", function (result) {
+            location.href = a;
+        },
+            function () {
+                $("#loading").css('display', 'none');
+            }).set({
+                title: "Confirmation"
+            });
+
+
+    }    
+    function ConfirmCancel(a) {
+
+        alertify.confirm("Are you sure you want to cancel PO ?", function (result) {
+            location.href = a;
+        },
+            function () {
+                $("#loading").css('display', 'none');
+            }).set({
+                title: "Confirmation"
+            });
+    }
+
+    $(document).on('click', '.btnEdit', function () {
+        $("#loading").css('display', 'none');        
+        var id = $(this).data("value");
+        $("#editarEstiloModal").modal("show");
+        $("#ContenedorEditarModal").load("/Pedidos/EditarPO/" + id, function () {           
+            $("#IdPedido").val(id);           
+        });
+    });
+
+    function imprimir_reporte_po(id) {
+        $.ajax({
+            url: "/Pedidos/Imprimir_Reporte_PO/",
+            data: "{'id':'" + id + "'}",
+            dataType: 'json',
+            contentType: 'application/json',
+            type: 'post',
+            success: function () {
+                imprimir_reporte();
+            }
+        });
+    }
+    function imprimir_reporte() {
+        var h = screen.height - 100;
+        var w = screen.width - 30;
+        window.open('/PDF/Imprimir_Reporte_PO', '_blank', 'toolbar=0,location=0,menubar=0,width=' + w + ',height=' + h + ', fullscreen=yes');
+        $("#loading").css('display', 'none');
+    }
+
+
+</script>

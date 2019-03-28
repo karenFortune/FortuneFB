@@ -1,0 +1,509 @@
+﻿@{
+    // var cargo = int.Parse(TempData["Data"].ToString());
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - FORTUNE</title>
+
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    <link type="text/css" href="~/Content/DataTables/DataTables-1.10.18/css/jquery.dataTables.min.css" rel="stylesheet" />
+    <link type="text/css" href="~/Content/DataTables/DataTables-1.10.18/css/jquery.dataTables.css" rel="stylesheet" />
+    <link type="text/css" href="~/Content/DataTables/Buttons-1.5.2/css/buttons.dataTables.min.css" rel="stylesheet" />
+    <link type="text/css" href="~/Content/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+    <link type="text/css" href="~/Content/load.css" rel="stylesheet" />
+    <link href="~/Content/themes/base/jquery-ui.min.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-3.3.1.min.js"></script>
+    <link href="~/Content/select2-4.0.5/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="~/Content/select2-4.0.5/dist/js/select2.min.js"></script>
+    <link rel="stylesheet" href="~/Content/alertifyjs/css/alertify.min.css" />
+    <link rel="stylesheet" href="~/Content/alertifyjs/css/themes/default.min.css" />
+    <script src="~/Content/alertifyjs/alertify.min.js"></script>
+    <link rel="stylesheet" href="~/Content/bootstrap-table-master/dist/bootstrap-table.min.css" />
+    <script src="~/Content/bootstrap-table-master/dist/bootstrap-table.min.js"></script>
+    <script src="~/Content/bootstrap-table-master/dist/locale/bootstrap-table-zh-CN.min.js"></script>
+    <script type="text/javascript" src="~/Content/TableDnD-master/js/jquery.tablednd.js"></script>
+
+    <style>
+        footer {
+            width: 79%;
+            height: 5%;
+            position: relative;
+            bottom: 20%;
+            left: 15%;
+        }
+    </style>
+    
+</head>
+<body>
+
+    @*<div class="container-fluid">
+            @{
+                Html.RenderPartial("Header");
+            }
+        </div>*@
+
+    <nav class="main-menu">
+        <p class="text-small text-center menu">MENU </p>
+
+        <ul>
+
+            @*<li><a><i class="glyphicon glyphicon-home fa_menu"></i> <span class="nav-text">Customer Service</span></a></li>
+                <p class="text-small menu-title text-center"></p>*@
+            <br />
+            <br />
+            @if (Session["idCargo"] == null || (int)Session["idCargo"] == 0)
+            {
+                <script type="text/javascript">
+                var url = '@Url.Action("Login", "Login")';
+                window.location.href = url;
+                </script>
+            }
+            else if ((int)Session["idCargo"] == 1)
+            {
+
+                <li class="has-subnav"><a href="@Url.Action("Index", "catalogos")" id="opc"> <i class="glyphicon glyphicon-book fa_menu"></i> <span class="nav-text">Catalogs</span></a></li>
+                <li class="has-subnav"><a href="@Url.Action("Index", "usuarios")" id="opc"> <i class="glyphicon glyphicon-user fa_menu"></i> <span class="nav-text">Users</span></a></li>
+                <li class="has-subnav"><a href="@Url.Action("Index", "roles")" id="opc"> <i class="glyphicon glyphicon-cog fa_menu"></i> <span class="nav-text">Roles</span></a></li>
+                <li class="has-subnav"><a href="@Url.Action("Index", "pedidos")" id="opc"> <i class="glyphicon  glyphicon-list-alt fa_menu"></i> <span class="nav-text">New PO</span></a></li>
+                <li class="has-subnav"><a href="@Url.Action("Index", "almacen")"> <i class="glyphicon glyphicon-download-alt fa_menu"></i> <span class="nav-text">Warehouse</span></a></li>
+                <li class="has-subnav"><a href="@Url.Action("Index", "printshop")" id="opc"> <i class="glyphicon glyphicon-tint fa_menu"></i> <span class="nav-text">PrintShop</span></a></li>
+                <li class="has-subnav"><a href="@Url.Action("Index", "pnl")" id="opc"> <i class="fa fa-wpforms fa-lg fa_menu"></i> <span class="nav-text">PNL</span></a></li>
+                <li class="has-subnav"><a href="@Url.Action("Index", "packing")" id="opc"> <i class="fa fa-archive fa-lg fa_menu" aria-hidden="true"></i> <span class="nav-text">Packing</span></a></li>
+                <li class="has-subnav"><a href="@Url.Action("CatalogoArte", "arte")" id="opc"> <i class="fa fa-paint-brush fa-lg fa_menu"></i> <span class="nav-text">Art</span></a></li>
+                <li class="has-subnav"><a href="@Url.Action("Index", "fantasy")" id="opc"> <i class="glyphicon glyphicon-list-alt fa-lg fa_menu"></i> <span class="nav-text">Fantasy</span></a></li>
+                <li class="has-subnav"><a href="@Url.Action("Index", "staging")" id="opc"> <i class="glyphicon glyphicon-equalizer fa-lg fa_menu"></i> <span class="nav-text">Stagging</span></a></li>
+                <li class="has-subnav"><a href="@Url.Action("Index", "shipping")" id="opc"> <i class="glyphicon glyphicon-envelope fa-lg fa_menu"></i> <span class="nav-text">Shipping</span></a></li>
+                <li class="has-subnav"><a href="@Url.Action("Index", "WIP")" id="opc"> <i class="fa fa-calendar fa-lg fa_menu"></i> <span class="nav-text">WIP</span></a></li>
+            }
+            else if ((int)Session["idCargo"] == 4)
+            {
+                <li class="has-subnav"><a href="@Url.Action("Index", "almacen")"> <i class="glyphicon glyphicon-download-alt fa_menu"></i> <span class="nav-text">Receipts</span></a></li>
+            }
+            else if ((int)Session["idCargo"] == 5)
+            {
+                <li class="has-subnav"><a href="@Url.Action("Index", "printshop")" id="menuOpc"> <i class="glyphicon glyphicon-tint fa_menu"></i> <span class="nav-text">PrintShop</span></a></li>
+                <li class="has-subnav"><a href="@Url.Action("Index", "pnl")" id="menuOpc"> <i class="fa fa-wpforms fa-lg fa_menu"></i> <span class="nav-text">PNL</span></a></li>
+                <li class="has-subnav"><a href="@Url.Action("Index", "packing")" id="menuOpc"> <i class="fa fa-archive fa-lg fa_menu" aria-hidden="true"></i> <span class="nav-text">Packing</span></a></li>
+            }
+            else if ((int)Session["idCargo"] == 6)
+            {
+                <li class="has-subnav"><a href="@Url.Action("Index", "catalogos")" id="opc"> <i class="glyphicon glyphicon-book fa_menu"></i> <span class="nav-text">Catalogs</span></a></li>
+                <li class="has-subnav"><a href="@Url.Action("Index", "pedidos")" id="opc"> <i class="glyphicon  glyphicon-list-alt fa_menu"></i> <span class="nav-text">New PO</span></a></li>
+                <li class="has-subnav"><a href="@Url.Action("Index", "printshop")" id="menuOpc"> <i class="glyphicon glyphicon-tint fa_menu"></i> <span class="nav-text">PrintShop</span></a></li>
+                <li class="has-subnav"><a href="@Url.Action("Index", "pnl")" id="menuOpc"> <i class="fa fa-wpforms fa-lg fa_menu"></i> <span class="nav-text">PNL</span></a></li>
+                <li class="has-subnav"><a href="@Url.Action("Index", "shipping")"> <i class="glyphicon glyphicon-envelope fa-lg fa_menu"></i> <span class="nav-text">Shipping</span></a></li>
+                <li class="has-subnav"><a href="@Url.Action("Index", "packing")" id="menuOpc"> <i class="fa fa-archive fa-lg fa_menu" aria-hidden="true"></i> <span class="nav-text">Packing</span></a></li>
+            }
+            else if ((int)Session["idCargo"] == 7)
+            {
+                <li class="has-subnav"><a href="@Url.Action("Index", "pedidos")" id="opc"> <i class="glyphicon  glyphicon-list-alt fa_menu"></i> <span class="nav-text">New PO</span></a></li>
+                <li class="has-subnav"><a href="@Url.Action("Index", "staging")"> <i class="glyphicon glyphicon-tint fa_menu"></i> <span class="nav-text">Staging</span></a></li>
+                <li class="has-subnav"><a href="@Url.Action("Index", "packing")" id="menuOpc"> <i class="fa fa-archive fa-lg fa_menu" aria-hidden="true"></i> <span class="nav-text">Packing</span></a></li>
+            }
+            else if ((int)Session["idCargo"] == 8)
+            {
+                <li class="has-subnav"><a href="@Url.Action("Index", "printshop")" id="menuOpc"> <i class="glyphicon glyphicon-tint fa_menu"></i> <span class="nav-text">PrintShop</span></a></li>
+                <li class="has-subnav"><a href="@Url.Action("Index", "pnl")" id="menuOpc"> <i class="fa fa-wpforms fa-lg fa_menu"></i> <span class="nav-text">PNL</span></a></li>
+                <li class="has-subnav"><a href="@Url.Action("Index", "packing")" id="menuOpc">  <i class="fa fa-archive fa-lg fa_menu" aria-hidden="true"></i> <span class="nav-text">Packing</span></a></li>
+
+            }
+            else if ((int)Session["idCargo"] == 9)
+            {
+                <li class="has-subnav"><a href="@Url.Action("Index", "printshop")" id="menuOpc"> <i class="glyphicon glyphicon-tint fa_menu"></i> <span class="nav-text">PrintShop</span></a></li>
+                <li class="has-subnav"><a href="@Url.Action("Index", "pnl")" id="menuOpc"> <i class="fa fa-wpforms fa-lg fa_menu"></i> <span class="nav-text">PNL</span></a></li>
+                <li class="has-subnav"><a href="@Url.Action("Index", "packing")" id="menuOpc"> <i class="fa fa-archive fa-lg fa_menu" aria-hidden="true"></i> <span class="nav-text">Packing</span></a></li>
+            }
+            else if ((int)Session["idCargo"] == 12)
+            {
+                <li class="has-subnav"><a href="@Url.Action("Index", "arte")" id="menuOpc"> <i class="fa fa-paint-brush fa-lg fa_menu"></i> <span class="nav-text">Art</span></a></li>
+            }
+            else if ((int)Session["idCargo"] == 15)
+            {
+                <li class="has-subnav"><a href="@Url.Action("Index", "pedidos")" id="opc"> <i class="glyphicon  glyphicon-list-alt fa_menu"></i> <span class="nav-text">New PO</span></a></li>
+            }
+            else
+            {
+                <script type="text/javascript">
+                var url = '@Url.Action("Login", "Login")';
+                window.location.href = url;
+                </script>
+            }
+        </ul>
+        <ul class="user">
+            <li>
+                <a>
+                    <i class="fa fa-user-circle-o fa-3x fa_menu"></i><span class="nav-text">@Session["nombre"] <br /> Dept. @Session["rolUser"]</span>
+                </a>
+            </li>
+        </ul>
+        <ul class="logout">
+            <li>
+                <a href="@Url.Action("Login","Login")">
+                    <i class="glyphicon glyphicon-log-out fa_menu"></i> <span class="nav-text">Logout</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="container body-content">
+        @RenderBody()
+
+        <footer>
+            <hr />
+            <p>&copy; @DateTime.Now.Year - Fortune Fashions Baja</p>
+        </footer>
+    </div>
+
+
+
+
+    <script src="~/Content/DataTables/DataTables-1.10.18/js/jquery.dataTables.min.js"></script>
+    <script src="~/Content/DataTables/Buttons-1.5.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script src="~/Content/DataTables/Buttons-1.5.2/js/buttons.html5.min.js"></script>
+    <script src="~/Content/resources/js/general/btn_siguiente_anterior.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <link rel="stylesheet" href="~/Content/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/Content/DataTables/DataTables-1.10.18/css/dataTables.bootstrap.min.css" />
+    <script src="~/Scripts/bootstrap.js"></script>
+    <!-- Required jQuery and jQuery UI Javascript references -->
+    <script src="@Url.Content("~/Scripts/jquery-ui-1.12.1.min.js")"></script>
+    <script type="text/javascript">
+        var tablaPO;
+        $("a").on('click', function () {
+            $("#loading").show();
+        });
+
+        //$('#menuOpc').on('click', $('#loading').show());
+
+        $(document).ready(function () {
+            $('#tablaUsuarios').dataTable({
+                responsive: true,
+            });
+            $('#tablaRoles').dataTable({
+                responsive: true,
+                "columns": [
+                    { "width": "10%" },
+                    { "width": "10%" },
+                    { "width": "5%" }
+
+                ]
+            });
+            $('#tablaClientes').dataTable({
+                responsive: true
+            });
+            $('#tablaWip').dataTable({
+                responsive: true
+            });
+            $('#tablaClientesFinal').dataTable({
+                responsive: true
+            });
+            $('#tablaColores').dataTable({
+                responsive: true
+            });
+            $('#tablaGenero').dataTable({
+                responsive: true
+            });
+            $('#tablaPedido').dataTable({
+                responsive: true
+            });
+            $('#tablaTalla').dataTable({
+                responsive: true,
+                "columns": [
+                    { "width": "10%" },
+                    { "width": "10%" },
+                    { "width": "5%" }
+
+                ]
+            });
+
+            $('#tablaArteInventario').dataTable({
+                responsive: true,
+                "ordering": false,
+                "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]]
+
+            });
+
+            $('#tablaPO').dataTable({
+                responsive: true,
+                "ordering": false,
+                "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+                "lengthChange": false,
+                dom: 'Bfrtip',
+                buttons: [
+                    {
+                        extend: 'pdfHtml5',
+                        title: 'Data export',
+                        text: '<i class="fa fa-file-pdf-o"></i> PDF',
+                        className: 'pdfbtn',
+                        dom: 'Bfrtip',
+                        title: 'Purchase Orders Report ',
+                        pageSize: 'letter',
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4, 5],
+                            page: 'current'
+                        },
+                        customize: function (doc) {
+                            doc.styles.title = {
+                                color: 'black',
+                                fontSize: '40',
+                                alignment: 'center'
+                            }
+                            doc.styles.tableHeader = {
+                                color: 'white',
+                                alignment: 'center',
+                                fillColor: "#006bb3"
+                            }
+                        }
+                    }
+                ]
+            });
+
+            $('#tablaPOPrint').dataTable({
+                responsive: true,
+                "ordering": false,
+                "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]]
+
+            });
+
+            $('#tablaPOPnl').dataTable({
+                responsive: true,
+                "ordering": false,
+                "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]]
+            });
+
+            $('#tablaPOPacking').dataTable({
+                responsive: true,
+                "ordering": false,
+                "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]]
+            });
+
+            $("#tablaPO").removeClass('dataTable no-footer');
+
+            /* var table = $('#tablaPO').DataTable();
+
+                 var buttons = new $.fn.dataTable.Buttons(table, {
+                     buttons: [
+                         {
+                         extend: 'pdfHtml5',
+                         title: 'Data export',
+                         text: '<i class="fa fa-file-pdf-o"></i> PDF',
+                         className: 'pdfbtn',
+                         dom: 'Bfrtip',
+                         title: 'Reference Order Report ',
+                         pageSize: 'letter',
+                         exportOptions: {
+                           columns: [0, 1, 2, 3, 4, 5],
+                           page: 'current'
+                         },
+                         customize: function (doc) {
+                             doc.styles.title = {
+                             color: 'black',
+                             fontSize: '40',
+                             alignment: 'center'
+                         }
+                         doc.styles.tableHeader = {
+                             color: 'white',
+                             alignment: 'center',
+                             fillColor: "#006bb3"
+                         }
+                     }
+                 }
+                 ]
+                 }).container().appendTo($('#botones'));*/
+
+            $('.pdfbtn').each(function () {
+                $(this).removeClass('dt-button buttons-pdf buttons-html5').addClass('btn btn-primary btn-md pull-right btn-sm btnPdf')
+            })
+
+            $('#tablaTela').dataTable({
+                responsive: true
+            });
+
+            $('#tablaTipoCamiseta').dataTable({
+                responsive: true
+            });
+
+            $('#tablaPOEstilos').dataTable({
+                responsive: true,
+                "ordering": false,
+                "searching": false,
+                "paging": false,
+                "scrollCollapse": true,
+                "info": false/*,
+                                        "language": {
+                                    "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+                            }*/
+            });
+
+        });
+
+
+        $('#selectCargo').select2({
+            /*language: {
+
+                noResults: function () {
+
+                    return "No hay resultado";
+                },
+                searching: function () {
+
+                    return "Buscando..";
+                }
+            }*/
+
+        });
+
+        $('#selectEstado').select2({
+        });
+
+        $('#selectEstado').select2({
+        });
+
+        $('#selectGenero').select2({
+            placeholder: "Select a gender"
+        });
+
+        $('#selectTela').select2({
+            placeholder: "Select a type of fabric"
+        });
+
+        $("#selectTipoCamiseta").select2({
+            placeholder: "Select a type of shirt"
+        });
+
+        $("#selectEspecialidad").select2({
+            placeholder: "Select a specialtyt"
+        });
+
+        $("#selectFechas").select2({
+        });
+
+        $('#selectCliente').select2({
+        });
+
+        $('#selectTipoOrden').select2({
+        });
+
+        $("#selectClienteFinal").select2({
+        });
+
+        $('#ListadoPeriodo').select2({
+            placeholder: "Select a year",
+            width: '100px'
+        });
+
+        $('#selectEstilos').select2({
+            /* width: '250px',
+             height: '50px'*/
+        });
+
+        $("#selectClienteFinal").select2({
+        });
+
+        $("#selectPackingName").select2({
+        });
+
+        $('#selectSucursal').select2({
+            placeholder: "Select a factory"
+        });
+
+        $('#selectSuc').select2({
+        });
+
+
+        $(function () {
+            $.datepicker.regional['es'] = {
+                closeText: 'Cerrar',
+                prevText: '<Ant',
+                nextText: 'Sig>',
+                currentText: 'Hoy',
+                monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                monthNamesShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+                    'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                dayNames: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+                dayNamesShort: ['Dom', 'Lun', 'Mar', 'Mié', 'Juv', 'Vie', 'Sáb'],
+                dayNamesMin: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'],
+                weekHeader: 'Sm',
+                dateFormat: 'mm/dd/yy',
+                firstDay: 1,
+                isRTL: false,
+                showMonthAfterYear: false,
+                yearSuffix: ''
+            };
+            $.datepicker.setDefaults($.datepicker.regional['es']);
+
+            $('#FechaOrden').datepicker();
+
+            $('#FechaCancel').datepicker();
+        })
+
+        $(function () {
+
+            var oTable = $('#tablaPO').dataTable();
+
+            $("#datepicker_from").datepicker({
+                showOn: "button",
+                buttonImage: "/Content/img/calendario3.png",
+                buttonImageOnly: false,
+                "onSelect": function (date) {
+                    minDateFilter = new Date(date).getTime();
+                    oTable.fnDraw();
+                }
+            }).keyup(function () {
+                minDateFilter = new Date(this.value).getTime();
+                oTable.fnDraw();
+            });
+
+            $("#datepicker_to").datepicker({
+                showOn: "button",
+                buttonImage: "/Content/img/calendario3.png",
+                buttonImageOnly: false,
+                "onSelect": function (date) {
+                    maxDateFilter = new Date(date).getTime() + 86400000;
+                    oTable.fnDraw();
+                }
+            }).keyup(function () {
+                maxDateFilter = new Date(this.value).getTime();
+                oTable.fnDraw();
+            });
+            var tipo;
+            $(document).on('change', '#selectFechas', function (event) {
+                tipo = $("#selectFechas option:selected").val();
+            });
+
+            // Date range filter
+            minDateFilter = "";
+            maxDateFilter = "";
+
+            $.fn.dataTableExt.afnFiltering.push(
+                function (oSettings, aData, iDataIndex) {
+                    if (typeof aData._date == 'undefined') {
+                        aData._date = new Date(aData[tipo]).getTime();
+                    }
+                    if (minDateFilter && !isNaN(minDateFilter)) {
+                        if (aData._date < minDateFilter) {
+                            return false;
+                        }
+                    }
+                    if (maxDateFilter && !isNaN(maxDateFilter)) {
+                        if (aData._date > maxDateFilter) {
+                            return false;
+                        }
+                    }
+                    return true;
+                });
+        });
+    </script>
+    @RenderSection("scripts", required: false)
+    <div id="loading" class="load">
+        <div id="spinner" class="imagen_loading" style=""></div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,93 @@
+﻿@model IEnumerable<FortuneSystem.Models.Estilos.Estilo>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.id_po_summary)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.id_estilo)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.estilo)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.id_color)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.color)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.cantidad)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.precio)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.total_precio)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.genero)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.stag)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.totales)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.totales_recibidos)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.id_po_summary)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.id_estilo)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.estilo)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.id_color)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.color)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.cantidad)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.precio)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.total_precio)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.genero)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.stag)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.totales)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.totales_recibidos)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
+            @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
+            @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+        </td>
+    </tr>
+}
+
+</table>

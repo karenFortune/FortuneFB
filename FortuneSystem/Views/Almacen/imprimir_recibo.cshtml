@@ -1,0 +1,44 @@
+﻿@model IEnumerable<FortuneSystem.Models.Almacen.recibo>
+@{ Layout = null; }
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Receive</title>
+</head>
+<body>  
+    <table class="table">
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.id_recibo)</th>
+            <th>@Html.DisplayNameFor(model => model.fecha)</th>
+            <th>@Html.DisplayNameFor(model => model.total)</th>
+            <th>@Html.DisplayNameFor(model => model.id_usuario)</th>
+            <th>@Html.DisplayNameFor(model => model.id_sucursal)</th>
+            <th>@Html.DisplayNameFor(model => model.id_origen)</th>
+            <th>@Html.DisplayNameFor(model => model.items)</th>
+            <th>@Html.DisplayNameFor(model => model.mp_number)</th>
+            <th>@Html.DisplayNameFor(model => model.usuario)</th>
+            <th>@Html.DisplayNameFor(model => model.sucursal)</th>
+            <th>@Html.DisplayNameFor(model => model.mill_po)</th>
+            <th>@Html.DisplayNameFor(model => model.po_referencia)</th>            
+        </tr>    
+    @foreach (var item in Model) {
+        <tr>
+            <td>@Html.DisplayFor(modelItem => item.id_recibo)</td>
+            <td>@Html.DisplayFor(modelItem => item.fecha)</td>
+            <td>@Html.DisplayFor(modelItem => item.total)</td>
+            <td>@Html.DisplayFor(modelItem => item.id_usuario)</td>
+            <td>@Html.DisplayFor(modelItem => item.id_sucursal)</td>
+            <td>@Html.DisplayFor(modelItem => item.id_origen)</td>
+            <td>@Html.DisplayFor(modelItem => item.items)</td>
+            <td>@Html.DisplayFor(modelItem => item.mp_number)</td>
+            <td>@Html.DisplayFor(modelItem => item.usuario)</td>
+            <td>@Html.DisplayFor(modelItem => item.sucursal)</td>
+            <td>@Html.DisplayFor(modelItem => item.mill_po)</td>
+            <td>@Html.DisplayFor(modelItem => item.po_referencia)</td>            
+        </tr>
+    }
+    
+    </table>
+</body>
+</html>

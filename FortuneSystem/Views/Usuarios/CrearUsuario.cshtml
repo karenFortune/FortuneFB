@@ -1,0 +1,115 @@
+﻿@model FortuneSystem.Models.Usuarios.CatUsuario
+
+@{
+    ViewBag.Title = "Create Users";
+
+   
+}
+
+
+
+
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "formUsuario" })) 
+{
+    @Html.AntiForgeryToken()
+    
+<div class="form-horizontal">
+
+
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.NoEmpleado, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.NoEmpleado, new { htmlAttributes = new { @class = "form-control", @Value = " " } })
+            @Html.ValidationMessageFor(model => model.NoEmpleado, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Nombres, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Nombres, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.Nombres, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+
+        @Html.LabelFor(model => model.Apellidos, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Apellidos, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.Apellidos, "", new { @class = "text-danger" })
+
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Cargo, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.DropDownList("listRoles", (IEnumerable<System.Web.Mvc.SelectListItem>)ViewData["listRoles"], new { @class = "form-control", @id = "selectCargo", @name = "state" })
+            @Html.ValidationMessageFor(model => model.Cargo, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.IdSucursal, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.DropDownList("listSucursal", (IEnumerable<System.Web.Mvc.SelectListItem>)ViewData["listSucursal"], new { @class = "form-control", @id = "selectSuc", @name = "state" })
+            @Html.ValidationMessageFor(model => model.IdSucursal, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Turnos, htmlAttributes: new { @class = "control-label col-md-2 " })
+        <div class="col-md-10">
+            @Html.EnumDropDownListFor(model => model.Turnos, "Select Turn", new { @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.Turnos, "", new { @class = "text-danger" })
+        </div>
+    </div>        
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Email, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Contrasena, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Contrasena, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.Contrasena, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" id="btn-submit" value="Register" class="btn btn-success" />
+        </div>
+    </div>
+</div>
+}
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+<script>
+   
+   /* $("#btn-submit").on("click", function (event) {
+        event.preventDefault();
+        alertify.confirm("Desea registrar al usuario?", function (e) {
+            if (e) {
+                $("#formUsuario").submit();
+                alertify.success("Category was saved.")
+                return true;
+            } else {
+                alertify.error("Category not saved.");
+                return false;
+            }
+        });
+    });*/
+
+</script>

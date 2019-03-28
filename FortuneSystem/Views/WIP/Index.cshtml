@@ -1,0 +1,632 @@
+﻿@model FortuneSystem.Models.Pedidos.OrdenesCompra
+
+@{
+    ViewBag.Title = "WIP";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@*<link type="text/css" rel="stylesheet" href="~/Content/jsgrid-1.5.3/dist/jsgrid.min.css" />
+    <link type="text/css" rel="stylesheet" href="~/Content/jsgrid-1.5.3/dist/jsgrid-theme.min.css" />
+    <script type="text/javascript" src="~/Content/jsgrid-1.5.3/dist/jsgrid.min.js"></script>*@
+@*<link href="http://js-grid.com/css/jsgrid.min.css" rel="stylesheet" />
+    <link href="http://js-grid.com/css/jsgrid-theme.min.css" rel="stylesheet" />
+    <link href="~/Content/themes/base/jquery-ui.css" rel="stylesheet" />
+    <link href="~/Content/jquery.jqGrid/ui.jqgrid.css" rel="stylesheet" />*@
+
+@*<link href="~/Content/kendoui.2019.1.220.core/styles/kendo.common.min.css" rel="stylesheet" />
+    <link href="~/Content/kendoui.2019.1.220.core/styles/kendo.default.min.css" rel="stylesheet" />
+    <script type="text/javascript" src="~/Scripts/kendo.all.min.js"></script>
+    <script type="text/javascript" src="~/Scripts/kendo.aspnetmvc.min.js"></script>*@
+
+<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid.min.css" />
+<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid-theme.min.css" />
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid.min.js"></script>
+
+<!-- DevExtreme themes -->
+<link rel="stylesheet" type="text/css" href="~/Content/dx.common.css" />
+<link rel="stylesheet" type="text/css" href="~/Content/dx.light.css" />
+
+
+<!-- DevExtreme library -->
+<script type="text/javascript" src="~/Scripts/jszip.min.js"></script>
+<script type="text/javascript" src="~/Scripts/dx.all.js"></script>
+
+
+<script type="text/javascript" src="~/Scripts/general/dataWIP.js"></script>
+
+<style>
+    .content {
+        text-align: justify;
+        margin-top: 25px;
+    }
+
+    #longtabs {
+        margin-top: 20px;
+    }
+
+    #scrolledtabs {
+        margin-top: 20px;
+    }
+
+    #tabs {
+        margin-top: 60px;
+    }
+
+    .caption {
+        font-size: 16px;
+        padding-bottom: 3px;
+        padding-left: 10px;
+    }
+
+    .left-aligned {
+        text-align: left;
+    }
+
+    .colorCell {
+        background-color: #ff0000;
+        color: #000000;
+    }
+
+    img {
+        height: 50px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .center {
+        height: 80% !important;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .edit_driver {
+    }
+
+        .edit_driver:hover {
+            color: white !important;
+            background: #3479bf !important;
+            border-radius: 15px;
+        }
+
+    .highAmountOrder_saleAmount {
+        background-color: #FFBB00;
+        color: #000000;
+    }
+</style>
+@{
+    if (TempData["itemEditar"] != null)
+    {
+        <script type="text/javascript">
+            alertify.set('notifier', 'position', 'top-right');
+            alertify.notify(@Html.Raw(Json.Encode(TempData["itemEditar"])), 'success', 5, null);
+
+        </script>
+    }
+    if (TempData["itemEditarError"] != null)
+    {
+        <script type="text/javascript">
+            alertify.set('notifier', 'position', 'top-right');
+            alertify.notify(@Html.Raw(Json.Encode(TempData["itemEditarError"])), 'error', 5, null);
+
+        </script>
+    }
+
+    if (TempData["cancelarPO"] != null)
+    {
+        <script type="text/javascript">
+            alertify.set('notifier', 'position', 'top-right');
+            alertify.notify(@Html.Raw(Json.Encode(TempData["cancelarPO"])), 'success', 5, null);
+
+        </script>
+    }
+
+    <script type="text/javascript">
+
+    </script>
+
+}
+
+</div>
+<div id="popover2">
+    The designs for new brochures and
+    website have been approved.
+    Launch date is set for Feb 28.
+</div>
+<div class="modal fade" id="enlargeImageModal" tabindex="-1" role="dialog" aria-labelledby="enlargeImageModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="exampleModalLabel">ART</h2>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+                <img class="enlargeImageModalSource center" style="width: 50%;">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container-fluid" style="margin-left:15em; margin-right:5em; ">
+    <div class="panel panel-primary" id="listaWIP">
+        <div class="panel-heading">
+            <h2>WIP</h2>
+        </div>
+        <br />
+        <div id="botones"></div>
+        <br />
+        <div id="jsGrid"></div>
+
+        <div class="demo-container">
+            <div id="tabs">
+                <div class="tabs-container"></div>
+                <div class="content  dx-fieldset">
+                    <div class="dx-field gridWip" style="display:inline;">
+
+                        <div id="gridContainer"></div>
+                     
+                    </div>
+                    <br />
+                    <div class="dx-field-value idTabs">
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" charset="utf-8">
+
+    $(function () {   
+  
+        //Lista de Pedidos
+        var orders = new DevExpress.data.CustomStore({
+            loadMode: "raw",
+            load: function () {
+                var d = $.Deferred();
+
+                $.ajax({
+                    type: 'GET',
+                    url: "/WIP/ListadoPedido",
+                    dataType: "json",
+                    success: function (data) {
+                        d.resolve(data);
+                    },
+                    error: function (e) {
+                        alert("error: " + e.responseText);
+                    }
+                });
+
+                return d.promise();
+            },
+            update: function (key, values) {
+                debugger;
+                var idComentario = key.CatComentarios.IdComentario;
+                var comentario = values.CatComentarios.Comentario;
+                var idSummary = key.POSummary.IdItems;
+                var d = $.Deferred();
+
+                $.ajax({
+                    type: 'POST',
+                    url: "/WIP/RegistrarCometarioWIP",
+                    data: {Comentario: comentario, IdSummary: parseInt(idSummary)},
+                    success: function (data) {
+                        loadPanel;
+                       d.resolve(data);
+                        if (!timeOut) {
+                            timeOut = setTimeout(timerCallback, 100);                           
+                        }
+                        
+                    },
+                    error: function (e) {
+                        alert("error: " + e.responseText);
+                    }
+                });
+               return d.promise();
+            }
+        });
+
+        //Lista de comentarios
+        var comments = new DevExpress.data.CustomStore({
+            loadMode: "raw",
+            load: function () {
+                var d = $.Deferred();
+
+                $.ajax({
+                    type: 'GET',
+                    url: "/WIP/ListadoComentarios",
+                    dataType: "json",
+                    success: function (data) {
+                        d.resolve(data);
+                    },
+                    error: function (e) {
+                        alert("error: " + e.responseText);
+                    }
+                });
+
+                return d.promise();
+            },
+            update: function () {
+                throw 'not implemented';
+            }
+        });
+
+        var editCells = [];
+        
+        var grid = $("#gridContainer").dxDataGrid({
+            onInitialized: function (e) {
+                grid = e.component;
+            },
+            dataSource: {
+                store: orders
+            },
+            keyExpr: "IdSummaryOrden",
+            selection: {
+                mode: "single"
+            },
+            export: {
+                enabled: true,
+                fileName: "WIP",
+                //allowExportSelectedData: true,
+                excelFilterEnabled: true,
+                customizeExcelCell: options => {
+                    if (options.gridCell.rowType === 'header') {
+                        options.backgroundColor = '#000000';
+                        options.font.color = '#ffffff';
+                        options.font.bold = true;
+                    } 
+                    if (options.gridCell.rowType === 'data') {
+                        if (options.gridCell.column.dataField === 'ImagenArte.StatusArteInf') {
+                            if (options.gridCell.data.ImagenArte.StatusArteInf === 'IN HOUSE') {
+                                options.font.bold = true;
+                                options.backgroundColor = '#40bf80';
+                                options.font.color = '#000000';
+
+                            } else if (options.gridCell.data.ImagenArte.StatusArteInf === 'REVIEWED') {
+                                options.font.bold = true;
+                                options.backgroundColor = '#66c2ff';
+                                options.font.color = '#000000';
+                            } else if (options.gridCell.data.ImagenArte.StatusArteInf === 'PENDING') {
+                                options.font.bold = true;
+                                options.backgroundColor = '#ff3300';
+                                options.font.color = '#000000';
+                            }                            
+                        }    
+                        if (options.gridCell.column.dataField === 'PO') {
+                            options.font.bold = true;
+                        }
+                        if (options.gridCell.column.dataField === 'CatTipoBrand.TipoBrandName') {
+                            options.font.bold = true;
+                        }
+                        if (options.gridCell.column.dataField === 'CatTipoOrden.TipoOrden') {
+                            options.font.bold = true;
+                        }
+                        if (options.gridCell.column.dataField === 'POSummary.ItemDescripcion.Descripcion') {
+                            options.font.bold = true;
+                        }
+                    }
+                }
+            },
+            groupPanel: {
+                visible: true            
+            },
+            editing: {
+                mode: "batch",
+                allowUpdating: true
+            },
+            allowColumnReordering: true,
+            allowColumnResizing: true,
+            columnAutoWidth: true,
+            showBorders: true,
+            showColumnLines: false,
+            showRowLines: true,
+            rowAlternationEnabled: true,
+            scrolling: {
+                columnRenderingMode: "virtual"
+            },
+            remoteOperations:false,
+            paging: {
+                pageSize: 10
+            },
+            searchPanel: {
+                visible: true,
+                width: 240,
+                placeholder: "Search..."
+            },
+            filterRow: {
+                visible: true
+            },
+            headerFilter: {
+                visible: true
+            }/*,
+            loadPanel: {
+                shadingColor: "rgba(0,0,0,0.4)",
+                position: { of: "#gridContainer" },
+                visible: false,
+                showIndicator: true,
+                showPane: true,
+                shading: true,
+            }*/,
+            columns: [           
+                {
+                    caption: "CUSTOMER",
+                    dataField: "CatCliente.Nombre",
+                    alignment: "center",
+                    allowEditing: false,
+                    headerCellTemplate: $('<b style="color: gray">CUSTOMER</b>')
+                }, {
+                    caption: "RETAILER",
+                    dataField: "CatClienteFinal.NombreCliente",
+                    alignment: "center",
+                    allowEditing: false,
+                    headerCellTemplate: $('<b style="color: gray">RETAILER</b>')
+                }, {
+                    caption: "PO RECVD DATE",
+                    dataField: "FechaRecOrden",
+                    alignment: "center",
+                    dataType: "date",
+                    format: "dd/MM/yyyy",
+                    allowEditing: false,
+                    headerCellTemplate: $('<b style="color: gray">PO RECVD DATE</b>')
+
+                }, {
+                    caption: "PO NO",
+                    dataField: "PO",
+                    alignment: "center",
+                    allowEditing: false,
+                    headerCellTemplate: $('<b style="color: gray">PO NO</b>')
+                }, {
+                    caption: "BRAND NAME",
+                    dataField: "CatTipoBrand.TipoBrandName",
+                    alignment: "center",
+                    allowEditing: false,
+                    headerCellTemplate: $('<b style="color: gray">BRAND NAME</b>')
+                }, {
+                    caption: "AMT PO",
+                    dataField: "VPO",
+                    alignment: "center",
+                    allowEditing: false,
+                    headerCellTemplate: $('<b style="color: gray">AMT PO</b>')
+                }, {
+                    caption: "REG/BULK", 
+                    dataField: "CatTipoOrden.TipoOrden",
+                    alignment: "center",
+                    allowEditing: false,
+                    headerCellTemplate: $('<b style="color: gray">REG/BULK</b>')
+                }, {
+                    caption: "BALANCE QTY",
+                    dataField: "POSummary.Cantidad",
+                    alignment: "center",
+                    allowEditing: false,
+                    headerCellTemplate: $('<b style="color: gray">BALANCE QTY</b>')
+                }, {
+                    caption: "EXPECTED SHIP DATE",
+                    dataField: "FechaOrdenFinal",
+                    alignment: "center",
+                    dataType: "date",
+                    format: "dd/MM/yyyy",
+                    allowEditing: false,
+                    headerCellTemplate: $('<b style="color: gray">EXPECTED SHIP DATE</b>')
+                }, {
+                    caption: "ORIGINAL CUST DUE DATE",
+                    dataField: "FechaCancelada",
+                    alignment: "center",
+                    dataType: "date",
+                    format: "dd/MM/yyyy",
+                    allowEditing: false,
+                    headerCellTemplate: $('<b style="color: gray">ORIGINAL CUST DUE DATE</b>')
+
+                }, {
+                    caption: "DESIGN NAME",
+                    dataField: "InfoSummary.ItemDesc.Descripcion",
+                    alignment: "center",
+                    allowEditing: false,
+                    headerCellTemplate: $('<b style="color: gray">DESIGN NAME</b>')
+                }, {
+                    caption: "STYLE",
+                    dataField: "InfoSummary.ItemDesc.ItemEstilo",
+                    alignment: "center",
+                    allowEditing: false,
+                    headerCellTemplate: $('<b style="color: gray">STYLE</b>')
+                }, {
+                    caption: "MILL PO",
+                    dataField: "MillPO",
+                    alignment: "center",
+                    allowEditing: false,
+                    headerCellTemplate: $('<b style="color: gray">MILL PO</b>')
+                }, {
+                    caption: "COLOR",
+                    dataField: "InfoSummary.CatColores.DescripcionColor",
+                    alignment: "center",
+                    allowEditing: false,
+                    headerCellTemplate: $('<b style="color: gray">COLOR</b>')
+                }, {
+                    caption: "GENDER",
+                    dataField: "InfoSummary.CatGenero.Genero",
+                    alignment: "center",
+                    allowEditing: false,
+                    headerCellTemplate: $('<b style="color: gray">GENDER</b>')
+                }, {
+                    caption: "BLANKS RECEIVED",
+                    dataField: "",
+                    alignment: "center",
+                    allowEditing: false,
+                    headerCellTemplate: $('<b style="color: gray">BLANKS RECEIVED</b>')
+                }, {
+                    caption: "PARTIAL/COMPLETE BLANKS",
+                    dataField: "",
+                    alignment: "center",
+                    allowEditing: false,
+                    headerCellTemplate: $('<b style="color: gray">PARTIAL/COMPLETE BLANKS</b>')
+                }, {
+                    caption: "ART RECEIVED",
+                    dataField: "ImagenArte.StatusArteInf",
+                    alignment: "center",
+                    allowEditing: false,
+                    headerCellTemplate: $('<b style="color: gray">ART RECEIVED</b>'),
+                    cellTemplate: function (element, info) {
+                        if (info.text === 'IN HOUSE') {
+                            element.append("<div>" + info.text + "</div>")
+                                .css("background-color", "#40bf80");
+                            element.append("<div></div>")
+                                .css("color", "white");
+                            if (info.data.ImagenArte.extensionArte === "") {
+                                info.data.ImagenArte.extensionArte = "/Content/img/noImagen.png";
+                            }
+                            element.append($('<img />').attr('src', '/Content/imagenesArte/' + info.data.ImagenArte.extensionArte).on('click', function (event) {
+                                    $('.enlargeImageModalSource').attr('src', $(this).attr('src'));
+                                    $('#enlargeImageModal').modal('show');
+                                }));
+
+                        } else if (info.text === 'REVIEWED') {
+                            element.append("<div>" + info.text + "</div>")
+                                .css("background-color", "#66c2ff"); 
+                            element.append("<div></div>")
+                                .css("color", "white");
+                        } else if (info.text === 'PENDING') {
+                            element.append("<div>" + info.text + "</div>")
+                                .css("background-color", "#ff3300");
+                            element.append("<div></div>")
+                                .css("color", "white");
+                        }
+                    }
+                }, {
+                    caption: "TRIIM RECEIVED",
+                    dataField: "",
+                    alignment: "center",
+                    allowEditing: false,
+                    headerCellTemplate: $('<b style="color: gray">TRIIM RECEIVED</b>')
+                }, {
+                    caption: "PACK INST. RCVD",
+                    dataField: "",
+                    aalignment: "center",
+                    allowEditing: false,
+                    headerCellTemplate: $('<b style="color: gray">PACK INST. RCVD</b>')
+                }, {
+                    caption: "PRICE TICKET RECEIVED",
+                    dataField: "",
+                    alignment: "center",
+                    allowEditing: false,
+                    headerCellTemplate: $('<b style="color: gray">PRICE TICKET RECEIVED</b>')
+                }, {
+                    caption: "UCC RECEIVED",
+                    dataField: "",
+                    alignment: "center",
+                    allowEditing: false,
+                    headerCellTemplate: $('<b style="color: gray">UCC RECEIVED</b>')
+                }, {
+                    caption: "COMMENTS UPDATE",
+                    dataField: "CatComentarios.FechaComents",
+                    alignment: "center",
+                    dataType: "date",
+                    format: "dd/MM/yyyy",
+                    allowEditing: false,
+                    headerCellTemplate: $('<b style="color: gray">COMMENTS UPDATE</b>')
+                }, {
+                    caption: "COMMENTS",
+                    dataField: "CatComentarios.Comentario",
+                    alignment: "center",
+                    id: "COMENTARIO",
+                    headerCellTemplate: $('<b style="color: gray">COMMENTS</b>')
+                }, {
+                    caption: "ID COMMENT",
+                    dataField: "CatComentarios.IdComentario",
+                    visible: false,
+                    allowEditing: false,
+                    id: "ID"
+                }
+            ],
+            onCellPrepared: function (e) {
+                /*if (e.rowType === "data" && $.inArray(e.rowIndex + ":" + e.columnIndex, editCells) >= 0) {
+                    e.cellElement.css("background-color", "lightblue");            
+                }*/
+
+                
+
+            },
+            onEditorPreparing: function (e) {
+                var grid = e.component;
+                if (e.parentType === "dataRow") {
+                    var oldOnValueChanged = e.editorOptions.onValueChanged;
+                    e.editorOptions.onValueChanged = function (e) {
+                        oldOnValueChanged.apply(this, arguments);
+                        for (var i = 0; i < editCells.length; i++) {
+                            var rowIndex = Number(editCells[i].split(":")[0]);
+                            var columnIndex = Number(editCells[i].split(":")[1]);
+                            grid.cellValue(rowIndex, columnIndex, e.value);
+                        }
+                    }
+                }
+            },
+            onCellClick: function (e) {
+                if (e.jQueryEvent.ctrlKey) {
+                    editCells.push(e.rowIndex + ":" + e.columnIndex);
+                }
+                else if (editCells.length) {
+                    editCells = [];
+                    e.component.repaint();
+                }
+            },
+            onContentReady: function (e) {
+                e.element.find(".dx-datagrid-save-button").click(function (e) {
+                    if (editCells.length)
+                        editCells = [];
+                });
+                e.element.find(".dx-datagrid-cancel-button ").click(function (e) {
+                    if (editCells.length)
+                        editCells = [];
+                });
+            },
+            masterDetail: {
+                enabled: true,
+                template: function (container, options) {
+                    var currentEmployeeData = options.data;
+
+                    $("<div>")
+                        .addClass("master-detail-caption")
+                        .text("COMMENTS LIST " + "PO- " + currentEmployeeData.PO)
+                        .appendTo(container);
+
+                    $("<div>")
+                        .dxDataGrid({
+                            showBorders: true,
+                            columns: [{
+                                caption: "COMMENT",
+                                dataField: "Comentario",
+                                width: 350
+                            },
+                            {
+                                caption: "DATE COMMENT",
+                                dataField: "FechaComents",
+                                dataType: "date",
+                                format: "dd/MM/yyyy",
+                                width: 150
+                            },
+                            {
+                                caption: "USER",
+                                dataField: "NombreUsuario",
+                                width: 350
+                            }
+                            ],
+                            dataSource: new DevExpress.data.DataSource({
+                                key: "IdSummaryOrden",
+                                store: comments,
+                                filter: ["IdSummary", "=", options.key.IdSummaryOrden]
+                            })
+                        }).appendTo(container);
+                }
+            }
+        }).dxDataGrid("instance");
+    });
+</script>
+
+
+
+
+
+

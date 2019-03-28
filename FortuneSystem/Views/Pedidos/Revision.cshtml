@@ -1,0 +1,378 @@
+﻿@model FortuneSystem.Models.Pedidos.OrdenesCompra
+
+@{
+    ViewBag.Title = "Revision";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+
+    #nuevo-estilo {
+        margin-left: 30px;
+        margin-top: 1px;
+        width: 180px;
+        height: 40px;
+        border: none;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+   /* .ui-autocomplete {
+        height: 200px;
+        overflow-y: scroll;
+        overflow-x: hidden;
+    }*/
+</style>
+
+<script>
+    var idEstilo;
+    $(document).ready(function () {
+        var ID = $("#IdPedido").val();
+        buscar_estilos_rev(ID);
+        idEstilo = ID;
+
+    });
+
+    function probar() {
+        $('#tabless tr').on('click', function (e) {
+            $('#tabless tr').removeClass('highlighted');
+            $(this).addClass('highlighted');
+        });
+    }
+
+    function buscar_estilos_rev(ID) {
+        $.ajax({
+            url: "/Pedidos/Lista_Estilos_PO/" + ID,
+            type: "POST",
+            contentType: "application/json;charset=UTF-8",
+            dataType: "json",
+            success: function (jsonData) {
+                var html = '';
+                var lista_estilo = jsonData.Data.listaItem;
+
+                $.each(lista_estilo, function (key, item) {
+                    html += '<tr  onclick="probar()">';
+                    html += '<td>' + item.EstiloItem + '</td>';
+                    html += '<td>' + item.ItemDescripcion.Descripcion + '</td>';
+                    html += '<td>' + item.CatColores.CodigoColor + '</td>';
+                    html += '<td>' + item.CatColores.DescripcionColor + '</td>';
+                    html += '<td>' + item.Cantidad + '</td>';
+                    html += '<td>' + item.Price + '</td>';
+                    html += '<td>' + item.Total + '</td>';
+                   // html += '<td><a href="#" onclick="obtener_tallas_item(' + item.IdItems + ');" class = "btn btn-default glyphicon glyphicon-search l1s" style = "color:black; padding:0px 5px 0px 5px;" Title = "Tallas"></a></td>';
+                    html += '<td><a href="#" class="btn btn-default glyphicon glyphicon-edit btnEdit" data-value="' + item.IdItems + '" title="Edit Estilo"></a> | ';
+                    html += '<a href="#" class="btn btn-default glyphicon glyphicon-trash btnDelete" data-value="' + item.IdItems + '" title="Delete Style"></a> </td>';
+                    html += '</tr>';
+                });
+                if (Object.keys(lista_estilo).length === 0) {
+                    html += '<tr class="odd"><td valign="middle" align="center" colspan="10" class="dataTables_empty">No se encontraron estilos para la orden de compra.</td></tr>';
+
+                }
+                $('.tbody').html(html);
+                $("#div_estilos_orden").css("visibility", "visible");
+            },
+            error: function (errormessage) { alert(errormessage.responseText); }
+        });
+    }
+
+
+
+    function obtener_tallas_item(IdTalla, estilo) {
+        var tempScrollTop = $(window).scrollTop();
+        probar();
+        var itemEstilo = estilo;
+        $.ajax({
+            url: "/Pedidos/Lista_Tallas_Estilo/" + IdTalla,
+            type: "POST",
+            contentType: "application/json;charset=UTF-8",
+            dataType: "json",
+            success: function (jsonData) {
+                var html = '';
+                var estilos = jsonData.Data.estilos;
+                if (estilos != '') {
+                    $("#div_estilo").html("<h2>Estilo: " + estilos + "</h2>");
+                    $("#div_estilo").show();
+                } else {
+                    $("#div_estilo").hide();
+                }
+
+                var lista_estilo = jsonData.Data.listaTalla;
+                html += '<tr> <th> Talla </th>'
+                $.each(lista_estilo, function (key, item) {
+
+                    html += '<th>' + item.Talla + '</th>';
+
+                });
+                html += '<th> Total </th>'
+                html += '</tr><tr><td>Cantidad</td>';
+                var cantidades = 0;
+                $.each(lista_estilo, function (key, item) {
+
+                    html += '<td>' + item.Cantidad + '</td>';
+                    cantidades += item.Cantidad;
+                });
+                html += '<td>' + cantidades + '</td>';
+                html += '</tr><tr><td>Extras</td>';
+                var extrasCantidad = 0;
+                $.each(lista_estilo, function (key, item) {
+
+                    html += '<td>' + item.Extras + '</td>';
+                    extrasCantidad += item.Extras;
+                });
+                html += '<td>' + extrasCantidad + '</td>';
+                html += '</tr><tr><td>Ejemplos</td>';
+                var ejemplosCantidad = 0;
+                $.each(lista_estilo, function (key, item) {
+
+                    html += '<td>' + item.Ejemplos + '</td>';
+                    ejemplosCantidad += item.Ejemplos;
+                });
+                html += '<td>' + ejemplosCantidad + '</td>';
+                html += '</tr>';
+                if (Object.keys(lista_estilo).length === 0) {
+                    html += '<tr class="odd"><td valign="middle" align="center" colspan="10" class="dataTables_empty">No se encontraron tallas para el estilo.</td></tr>';
+
+                }
+                $('.tbodys').html(html);
+                $("#div_estilo").css("visibility", "visible");
+                $("#consultaTalla").css("visibility", "visible");
+                $(window).scrollTop(tempScrollTop);
+            },
+            error: function (errormessage) { alert(errormessage.responseText); }
+        });
+    }
+
+    function redireccionarPagina() {
+        window.location = '/pedidos/Index';
+        $("#loading").css('display', 'none');  
+    }
+    $(document).on('click', '#terminarRev', function () {
+        $("#loading").css('display', 'inline');   
+        $('#terminarRev').prop("disabled", true);
+        //setTimeout("redireccionarPagina()", 500);
+        window.location.href = '/pedidos/Index';
+        alertify.notify('The purchase order review was recorded correctly.', 'success', 5, null);
+    });
+
+    $(document).on('click', '.btnCancel', function () {
+        $("#loading").css('display', 'none'); 
+        buscar_estilos_rev(idEstilo);
+        //buscar_estilos_Edicion();
+    });
+
+</script>
+</div>
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.HiddenFor(model => model.IdPedido)
+        @Html.HiddenFor(model => model.Cliente)
+        @Html.HiddenFor(model => model.ClienteFinal)
+
+        <div class="container-fluid" style="padding-left:20em; padding-right:10em;">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h4>PURCHASE ORDER REVIEW</h4>
+                </div>
+                <div class="container-fluid">
+
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            @Html.LabelFor(model => model.PO, htmlAttributes: new { @class = "control-label " })
+                            @Html.EditorFor(model => model.PO, new { htmlAttributes = new { @class = "form-control nuevo_po", @readonly = "readonly" } })
+                            @Html.ValidationMessageFor(model => model.PO, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            @Html.LabelFor(model => model.VPO, htmlAttributes: new { @class = "control-label " })
+                            @Html.EditorFor(model => model.VPO, new { htmlAttributes = new { @class = "form-control nuevo_po", @readonly = "readonly" } })
+                            @Html.ValidationMessageFor(model => model.VPO, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            @Html.LabelFor(model => model.FechaCancel, htmlAttributes: new { @class = "control-label" })
+                            @Html.EditorFor(model => model.FechaCancel, new { htmlAttributes = new { @class = "form-control date-picker nuevo_po", @Value = Model.FechaCancel.ToString("yyyy-MM-dd"), @readonly = "readonly" } })
+                            @Html.ValidationMessageFor(model => model.FechaCancel, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+                <div class="container-fluid">
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            @Html.LabelFor(model => model.FechaOrden, htmlAttributes: new { @class = "control-label" })
+                            @Html.EditorFor(model => model.FechaOrden, new { htmlAttributes = new { @class = "form-control date-picker nuevo_po", @Value = Model.FechaOrden.ToString("yyyy-MM-dd"), @readonly = "readonly" } })
+                            @Html.ValidationMessageFor(model => model.FechaOrden, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            @Html.LabelFor(model => model.Cliente, htmlAttributes: new { @class = "control-label " }) <br />
+                            @Html.DropDownList("Nombre", (SelectList)ViewBag.listCliente, new { @class = "form-control nuevo_po", @id = "selectCliente", @name = "state", @disabled = "disabled" })
+                            @Html.ValidationMessageFor(model => model.Cliente, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            @Html.LabelFor(model => model.ClienteFinal, htmlAttributes: new { @class = "control-label" }) <br />
+                            @Html.DropDownList("NombreCliente", (SelectList)ViewBag.listClienteFinal, "listClienteFinal", new { @class = "form-control nuevo_po", @id = "selectClienteFinal", @name = "state", @disabled = "disabled" })
+                            @Html.ValidationMessageFor(model => model.ClienteFinal, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="form-group col-md-11">
+                            @Html.LabelFor(model => model.TotalUnidades, htmlAttributes: new { @class = "control-label" })
+                            @Html.EditorFor(model => model.TotalUnidades, new { htmlAttributes = new { @class = "form-control nuevo_po", @readonly = "readonly" } })
+                            @Html.ValidationMessageFor(model => model.TotalUnidades, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-primary" id="estilos">
+                <div class="panel-heading">
+                    <h4>STYLES</h4>
+                </div>
+                <br />
+                <p>
+                    <a href="#" class="btn btn-primary  btnNuevo" title="ADD NEW STYLE" id="nuevo-estilo"> <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> ADD NEW STYLE</a>
+                </p>
+                <br />
+                @* @{
+             Html.RenderAction("Listado_Estilos_PO", "Pedidos");
+        }*@
+                <div id="div_tabla_estilos" style="width: 100%; height:350px; overflow:auto; ">
+                    <br />
+                    <table id="tabless" class="table table-sm table-striped table-hover ">
+                        <thead>
+                            <tr>
+                                <th>STYLE</th>
+                                <th>ITEM DESCRIPTION</th>
+                                <th>COLOR CODE</th>
+                                <th>COLOR DESCRIPTION</th>
+                                <th>QTY</th>
+                                <th>PRICE</th>
+                                <th>TOTAL</th>
+                                <th>ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody class="tbody"></tbody>
+                    </table>
+                </div>
+                <br />
+                <br />
+                <div class="form-group">
+                    <div class="text-center margin-bottom col-sm-12">
+                        <button type="button" id="terminarRev" class="btn btn-success" data-toggle="modal">
+                            <span class="glyphicon glyphicon-check" aria-hidden="true"></span> Finish review
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div>
+                @Html.ActionLink("Back to List", "Index")
+            </div>
+        </div>
+    </div>
+}
+<div class="modal fade" id="nuevoEstiloModal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="exampleModalLabel">REGISTER STYLES</h2>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div id="Contenedor"></div>
+            </div>
+            <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btnCancel" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="exampleModalLabel">STYLE</h2>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div id="ContenedorModal"></div>
+            </div>
+            <div class="modal-footer">
+                   <button type="button" class="btn btn-secondary " data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="deleteColorModal" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="deleteColorModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="exampleModalLabel">Are you sure to eliminate the style?</h2>
+            </div>
+            <div class="modal-body">
+                <div id="ContenedorDeleteModal">
+
+                    <div class="form-actions no-color">
+                        <input type="button" value="Delete" class="btn btn-danger btnEliminar" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+
+    $(document).ready(function () {
+        $(".btnNuevo").click(function () {
+            $("#Contenedor").load("/POSummary/RegistrarNuevoEstilo", function () {
+                $("#nuevoEstiloModal").modal("show");
+            });
+        });       
+    });
+
+    $(document).on('click', '.btnEdit', function () {
+        var id = $(this).data("value");
+        $("#ContenedorModal").load("/Pedidos/EditarEstilo/" + id, function () {
+            $("#IdItems").val(id);
+            $("#myModal").modal("show");
+        });        
+    });
+    var idEst;
+    $(document).on('click', '.btnDelete', function () {
+        $("#loading").css('display', 'none');
+        var id = $(this).data("value");
+        idEst = id;
+        $('#deleteColorModal').modal('show');
+       // $("#ContenedorDeleteModal").load("/Pedidos/Eliminar/" + id, function () {});
+    });
+
+    $(document).on('click', '.btnEliminar', function () {
+        $("#loading").css('display', 'none');
+        var id = idEst;        
+        $.ajax({
+            url: "/Pedidos/Eliminar/" + id,
+            method: 'POST',
+            dataType: "json",
+            success: function () {
+                buscar_estilos_rev(idEstilo);
+                $('#deleteColorModal').modal('hide');
+            },
+            error: function (errormessage) {
+                //alert(errormessage.responseText);
+            }
+        }).done(function (data) {
+            buscar_estilos_rev(idEstilo);
+            $('#deleteColorModal').modal('hide');
+            });
+        buscar_estilos_rev(idEstilo);
+        $('#deleteColorModal').modal('hide');
+        alertify.notify('The style was removed correctly.', 'success', 3, null);
+    });
+</script>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

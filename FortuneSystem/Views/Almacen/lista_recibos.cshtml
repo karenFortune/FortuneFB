@@ -1,0 +1,329 @@
+﻿
+<script>
+    $(document).ready(function () {
+        load_recibos();
+    });
+    $(document).ready(function () {
+        $(".search_recibos").keyup(function () {
+            var searchTerm = $(".search_recibos").val();
+            var listItem = $('.results_recibos tbody').children('tr');
+            var searchSplit = searchTerm.replace(/ /g, "'):containsi('")
+            $.extend($.expr[':'], {
+                'containsi': function (elem, i, match, array) {
+                    return (elem.textContent || elem.innerText || '').toLowerCase().indexOf((match[3] || "").toLowerCase()) >= 0;
+                }
+            });
+            $(".results_recibos tbody tr").not(":containsi('" + searchSplit + "')").each(function (e) {
+                $(this).attr('visible', 'false');
+            });
+            $(".results_recibos tbody tr:containsi('" + searchSplit + "')").each(function (e) {
+                $(this).attr('visible', 'true');
+            });
+            var jobCount = $('.results_recibos tbody tr[visible="true"]').length;
+            $('.counter_recibos').text(jobCount + ' item');
+            if (jobCount == '0') { $('.no-result_recibos').show(); }
+            else { $('.no-result').hide(); }
+        });
+    });
+    $(document).on("click", "a", function () {
+        //setTimeout(function () { $("#loading").css('display', 'none'); }, 1000);
+        $("#loading").css('display', 'none');
+    });
+    function load_recibos() {
+        $("#loading_recibos").css('display', 'inline');
+        $.ajax({
+            url: '/Almacen/obtener_recibos_lista',
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            success: function (result) {
+                var html = '';
+                $.each(result, function (key, item) {
+                    html += '<tr>' +
+                        '<td>' + item.id_recibo + '</td> ' +
+                        '<td>' + item.mp_number + '</td> ' +
+                        '<td>' + item.fecha + '</td> ' +
+                        '<td>' + item.items + '</td> ' +
+                        '<td>' + item.total + '</td> ' +
+                        '<td>' + item.usuario + '</td> ' +
+                        '<td>' + item.sucursal + '</td> ' +
+                        '<td>' + item.mill_po + '</td> ' +
+                        '<td>' + item.po_referencia + '</td> ' +
+                        '<td> <button type="button" title="Print labels" id="btn_imprimir_etiquetas" class="btn btn-success  classAdd agregar" onclick="imprimir_tags(' + item.id_recibo + ')" style=" padding:0px 5px !important; margin:0px;"><span class="glyphicon glyphicon-print" aria-hidden="true"></span></button> </td> '+
+                        '<td> <button type="button" title="See receive details" id="btn_ver_recibo" class="btn btn-success  classAdd agregar" onclick="ver_recibo(' + item.id_recibo + ')" style="visibility:hidden; padding:0px 5px !important; margin:0px;"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button> </td> ';
+
+                    if (item.mp_number != 'n/a') {
+                        html += '<td> <button type="button" title="Add MP" id="btn_ver_recibo" class="btn btn-success  classAdd agregar" onclick="agregar_mp(' + item.id_recibo + ')" style=" visibility:hidden; padding:0px 5px !important; margin:0px;"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button> </td> ';
+
+                    } else {
+                        html += '<td> <button type="button" title="Add MP" id="btn_ver_recibo" class="btn btn-success  classAdd agregar" onclick="agregar_mp(' + item.id_recibo + ')" style="padding:0px 5px !important; margin:0px;"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button> </td> ';
+                    }
+                    html += '</tr>';
+                });
+                $(".resultados_recibos").html(html);
+                $("#loading_recibos").css('display', 'none');
+            }
+        });
+    }
+
+    function imprimir_tags(ID) {
+        $.ajax({
+            url: "/Almacen/imprimir_etiquetas_cajas/"+ID,
+            dataType: 'json',
+            type: 'post',
+            success: function () {
+                imprimir_etiquetas();
+            }
+        });
+    }
+    function imprimir_etiquetas() {
+        /*var h = screen.height - 100;
+        var w = screen.width - 30;
+        window.open('/PDF/imprimir_etiquetas_recibos', '_blank', 'toolbar=0,location=0,menubar=0,width=' + w + ',height=' + h + ', fullscreen=yes');*/
+        var boton = document.getElementById('imprimir_cajas');
+        boton.click();
+    }
+
+    function ver_recibo(id) {
+        $("#loading_recibos").css('display', 'inline');
+        $.ajax({
+            url: '/Almacen/obtener_recibo',
+            contentType: 'application/json',
+            data: "{'recibo':'" + id + "'}",
+            dataType: 'json',
+            type: 'post',
+            success: function (result) {
+                var inventario;
+                var html = '' +
+                    '<tr><td>' + result.id_recibo + '</td> ' +
+                    '<td>' + result.mp_number + '</td> ' +
+                    '<td>' + result.fecha + '</td> ' +
+                    '<td>' + result.items + '</td> ' +
+                    '<td>' + result.total + '</td> ' +
+                    '<td>' + result.usuario + '</td> ' +
+                    '<td>' + result.sucursal + '</td> ' +
+                    '<td>' + result.mill_po + '</td> ' +
+                    '<td>' + result.po_referencia + '</td> </tr>';
+                $(".recibo_individual").html(html);
+
+                var recibos_items = result.lista_recibos_item;
+                html = '';
+                $.each(recibos_items, function (key, ri) {
+                    inventario = ri.item;
+                    html += '<tr><td>' + inventario.po + '</td> ' +
+                        '<td>' + inventario.categoria_inventario + '</td> ' +
+                        '<td>' + inventario.descripcion + '</td> ' +
+                        '<td>' + ri.total + '</td> </tr>';
+                });
+                $(".recibo_items_individual").html(html);
+                $("#detalles_recibo").css('display', 'inline');
+                $("#loading_recibos").css('display', 'none');
+            }
+        });
+    }
+
+    function cerrar_panel_mp() {
+        $("#div_agregar_mp").css('display', 'none');
+    }
+    function agregar_mp(id) {
+        $("#label_mp").html("MP for receive number " + id);
+        $("#caja_mp_recibo").val(id);
+        $("#div_agregar_mp").css('display', 'inline');
+    }
+    function guardar_mp(event) {
+        var error = 0;
+        if ($("#caja_mp_number").val() == '') {
+            $(this).css('border', '2px solid #e03f3f');
+            error++;
+        } else {
+            $(this).css('border', '1px solid #cccccc');
+        }
+        if (error == 0) {
+            var recibo = $("#caja_mp_recibo").val();
+            var mp = $("#caja_mp_number").val();
+            $.ajax({
+                url: '/Almacen/guardar_mp_recibo',
+                contentType: 'application/json',
+                data: "{'recibo':'" + recibo + "','mp':'" + mp + "'}",
+                dataType: 'json',
+                type: 'post',
+                success: function (result) {
+                    $("#div_agregar_mp").css('display', 'none');
+                    alertify.success('Succes!');
+                    alertify.set('notifier', 'position', 'top-right');
+                    load_recibos();
+                    event.preventDefault();
+                    return false;
+                }
+            });
+        } else {
+            $("#div_agregar_mp").css('display', 'inline');
+            event.preventDefault();
+            alertify.alert('Error!', 'Check empty fields, please');
+            return false;
+        }
+    }
+
+    $(document).on("dblclick", "#tabla_listado_recibos tr", function () {
+        var row = this.rowIndex;
+        //alert($('#items_recibos tr:eq('+row+') td:eq(0)').html()); //empieza las columas desde 0
+        //alert($('#items_recibos tr:eq(' + row + ') td:nth-child(2)').html());     //empieza las columnas desde 1
+        ver_recibo($('#tabla_listado_recibos tr:eq(' + row + ') td:eq(0)').html());
+    });
+    //CAMBIAR LOS ROW DE COLOR
+    $(document).on("click", "#tabla_listado_recibos tr", function (e) { 
+        //alert("x");
+        var row = this.rowIndex;
+        if (row != 0) {
+            if (this.style.background == "" || this.style.background == "white") {
+                $(this).css('background', '#46a772');
+                $(this).css('color', 'white');
+            } else {
+                $(this).css('background', 'white');
+                $(this).css('color', 'black');
+            }
+        }
+        e.stopImmediatePropagation();     
+    });
+
+   
+</script>
+<a id="imprimir_cajas" href="@Url.Action("imprimir_etiquetas_recibos", "PDF")" style="visibility:hidden;">Daily</a>
+<style>
+  
+    .panel_sobrepuesto {
+        position: absolute;
+        z-index: 9999;
+        top: 20%;
+        left: 30%;
+        width: 350px;
+        height: 300px;
+        background: white;
+        padding: 1.5em;
+        display: none;
+        border-radius: 10px;
+        border: solid #5cb85c 2px;
+    }
+
+    tr {
+        cursor:pointer;
+    }
+    .load_recibos {
+        position: fixed;
+        z-index: 2001 !important;
+        height: 100% !important;
+        display: none;
+        border: 0;
+        padding: .5em 1em;
+        overflow: auto;
+        top: 11%;
+        left: 3%;
+        background: white;
+        width: 94%;
+        border: none;
+        opacity: 0.8;
+        height: 85% !important;
+    }
+
+    .imagen_loading2 {
+        position: absolute;
+        z-index: 2000 !important;
+        top: 25%;
+        left: 35%;
+        width: 300px;
+        height: 300px;
+        background: url('../../Content/img/gif/loader3.gif');
+    }
+
+    .results_recibos tr[visible='false'],
+    .no-result_lr {
+        display: none;
+    }
+
+    .results_recibos tr[visible='true'] {
+        display: table-row;
+    }
+
+    .counter_recibos {
+        padding: 8px;
+        color: #ccc;
+    }
+
+
+</style>
+<div id="loading_recibos" class="load_recibos">
+    <div id="spinner" class="imagen_loading2" style=""></div>
+</div>
+<div class="row" style="padding:.5em;">
+    <div class="form-group pull-left" style="margin-left: 1em;">
+        <label class=" col-form-label">Type to search</label>
+        <input type="text" class="search_recibos form-control validacion" placeholder="Search something">
+    </div>
+    <span class="counter_recibos pull-left"></span><br />
+</div>
+<div style="overflow:auto; height:250px; margin:.5em;" class="row panel-default panel-primary panel">
+    <table id="tabla_listado_recibos" class="table table-striped results_recibos listado">
+        <thead style="background:#3479bf; color:white;">
+            <tr>
+                <th>#</th>
+                <th>MP</th>
+                <th>Date</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>User</th>
+                <th>Office</th>
+                <th>Mill Po</th>
+                <th>PO Reference</th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody class="resultados_recibos"></tbody>
+    </table>
+
+    <div id="div_agregar_mp" class="panel_sobrepuesto">
+        <h4 id="label_mp" class="card-title"></h4><br />
+        <div class="form-group pull-left">
+            <input type="text" id="caja_mp_recibo" style="visibility:hidden;" class=" form-control validacion" placeholder="">
+        </div>
+        <div class="form-group">
+            <input type="text" id="caja_mp_number" class="form-control numeric " width="20" maxlength="20"  ondrop="return false;" onpaste="return false;"  placeholder="Enter MP number" /><br />
+        </div>
+        <button type="button" class="btn btn-success" onclick="guardar_mp(event)" style="float:right;">Save</button>
+        <button type="button" class="btn btn-success" onclick="cerrar_panel_mp(event)" style="float:left;">Cancel</button>
+    </div>
+
+</div>
+<div id="detalles_recibo" class="row " style="overflow:auto; height:300px; margin:.5em; display:none;">
+    <div class="panel-heading">Details  </div>
+    <table id="tabla_recibo_individual" class="table table-striped results_recibos">
+        <thead style="">
+            <tr>
+                <th>#</th>
+                <th>MP</th>
+                <th>Date</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>User</th>
+                <th>Office</th>
+                <th>Mill Po</th>
+                <th>PO Reference</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody class="recibo_individual"></tbody>
+    </table>
+    <table id="tabla_listado_items_recibo" class="table table-striped results_recibos">
+        <thead style="">
+            <tr>
+                <th>PO</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody class="recibo_items_individual"></tbody>
+    </table>
+</div>

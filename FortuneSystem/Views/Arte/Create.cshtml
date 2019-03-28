@@ -1,0 +1,416 @@
+﻿@model FortuneSystem.IMAGEN_ARTE
+
+@{
+    ViewBag.Title = "Create Art";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link type="text/css" rel="stylesheet" href="~/Content/cssGeneral/estiloArte.css" />
+<link type="text/css" rel="stylesheet" href="~/Content/cssGeneral/estiloRadioButton.css" />
+
+<script>
+
+    var minLength = 12;
+    var maxLength = 15;
+    $(function () {
+
+    });
+    $(document).on("input", "#l-cantidad", function () {
+        this.value = this.value.replace(/\D/g, '');
+        $("#l-cantidad").on("keydown keyup change", function () {
+            debugger
+            var value = $(this).val();
+            if (value.length < minLength) {
+                $("#nuevoUPC").attr('disabled', 'disabled');
+                $(".msj").text("The minimum number of UPC is 12");
+                $('.msj').css('color', 'red');
+
+            }
+            else if (value.length > maxLength) {
+                $(".msj").text("The maximum UPC number is 15");
+                $('.msj').css('color', 'red');
+                $("#nuevoUPC").attr('disabled', 'disabled');
+            }
+            else {
+                $(".msj").text("The UPC is valid");
+                $('.msj').css('color', 'black');
+                $("#nuevoUPC").removeAttr('disabled');
+            }
+
+        });
+    });
+    $(function () {
+        $('#imgSalida').on('click', function () {
+            $('.enlargeImageModalSource').attr('src', $(this).attr('src'));
+            $('#enlargeImageModal').modal('show');
+        });
+        $('#imgSalidaPNL').on('click', function () {
+            $('.enlargeImageModalSource').attr('src', $(this).attr('src'));
+            $('#enlargeImageModal').modal('show');
+        });
+    });
+    $(function () {
+
+        $('#chooseFile').bind('change', function () {
+            var filename = $("#chooseFile").val();
+            if (/^\s*$/.test(filename)) {
+                $(".file-upload").removeClass('active');
+                $("#noFile").text("No file chosen...");
+            }
+            else {
+                $(".file-upload").addClass('active');
+                $("#noFile").text(filename.replace("C:\\fakepath\\", ""));
+            }
+        });
+
+        $('#chooseFilePNL').bind('change', function () {
+            var filePNLName = $("#chooseFilePNL").val();
+            if (/^\s*$/.test(filePNLName)) {
+                $(".filePnl-upload").removeClass('active');
+                $("#noFilePNL").text("No file chosen...");
+            }
+            else {
+                $(".filePnl-upload").addClass('active');
+                $("#noFilePNL").text(filePNLName.replace("C:\\fakepath\\", ""));
+            }
+        });
+
+    });
+    $(function () {
+        $('#chooseFile').change(function (e) {
+            addImage(e);
+        });
+
+        function addImage(e) {
+            var file = e.target.files[0],
+                imageType = /image.*/;
+
+            if (!file.type.match(imageType))
+                return;
+
+            var reader = new FileReader();
+            reader.onload = fileOnload;
+            reader.readAsDataURL(file);
+        }
+
+        function fileOnload(e) {
+            var result = e.target.result;
+            $('#imgSalida').attr("src", result);
+        }
+
+        /*MOSTRAR IMAGEN PNL*/
+        $('#chooseFilePNL').change(function (e) {
+            addImagePNL(e);
+        });
+
+        function addImagePNL(e) {
+            var file = e.target.files[0],
+                imageType = /image.*/;
+
+            if (!file.type.match(imageType))
+                return;
+
+            var reader = new FileReader();
+            reader.onload = filePNLOnload;
+            reader.readAsDataURL(file);
+        }
+
+        function filePNLOnload(e) {
+            var result = e.target.result;
+            $('#imgSalidaPNL').attr("src", result);
+        }
+    });
+
+    function obtenerListaTallas() {
+                $("#loading").css('display', 'inline');
+                $.ajax('@Url.Action("Lista_Tallas_Estilo", "Arte")', {
+                    method: 'GET',
+                    dataType: "json",
+                    success: function (jsonData) {
+                        var listaT = jsonData.Data.listaTalla;
+                        var listaU = jsonData.Data.listaUPC;
+                        var html = '';
+                        html +='<table class="table" id="tablaTallas"><thead>' +
+                            '  <tr>' +
+
+                            '<th>SIZE</th>' +
+                            ' <th>UPC</th>' +
+                            '</tr>'+
+                            '</thead><tbody>';
+                        if (listaU.length != 0) {
+                            $.each(listaU, function (key, item) {
+                                html += '<tr>';
+                                html += '<td><input type="text" id="f-talla" class="form-control talla" value="' + item.Talla + '" readonly/></td>';
+                                html += '<td><input type="text" name="l-cantidad" id="l-cantidad" class="form-control numeric "  value="' + item.UPC1 + '" readonly /><span class="msj"></span></td>';
+
+                                html += '</tr>';
+
+                            });
+                            
+                        } /*else {
+                            var cont = 0;
+                            $.each(listaT, function (key, item) {
+                                cont = cont + 1;
+                                html += '<tr id="pallet' + cont + '">';
+                                html += '<td><input type="text" id="f-talla" class="form-control talla" value="' + item.Talla + '" readonly/></td>';
+                                html += '<td><input type="text" name="l-cantidad" id="l-cantidad" class="form-control numeric' + cont +'" /><span class="msj"></span></td>';
+
+                                html += '</tr>';
+
+                            });
+                        }*/
+                        $("#nuevoUPC").hide();
+                        html += '</tbody> </table>';
+                        $('#listaTalla').html(html);
+                        $("#botonUPC").css("visibility", "visible");
+                        $("#loading").css('display', 'none');
+                    },
+                    error: function (errormessage) {
+                        alert(errormessage.responseText);
+                    },
+            }).done(function(data) {
+
+            });
+
+        }
+
+    function obtenerDetalleListaTallas() {
+                $("#loading").css('display', 'inline');
+                $.ajax('@Url.Action("Lista_Tallas_Estilo", "Arte")', {
+                    method: 'GET',
+                    dataType: "json",
+                    success: function (jsonData) {
+                        var listaT = jsonData.Data.listaTalla;
+                        var html = '';
+                        html +='<table class="table" id="detalleTallas"><thead>' +
+                            '  <tr>' +
+                            '<th >SIZE</th>' +
+                            '</tr>'+
+                            '</thead><tbody>';
+                        $.each(listaT, function (key, item) {
+                            html += '<tr>';
+                            html += '<td><input type="text" id="f-talla" class="form-control talla" value="' + item.Talla + '" readonly/></td>';
+                            html += '</tr>';
+
+                        });
+                        html += '</tbody> </table>';
+
+                        $('#detalleTallas').html(html);
+                        $("#loading").css('display', 'none');
+
+                    },
+                    error: function (errormessage) {
+                        alert(errormessage.responseText);
+                    },
+            }).done(function(data) {
+
+            });
+
+        }
+    $(document).ready(function () {
+        obtenerListaTallas();
+        obtenerDetalleListaTallas();
+        debugger
+        var btn = $("#botonUPC").css("visibility", "visible");
+        if (btn.length != 0) {
+            $("#btnRegister").attr('disabled', 'disabled');
+        }
+
+        $('#nuevoUPC').on('click', function () {
+            var r = 0; var c = 0; var i = 0; var cadena = new Array(1);
+            cadena[0] = ''; cadena[1] = '';
+            var nFilas = $("#tablaTallas tbody>tr").length;
+            var nColumnas = $("#tablaTallas tr:last td").length;
+            $('#tablaTallas tbody>tr').each(function () {
+                r = 0;
+                c = 0;
+                $(this).find("input").each(function () {
+                    $(this).closest('td').find("input").each(function () {
+                        cadena[c] += this.value + "*";
+                        c++;
+                    });
+
+                    r++;
+                });
+            });
+            debugger
+            var error = 0;
+            $('#tablaTallas').find('td').each(function (i, el) {
+
+                var valor = $(el).children().val();
+
+                if ($(el).children().val() == '') {
+                    error++;
+                    $(el).children().css('border', '2px solid #e03f3f');
+
+                } else {
+                    $(el).children().css('border', '1px solid #cccccc');
+
+                }
+
+
+
+            });
+
+            enviarListaTalla(cadena, error);
+        });
+    });
+
+    function enviarListaTalla(cadena, error) {
+
+        if (error != 0) {
+            var alert = alertify.alert("Message", 'All fields are required.').set('label', 'Aceptar');
+            alert.set({ transition: 'zoom' });
+            alert.set('modal', false);
+        } else {
+            var id = $("#CATARTE_IdEstilo").val();
+            $.ajax({
+                url: "/POSummary/Obtener_Lista_Tallas_UPC",
+                datatType: 'json',
+                data: JSON.stringify({ ListTalla: cadena, IdSummary : id }),
+                cache: false,
+                type: 'POST',
+                contentType: 'application/json',
+                success: function (data) {
+                    $("#btnRegister").removeAttr('disabled');
+                    alertify.set('notifier', 'position', 'top-right');
+                    alertify.notify('The UPC was registered correctly.', 'success', 5, null);
+                    $("#nuevoUPC").hide();
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    showError(xhr.status, xhr.responseText);
+                    if (data.error == 1) {
+                        alertify.notify('Check.', 'error', 5, null);
+                    }
+                }
+            });
+        }
+
+    }
+
+</script>
+<style>
+    .center {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    #flecha {
+        cursor: auto;
+    }
+</style>
+ </div>
+@using (Html.BeginForm("Create", "Arte", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+
+<div class="form-horizontal">
+
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    @Html.HiddenFor(model => model.IdEstilo)
+    @Html.HiddenFor(model => model.IdImgArte)
+    @Html.HiddenFor(model => model.CATARTE.IdEstilo)
+
+    <div class="modal fade" id="enlargeImageModal" tabindex="-1" role="dialog" aria-labelledby="enlargeImageModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="exampleModalLabel">ART</h2>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                </div>
+                <div class="modal-body">
+                    <img class="enlargeImageModalSource center" style="width: 50%;">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid" style="padding-left:20em; padding-right:10em;">
+        <div class="panel panel-primary" id="panelArte">
+            <div class="panel-heading">
+                <h2>Add Art</h2>
+            </div>
+            <br />
+            <br />
+            <div class="row">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Tienda, htmlAttributes: new { @class = "control-label col-md-2" })
+                    @Html.EditorFor(model => model.Tienda, new { htmlAttributes = new { @class = "form-control ", @readonly = "readonly" } })
+                </div>
+            </div>
+            <hr />
+            <div class="row">
+                <div class="form-group">
+                    <div class="col-sm-1">
+                    </div>
+                    <div class="col-sm-5">
+                        @Html.LabelFor(model => model.imgArte, htmlAttributes: new { @class = "control-label col-md-4" })
+
+                        <img id="imgSalida" width="70" height="70" src="@Url.Action("ConvertirImagen", "Arte", new {arteCodigo = Model.IdImgArte})" />
+                    </div>
+                    <div class="col-md-10">
+                        <br />
+                        <div class="col-md-10">
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            @Html.LabelFor(model => model.StatusArte, htmlAttributes: new { @class = "control-label " })
+                            @Html.RadioButtonFor(model => model.EstadosArte, EstatusArte.APPROVED, new { @class = "form-radio", Checked = "checked", disabled = "disabled" }) APPROVED
+                            @Html.RadioButtonFor(model => model.EstadosArte, EstatusArte.REVIEWED, new { @class = "form-radio", disabled = "disabled" }) REVIEWED
+                            @Html.RadioButtonFor(model => model.EstadosArte, EstatusArte.PENDING, new { @class = "form-radio", disabled = "disabled" }) PENDING
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <hr />
+            @if (Model.ResultadoK.Count != 0 || Model.ResultadoW.Count != 0)
+            {
+
+                <div class="form-group">
+                    <div class="container-fluid">
+                        <h2 style="text-align:center">UPC</h2>
+                        <div id="listaTalla"></div>
+                        <div id="botonUPC" style="visibility:hidden;">
+                            <button type="button" id="nuevoUPC" class="btn btn-success btn-md pull-right btn-sm">Save UPC</button>
+                        </div>
+                        <br />
+                        <br />
+                    </div>
+
+                </div>
+
+            }
+            else
+            {
+                <div class="form-group">
+                    <div class="container-fluid">
+                        <h2 style="text-align:center">SIZE DETAIL</h2>
+                        <div id="detalleTallas"></div>
+                        <br />
+                        <br />
+                    </div>
+
+                </div>
+            }
+            <hr />
+            @*@if (Model.imgArte == null && Model.imgPNL == null)
+            {
+                <div class="form-group">
+                     <div class="col-md-offset-2 col-md-10">
+                        <input type = "submit" value="Register" id="btnRegister" class="btn btn-success" />
+                    </div>
+               </div>
+            }*@
+        </div>        
+        <a href='@Url.Action("Index", "Arte")'>
+            <img src='@Url.Content("~/Content/img/backToPage.png")' id="flecha" title="Go Back" />
+        </a>
+    </div>
+</div>
+}
+
+

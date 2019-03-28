@@ -1,0 +1,770 @@
+﻿@model FortuneSystem.Models.POSummary.POSummarys
+
+@{
+    ViewBag.Title = "CrearItems";
+
+}
+
+<link rel="stylesheet" href="~/Content/alertifyjs/css/alertify.min.css" />
+<link rel="stylesheet" href="~/Content/alertifyjs/css/themes/default.min.css" />
+<link href="~/Content/select2-4.0.5/dist/css/select2.min.css" rel="stylesheet" />
+<script src="~/Content/alertifyjs/alertify.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+<script src="~/Scripts/bootstrap.min.js"></script>
+<link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+<link href="~/Content/select2-4.0.5/dist/css/select2.min.css" rel="stylesheet" />
+<script src="~/Content/select2-4.0.5/dist/js/select2.min.js"></script>
+<script language="javascript" type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.10.0/jquery.validate.min.js"></script>
+<script src="~/Scripts/general/autocomplete.js"></script>
+<script src="~/Scripts/general/AgregarTallas.js"></script>
+<link type="text/css" rel="stylesheet" href="~/Content/cssGeneral/estiloArte.css" />
+
+
+<link href="@Url.Content("~/Content/themes/base/jquery-ui.min.css")" rel="stylesheet" />
+@Scripts.Render("~/Content/jquery-ui-1.12.1.custom/jquery-3.3.1.min.js")
+
+<script type="text/javascript">
+
+
+    $(document).ready(function () {
+        $("#selectEspecialidad").val('12');
+        $("#selectEspecialidad").trigger('change');
+
+        var estilo = $("#ItemDescripcion_ItemEstilo").val();
+        if (estilo != '') {
+            $('#ItemDescripcion_Descripcion').val('');
+            $("#nuevoEstilo").prop("disabled", false);
+            validarEstilo(estilo);
+
+        }
+
+            $('#nuevoColor').click(function (e) {
+        var colorEstilo = $("#CatColores_CodigoColor").val();
+        var colorDesc = $("#CatColores_DescripcionColor").val();
+        $.ajax('@Url.Action("Registrarcolor", "Colores")', {
+            data: { CodigoColor: colorEstilo, DescColor: colorDesc },
+            method: 'post'
+        }).done(function (data) {        });
+                $("#nuevoColor").prop("disabled", true);
+        alertify.set('notifier', 'position', 'top-right');
+                alertify.notify('The color was registered correctly.', 'success', 10, null);
+        });
+
+        $('#nuevoEstilo').click(function (e) {
+        var itemEstilo = $("#ItemDescripcion_ItemEstilo").val();
+        var estiloDesc = $("#ItemDescripcion_Descripcion").val();
+        $.ajax('@Url.Action("RegistrarEstilo", "Items")', {
+            data: { ItemEstilo: itemEstilo, DescEstilo: estiloDesc },
+            method: 'post'
+        }).done(function (data) {
+        });
+            $("#nuevoEstilo").prop("disabled", true);
+            alertify.set('notifier', 'position', 'top-right');
+            alertify.notify('The style was correctly registered.', 'success', 10, null);
+        });
+
+        @*$('#btnSaveArt').click(function (e) {
+            debugger
+
+            var data = new FormData();
+            var files = $("#chooseFile").get(0).files;
+
+            if (files.length > 0) { data.append("HelpSectionImages", files[0]); }
+            else {
+                common.showNotification('warning', 'Please select file to upload.', 'top', 'right');
+                return false;
+            }
+            var extension = $("#chooseFile").val().split('.').pop().toUpperCase();
+            if (extension != "PNG" && extension != "JPG" && extension != "GIF" && extension != "JPEG") {
+                common.showNotification('warning', 'Imvalid image file format.', 'top', 'right');
+                return false;
+            }
+        $.ajax('@Url.Action("FileUpload", "POSummary")', {
+            data: data,
+            type: 'post'
+        }).done(function (data) {
+                });
+            $('#agregarImgModal').modal('hide');
+        });*@
+       
+        $('#btnSaveArt').click(function () {
+
+                 if (window.FormData !== undefined) {
+
+                    var fileUpload = $("#chooseFile").get(0);
+                    var files = fileUpload.files; 
+                    var fileData = new FormData();
+
+                    for (var i = 0; i < files.length; i++) {
+                        fileData.append(files[i].name, files[i]);
+                    }
+
+                    $.ajax({
+                        url: '/Arte/UploadFiles',
+                        type: "POST",
+                        contentType: false,   
+                        processData: false,   
+                        data: fileData,
+                        success: function (result) {
+                            alert(result);
+                        },
+                        error: function (err) {
+                            alert(err.statusText);
+                        }
+                    });
+                } else {
+                    alert("FormData is not supported.");
+                }
+            });
+       
+
+        $("#ItemDescripcion_ItemEstilo,#CatColores_CodigoColor,#f-talla").on('input', function () {
+            var val = this.value;
+            this.value = val.replace(/[^A-Z\a-z\u00f1\u00d1\u0020\s\^0-9]/g, '');
+        });
+       /* $("#Cantidad").on('input', function () {
+            var val = this.value;
+            this.value = val.replace(/^[0-9]\./g, '');
+        });*/
+
+        $("#crearTallas").hide();
+       // $("#crearTipoPack").hide();
+        debugger
+        $('#nuevoItem').click(function (e) {
+            var error = 0;
+            var lista = []; 
+            lista = obtenerPackingEstilo();
+            var datos = JSON.stringify(lista);
+            var obj = datos;
+            obj = JSON.parse(obj);
+            $(".nuevo_item").each(function () {
+                error;
+                var id = $(this).attr('id');
+                var result = $(this).val();
+                if (result == '') {
+                    $("#" + id).css('border', '2px solid #e03f3f');
+                    error++;
+
+                } else {
+                    $("#" + id).css('border', '1px solid #cccccc');
+                }
+
+            });
+            if (error != 0) {
+                var alert = alertify.alert("Message", 'All fields are required.').set('label', 'Aceptar');
+                alert.set({ transition: 'zoom' });
+                alert.set('modal', false);
+            } else {
+                $("#nuevoItem").prop("disabled", true);
+                $("#crearTallas").show();
+              //  $("#crearTipoPack").show();
+                var EstiloItem = $("#ItemDescripcion_ItemEstilo").val();
+                var IdColor = $("#CatColores_CodigoColor").val();
+                var Cantidad = $("#CantidadT").val();
+                var Precio = $("#Precio").val();
+                var IdGenero = $("#selectGenero option:selected").val();
+                var IdTela = $("#selectTela option:selected").val();
+                var TipoCamiseta = $("#selectTipoCamiseta option:selected").val();
+                var Especialidad = $("#selectEspecialidad option:selected").val();
+
+                //var data1 = [{ "EstiloItem": EstiloItem, "IdColor": IdColor, "Cantidad": Cantidad, "Precio": Precio, "IdGenero": IdGenero, "TipoCamiseta": TipoCamiseta, "IdTela": IdTela, "IdEspecialidad": Especialidad, "ListaPackSytle": lista }];
+                $.ajax('@Url.Action("RegistrarItem", "POSummary")', {
+                    data: { EstiloItem: EstiloItem, IdColor: IdColor, Cantidad: Cantidad, Precio: Precio, IdGenero: IdGenero, TipoCamiseta: TipoCamiseta, IdTela: IdTela, IdEspecialidad: Especialidad, ListaPackSytle: obj },
+                    type: "POST",
+                    async: true,
+                    dataType: "json",
+                success: function (data) {
+
+                },
+            }).done(function(data) {
+
+                    });
+
+                var arteImg = '@Session["IdArte"]';
+                if (arteImg === "") {
+                    $("#loading").css('display', 'none');
+                    var id = $(this).data("value");
+                    //$('#agregarImgModal').modal('show');
+                    //$("#ContenedorModal").load("/Cliente/Detalles/" + id, function () {
+                   // });
+                } else {
+
+                }
+                alertify.set('notifier', 'position', 'top-right');
+                alertify.notify('The Style was registered correctly.', 'success', 10, null);
+
+            }
+
+
+        });
+
+        function obtenerPackingEstilo() {
+            var r = 0; var c = 0; var i = 0; var cadena = new Array(1);
+            cadena[0] = '';
+            var nFilas = $("#tablaPack tbody>tr").length;
+            var nColumnas = $("#tablaPack tr:last td").length;
+            $('#tablaPack tbody>tr').each(function () {
+                r = 0;
+                c = 0;
+                $(this).find("input").each(function () {
+                    $(this).closest('td').find("input").each(function () {
+                        cadena[c] += this.value + "*";
+                        c++;
+                    });
+
+                    r++;
+                });
+            });
+
+            var error = 0;
+            $('#tablaPack').find('td.datoPack').each(function (i, el) {
+
+                var valor = $(el).children().val();
+
+                if ($(el).children().val() == '') {
+                    error++;
+                    $(el).children().css('border', '2px solid #e03f3f');
+
+                } else {
+                    $(el).children().css('border', '1px solid #cccccc');
+
+                }
+            });
+
+            if (error == 0) {
+                return (cadena);
+            }
+
+        }
+
+        var colorDesc = $("#CatColores_DescripcionColor").val();
+        var colorEstilo = $("#CatColores_CodigoColor").val();
+        $(function () {
+            var list_datalist = Array();
+            $.ajax({
+                url: '/Tallas/Lista_Tallas',
+                type: 'GET',
+                success: function (data) {
+                    for (var i = 0; i < data.length; i++) {
+                        var html = "";
+                        list_datalist.push(data[i].Talla);
+                    }
+                }
+            })
+            var availableTags = list_datalist;
+            $(document).on("focus keyup", "input.talla", function (event) {
+
+                $(this).autocomplete({
+                    source: availableTags,
+                    select: function (event, ui) {
+                        event.preventDefault();
+                        this.value = ui.item.label;
+                    },
+                    focus: function (event, ui) {
+                        event.preventDefault();
+                        this.value = ui.item.label;
+                    }
+                });
+            });
+        });
+
+        $(function () {
+            $('#selectGenero').change(function () {
+                var text = $(this).find('option:selected').text();
+                $.ajax('@Url.Action("List", "POSummary")', {
+                data: { Genero: text},
+                    method: 'GET',
+                    success: function (result) {
+                        var html = '';   
+                        $.each(result, function (key, item) {
+                            html += '<tr>';
+                            html += '<td class="mover"><span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span></td>';
+                            html += '<td class="datoTalla"><input type="text" id="f-talla" class="form-control talla" value="' + item.CatTallaItem.Talla + '"/></td>';
+                            html += '<td class="datoTalla"><input type="text" name="l-cantidad" id="l-cantidad" class="form-control l-name01 numCantTall "  /></td>';
+                            html += '<td class="datoTalla"><input type="text" name="e-extras" id="e-extras" class="form-control e-name01 numExtTall" value="' + 0 + '"/></td>';
+                            html += '<td class="datoTalla"><input type="text" name="s-ejemplo" id="s-ejemplo" class="form-control s-name01 numEjmTall"  value="' + 0 + '"/></td>';
+                            html += '<td><button type="button" id="btnDelete" class="deleteTalla btn btn btn-danger btn-xs" value="4">Delete</button></td>';
+                            html += '</tr>';
+
+                        });
+                        $('.tbodyTallas').html(html);
+                    },
+                    error: function (errormessage) {
+                        alert(errormessage.responseText);
+                    },
+            }).done(function(data) {
+
+            });
+            });
+        });
+
+        var exists = false;
+
+
+    });
+
+    function buscarTipoCamiseta(tipoProd) {
+        $('#selectTipoCamiseta option').each(function (i, e) {
+            if (this.value == tipoProd) {
+                    $(this).attr('selected', 'selected');
+                $(this).val(tipoProd).change();
+
+                }
+            });
+    }
+
+    function buscarGenero(genero) {
+        $('#selectGenero option').each(function (i, e) {
+            if (this.value == genero) {
+                $(this).attr('selected', 'selected');
+                $(this).val(genero).change();
+
+            }
+        });
+    }
+
+    function validarEstilo(estilo) {
+        const re = /^([A-Z]{4})([0-9A-Z]{3})([A-Z]{1})([A-Z]{2})/;
+        var validar = estilo.match(re);
+        if (validar != null) {
+            var licencia = validar[1];
+            var genero = validar[3];
+            var tipoProd = validar[4];
+        }
+        var numero;
+        if (!validar) {
+            numero = 0;
+            return numero;
+        } else {
+            numero = 1;
+            buscarTipoCamiseta(tipoProd);
+            buscarGenero(genero);
+            return numero;
+
+        }
+
+
+    }
+
+    $(function () {
+        $('#chooseFile').bind('change', function () {
+            var filename = $("#chooseFile").val();
+            if (/^\s*$/.test(filename)) {
+                $(".file-upload").removeClass('active');
+                $("#noFile").text("No file chosen...");
+            }
+            else {
+                $(".file-upload").addClass('active');
+                $("#noFile").text(filename.replace("C:\\fakepath\\", ""));
+            }
+        });
+    });
+
+    $(function () {
+        $('#chooseFile').change(function (e) {
+            addImage(e);
+        });
+
+        function addImage(e) {
+            var file = e.target.files[0],
+                imageType = /image.*/;
+
+            if (!file.type.match(imageType))
+                return;
+
+            var reader = new FileReader();
+            reader.onload = fileOnload;
+            reader.readAsDataURL(file);
+        }
+
+        function fileOnload(e) {
+            var result = e.target.result;
+            $('#imgSalida').attr("src", result);
+        }
+    });
+
+    function InputToUpper(obj) {
+        if (obj.value != "") {
+            obj.value = obj.value.toUpperCase();
+        }
+    }
+
+    $(document).ready(function () {
+        $('#nuevaTalla').on('click', function () {
+            var r = 0; var c = 0; var i = 0; var cadena = new Array(4);
+            cadena[0] = ''; cadena[1] = ''; cadena[2] = ''; cadena[3] = '';
+            var nFilas = $("#tablaTallas tbody>tr").length;
+            var nColumnas = $("#tablaTallas tr:last td").length;
+            $('#tablaTallas tbody>tr').each(function () {
+                r = 0;
+                c = 0;
+                $(this).find("input").each(function () {
+                    $(this).closest('td').find("input").each(function () {
+                        cadena[c] += this.value + "*" ;
+                        c++;
+                    });
+
+                    r++;
+                    });
+                });
+
+            var error = 0;
+            $('#tablaTallas').find('td.datoTalla').each(function (i, el) {
+
+                var valor = $(el).children().val();
+
+                    if ($(el).children().val() == '') {
+                        error++;
+                        $(el).children().css('border', '2px solid #e03f3f');
+
+                    } else {
+                        $(el).children().css('border', '1px solid #cccccc');
+
+                    }
+            });
+
+            enviarListaTalla(cadena, error);
+        });
+    });
+
+    function redireccionarPagina() {
+        $("#loading").css('display', 'inline');
+        window.location = '/pedidos/Index';
+    }
+    function enviarListaTalla(cadena, error) {
+
+        if (error != 0) {
+            var alert = alertify.alert("Message", 'All fields are required.').set('label', 'Aceptar');
+            alert.set({ transition: 'zoom' });
+            alert.set('modal', false);
+        } else {
+            $.ajax({
+                url: "/POSummary/Obtener_Lista_Tallas",
+                datatType: 'json',
+                data: JSON.stringify({ ListTalla: cadena }),
+                cache: false,
+                type: 'POST',
+                contentType: 'application/json',
+                success: function (data) {
+                    alertify.set('notifier', 'position', 'top-right');
+                    alertify.notify('The sizes were correctly registered.', 'success', 5, null);
+                    var confirm = alertify.confirm('Confirmation', 'Do you want to register a new Style?', null, null).set('labels', { ok: 'Aceptar', cancel: 'Cancelar' });
+
+                    confirm.set({ transition: 'slide' });
+
+                    confirm.set('onok', function () {
+                        $("#crearTallas").hide();
+                       // $("#crearTipoPack").hide();
+                        $('#nuevoItem').prop("disabled", false);
+                        limpiarFormItems();
+                        alertify.success('Has confirmado');
+                    });
+
+                    confirm.set('oncancel', function () {
+                        alertify.notify('The purchase order record was finalized.','success', 5, null);
+                        setTimeout("redireccionarPagina()", 800);
+                        $("#loading").css('display', 'none');
+                    });
+                }
+            });
+        }
+
+    }
+
+    function limpiarFormItems() {
+        $('#ItemDescripcion_ItemEstilo').val('');
+        $('#ItemDescripcion_Descripcion').val('');
+        $('#CatColores_CodigoColor').val('');
+        $('#CatColores_DescripcionColor').val('');
+        $('#CantidadT').val('');
+        $('#Precio').val('');
+        $("#nuevoColor").prop("disabled", false);
+        $("#nuevoEstilo").prop("disabled", false);
+        limpiarInptCant();
+        limpiarInptExt();
+        limpiarInptEjm();
+    }
+
+    function limpiarInptCant() {
+        $(".numCantTall").each(function () {
+            $(this).val('');
+        });
+    }
+
+    function limpiarInptExt() {
+        $(".numExtTall").each(function () {
+            $(this).val('0');
+        });
+    }
+
+    function limpiarInptEjm() {
+        $(".numEjmTall").each(function () {
+            $(this).val('0');
+        });
+    }
+    //Sumar cantidades
+    var rep;
+    document.addEventListener("blur", function (event) {
+        var val = document.getElementById("CantidadT").value;
+        if (val !== "") {
+            rep = eval(val);
+            document.getElementById("CantidadT").value = rep;
+        }
+    }, true);
+
+    $(document).ready(function () {
+        $('.tbodyTallas').sortable();
+    });
+
+    $(document).ready(function () {
+        $('.tbodyPack').sortable();
+    });
+
+</script>
+
+<style>
+</style>
+
+<h2></h2>
+<div class="modal fade" id="agregarImgModal" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="agregarImgModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="exampleModalLabel">EDIT CUSTOMER</h2>
+            </div>
+            <div class="modal-body">                
+                    <div class="form-horizontal">
+                        <div class="row">
+                            <div class="form-group">
+                                <div class="col-sm-1">
+                                </div>
+                                <div class="col-sm-5">
+                                    @Html.LabelFor(model => model.ImgArte, htmlAttributes: new { @class = "control-label col-md-4" })
+                                    <div class="file-upload col-md-10">
+                                        <div class="file-select">
+                                            <div class="file-select-button" id="fileName">Browser File</div>
+                                            <div class="file-select-name" id="noFile">No file chosen...</div>
+                                            @Html.TextBoxFor(model => model.FileArte, new { type = "file", id = "chooseFile" })
+                                        </div>
+                                    </div>
+                                    <img id="imgSalida" width="70" height="70" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-offset-2 col-md-10">
+                                <input type="button" value="SAVE" id="btnSaveArt" class="btn btn-success" />
+                            </div>
+                        </div>
+                    </div>                
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "formItems" }))
+{
+    @Html.AntiForgeryToken()
+
+
+<div class="form-horizontal">
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    @Html.HiddenFor(model => model.IdItems)
+    @Html.HiddenFor(model => model.IdColor)
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h4>
+                Reception of styles
+            </h4>
+        </div>
+        <div class="container-fluid">
+            <div class="form-row ">
+                <div class="form-group col-md-4">
+                    @Html.LabelFor(model => model.ItemDescripcion.ItemEstilo, htmlAttributes: new { @class = "control-label" })
+                    @Html.EditorFor(model => model.ItemDescripcion.ItemEstilo, new { htmlAttributes = new { @class = "form-control nuevo_item", @onkeyup = "InputToUpper(this);" } })
+                    @Html.ValidationMessageFor(model => model.ItemDescripcion.ItemEstilo, "", new { @class = "text-danger" })
+                </div>
+                <div class="form-group col-md-4">
+                    @Html.LabelFor(model => model.ItemDescripcion.Descripcion, htmlAttributes: new { @class = "control-label" })
+                    @Html.EditorFor(model => model.ItemDescripcion.Descripcion, new { htmlAttributes = new { @class = "form-control nuevo_item", @onkeyup = "InputToUpper(this);" } })
+                    @Html.ValidationMessageFor(model => model.ItemDescripcion.Descripcion, "", new { @class = "text-danger" })
+                </div>
+                <div class="form-group col-md-4">
+                    <br />
+                    <button type="button" class="btn btn-success" id="nuevoEstilo" data-toggle="modal">
+                        <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> Add Style
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="container-fluid">
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    @Html.LabelFor(model => model.CatColores.CodigoColor, htmlAttributes: new { @class = "control-label" })
+                    @Html.EditorFor(model => model.CatColores.CodigoColor, new { htmlAttributes = new { @class = "form-control nuevo_item", @onkeyup = "InputToUpper(this);" } })
+                    @Html.ValidationMessageFor(model => model.CatColores.CodigoColor, "", new { @class = "text-danger" })
+
+                </div>
+                <div class="form-group col-md-4">
+                    @Html.LabelFor(model => model.CatColores.DescripcionColor, htmlAttributes: new { @class = "control-label" })
+                    @Html.EditorFor(model => model.CatColores.DescripcionColor, new { htmlAttributes = new { @class = "form-control nuevo_item", @onkeyup = "InputToUpper(this);" } })
+                    @Html.ValidationMessageFor(model => model.CatColores.DescripcionColor, "", new { @class = "text-danger" })
+                </div>
+                <div class="form-group col-md-4">
+                    <br />
+
+                    <button type="button" class="btn btn-success" id="nuevoColor" data-toggle="modal">
+                        <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> Add Color
+                    </button>
+
+                </div>
+            </div>
+        </div>
+
+
+        <div class="container-fluid">
+            <div class="form-row">
+
+                <div class="form-group col-sm-4">
+                    @Html.LabelFor(model => model.CantidadT, htmlAttributes: new { @class = "control-label" })
+                    @Html.EditorFor(model => model.CantidadT, new { htmlAttributes = new { @class = "form-control nuevo_item" } })
+                    @Html.ValidationMessageFor(model => model.CantidadT, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="form-group col-sm-4">
+                    @Html.LabelFor(model => model.Precio, htmlAttributes: new { @class = "control-label" })
+                    @Html.EditorFor(model => model.Precio, new { htmlAttributes = new { @class = "form-control nuevo_item" } })
+                    @Html.ValidationMessageFor(model => model.Precio, "", new { @class = "text-danger" })
+
+                </div>
+
+                <div class="form-group col-sm-4">
+                    @Html.LabelFor(model => model.CatEspecialidades.Especialidad, htmlAttributes: new { @class = "control-label " }) <br />
+                    @Html.DropDownList("listEspecialidad", (SelectList)ViewBag.listEspecialidad, string.Empty, new { @class = "form-control nuevo_item", @id = "selectEspecialidad", @name = "state", @style = "width: 60%;" })
+                    @Html.ValidationMessageFor(model => model.IdEspecialidad, "", new { @class = "text-danger" })
+
+                </div>
+
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="form-row">
+                <div class="form-group col-sm-4 estilo">
+                    @Html.LabelFor(model => model.IdGenero, htmlAttributes: new { @class = "control-label " }) <br />
+                    @Html.DropDownList("listGenero", (SelectList)ViewBag.listGenero, string.Empty, new { @class = "form-control nuevo_item", @id = "selectGenero", @name = "state", @style = "width: 60%;" })
+                    @Html.ValidationMessageFor(model => model.IdGenero, "", new { @class = "text-danger" })
+
+                </div>
+                <div class="form-group col-sm-4">
+                    @Html.LabelFor(model => model.IdTela, htmlAttributes: new { @class = "control-label " }) <br />
+                    @Html.DropDownList("listTela", (SelectList)ViewBag.listTela, string.Empty, new { @class = "form-control nuevo_item", @id = "selectTela", @name = "state", @style = "width: 60%;" })
+                    @Html.ValidationMessageFor(model => model.IdTela, "", new { @class = "text-danger" })
+                </div>
+                <div class="form-group col-sm-4">
+                    @Html.LabelFor(model => model.TipoCamiseta, htmlAttributes: new { @class = "control-label " }) <br />
+                    @Html.DropDownList("listTipoCamiseta", (SelectList)ViewBag.listTipoCamiseta, string.Empty, new { @class = "form-control nuevo_item", @id = "selectTipoCamiseta", @name = "state", @style = "width: 60%;" })
+                    @Html.ValidationMessageFor(model => model.TipoCamiseta, "", new { @class = "text-danger" })
+                </div>
+
+            </div>
+
+
+        </div>
+        <br />
+        <br />
+        <div class="container-fluid">
+            <div class="form-group">
+                <div class="panel-group">
+                    <div class="panel panel-title">
+                        <div class="panel-heading">Reception of type of packing</div>
+                        <div class="panel-body">
+                            <button type="button" id="btnAddPack" class="btn btn-xs btn-primary classAddPack">+ New Pack</button>
+                            <table class="table" id="tablaPack" style="margin:0px; padding:0px;">
+                                <thead>
+                                    <tr>
+                                        <th class="index"><span class="glyphicon glyphicon-fullscreen" aria-hidden="true" /></th>
+                                        <th>Packing</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody class="tbodyPack"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <br />
+                <div class="text-center margin-bottom col-sm-12">
+                    <button type="button" class="btn btn-success" id="nuevoItem" data-toggle="modal">
+                        <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> Save Item
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--<div class="panel panel-primary" id="crearTipoPack">
+        <div class="panel-heading">
+            <h4>Reception of type of packing</h4>
+        </div>
+
+        <div class="container-fluid">
+            <br />
+
+            <button type="button" id="btnAddPack" class="btn btn-xs btn-primary classAddPack">+ New Pack</button>
+            <table class="table" id="tablaPack">
+                <thead>
+                    <tr>
+                        <th class="index"><span class="glyphicon glyphicon-fullscreen" aria-hidden="true" /></th>
+                        <th>Packing</th>
+                    </tr>
+                </thead>
+                <tbody class="tbodyPack"></tbody>
+            </table>
+            <button type="button" id="nuevoPack" class="btn btn-success btn-md pull-right btn-sm">Save Pack</button>
+            <br />
+            <br />
+        </div>
+    </div>-->
+
+    <div class="panel panel-primary" id="crearTallas">
+        <div class="panel-heading">
+            <h4>Reception of sizes</h4>
+        </div>
+
+        <div class="container-fluid">
+            <br />
+
+            <button type="button" id="btnAdd" class="btn btn-xs btn-primary classAdd">+ New Size</button>
+            <table class="table" id="tablaTallas">
+                <thead>
+                    <tr>
+                        <th class="index"><span class="glyphicon glyphicon-fullscreen" aria-hidden="true" /></th>
+                        <th>Size</th>
+                        <th>Quantity</th>
+                        <th>Extra</th>
+                        <th>Examples</th>
+                    </tr>
+                </thead>
+                <tbody class="tbodyTallas"></tbody>
+            </table>
+            <button type="button" id="nuevaTalla" class="btn btn-success btn-md pull-right btn-sm">Save sizes</button>
+            <br />
+            <br />
+        </div>
+    </div>
+    <br />
+    <br />
+    <br />
+
+</div>
+
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
